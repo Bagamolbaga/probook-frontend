@@ -20,8 +20,8 @@ export async function generateMetadata({
 }
 
 const SignUpPage = () => {
-  redirect("/sign-in")
-  return null;
+  // redirect("/sign-in")
+  // return null;
   
   return <BusinessSignUpScene />;
 };

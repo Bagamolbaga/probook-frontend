@@ -35,7 +35,9 @@ export const useGetCompanyShiftsForDateRangeQuery = (
   const { queryOptions, companyId, ...args } = options;
 
   const fetcherFn = async () => {
-    return (await apiClient.admin.shifts.getCompanyShiftsForDateRange({companyId, ...args})).data;
+    return (
+      await apiClient.admin.shifts.getCompanyShiftsForDateRange({ companyId, ...args })
+    ).data;
   };
 
   return useQuery({
@@ -43,7 +45,7 @@ export const useGetCompanyShiftsForDateRangeQuery = (
     queryKey: ["shifts", companyId, args.start.getTime(), args.end.getTime()],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: companyId > 0
+    enabled: !!companyId,
   });
 };
 
@@ -83,10 +85,10 @@ export const useGetCompanyShiftsQuery = (
   options: Options<TGetCompanyShifts, TGetResponse<TShift[]>>
 ) => {
   const apiClient = useApiClient();
-  const {queryOptions, companyId} = options;
+  const { queryOptions, companyId } = options;
 
   const fetcherFn = async () => {
-    return (await apiClient.admin.shifts.getCompanyShifts({companyId})).data;
+    return (await apiClient.admin.shifts.getCompanyShifts({ companyId })).data;
   };
 
   return useQuery({
@@ -94,7 +96,7 @@ export const useGetCompanyShiftsQuery = (
     queryKey: ["operation_hour_shifts", companyId],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: companyId > 0
+    enabled: !!companyId,
   });
 };
 
@@ -105,7 +107,8 @@ export const useGetCompanyShiftByIdQuery = (
   const { queryOptions, companyId, ...args } = options;
 
   const fetcherFn = async () => {
-    return (await apiClient.admin.shifts.getCompanyShiftById({companyId, ...args})).data;
+    return (await apiClient.admin.shifts.getCompanyShiftById({ companyId, ...args }))
+      .data;
   };
 
   return useQuery({
@@ -113,7 +116,7 @@ export const useGetCompanyShiftByIdQuery = (
     queryKey: ["operation_hour_shifts", companyId],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: companyId > 0
+    enabled: !!companyId,
   });
 };
 

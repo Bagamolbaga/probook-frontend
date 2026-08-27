@@ -14,20 +14,18 @@ import { VerticalTimeLine } from "./components/VerticalTimeLine";
 import Shift from "./components/Shift";
 import { DATE_FNS_LOCALES, useLocale, useTranslations } from "@/i18n";
 import { FormattedDataItem } from "@/scenes/main/bookingManagement/components/timeLineCalendar";
-import UpdateBookingModal from "@/scenes/main/bookingManagement/components/timeLineCalendar/components/UpdateBookingModal";
 import BookingDetailsModal from "./components/BookingDetailsModal";
 import { BreakTime } from "./components/BreakTime/index.";
 import { TimeManager } from "@/utils/timeManager";
 import { useGetCompanyDetailsQuery } from "@/api/queries/company";
 import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
 import { useGetBookingsQuery } from "@/api/queries/booking";
-import { useGetCompanyServicesQuery } from "@/api/queries/company/services";
 import { useGetCompanyShiftsForDateRangeQuery } from "@/api/queries/company/shift";
 import { NotWorkingTime } from "./components/NotWorkingTime";
 import { FullDayOff } from "./components/FullDayOff";
 
 type Props = {
-  companyId: TCompany["id"];
+  companyId: string;
   specialistIds: TSpecialist["id"][];
   onStopLoading: (val: boolean) => void;
 };
@@ -40,12 +38,9 @@ const TimeLineCalendar = ({ companyId, specialistIds, onStopLoading }: Props) =>
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedDateIsOffDay, setSelectedDateIsOffDay] = useState(false);
-  const [isOpenBookingDetailModal, setIsOpenBookingDetailModal] = useState(false);
-  const [bookingWithTokenAlreadyOpened, setBookingWithTokenAlreadyOpened] =
-    useState(false);
 
   const [isOpenDatePicker, setIsOpenDatePicker] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState<TBooking>();
+  const [selectedBooking, setSelectedBooking] = useState<TApiBooking>();
 
   const getCompanyDetailsQuery = useGetCompanyDetailsQuery({
     companyId,
@@ -60,40 +55,38 @@ const TimeLineCalendar = ({ companyId, specialistIds, onStopLoading }: Props) =>
       end_date: addDays(selectedDate, 5),
     },
   });
-  const getCompanyServicesQuery = useGetCompanyServicesQuery({
-    companyId,
-  });
   const getCompanyShiftsForDateRangeQuery = useGetCompanyShiftsForDateRangeQuery({
     companyId,
     start: selectedDate,
     end: selectedDate,
   });
 
-  useEffect(() => {
-    if (
-      getCompanyDetailsQuery.data &&
-      getCompanySpecialistsQuery.data &&
-      getBookingsQuery.data &&
-      getCompanyServicesQuery.data &&
-      getCompanyShiftsForDateRangeQuery.data
-    ) {
-      onStopLoading(false);
-    }
-  }, [
-    getCompanyDetailsQuery.isLoading,
-    getCompanySpecialistsQuery.isLoading,
-    getBookingsQuery.isLoading,
-    getCompanyServicesQuery.isLoading,
-    getCompanyShiftsForDateRangeQuery.isLoading,
-  ]);
+  const isLoaded = Boolean(
+    getCompanyDetailsQuery.data &&
+    getCompanySpecialistsQuery.data &&
+    getBookingsQuery.data &&
+    getCompanyShiftsForDateRangeQuery.data
+  );
 
-  const revalidateQueriesHandler = useCallback(async () => {
-    void getCompanyDetailsQuery.refetch();
-    void getBookingsQuery.refetch();
-    void getCompanySpecialistsQuery.refetch();
-    void getCompanyShiftsForDateRangeQuery.refetch();
-    void getCompanyServicesQuery.refetch();
-  }, []);
+  useEffect(() => {
+    if (isLoaded) onStopLoading(false);
+  }, [isLoaded, onStopLoading]);
+
+  const revalidateQueriesHandler = useCallback(
+    async () =>
+      Promise.all([
+        getCompanyDetailsQuery.refetch(),
+        getBookingsQuery.refetch(),
+        getCompanySpecialistsQuery.refetch(),
+        getCompanyShiftsForDateRangeQuery.refetch(),
+      ]),
+    [
+      getBookingsQuery,
+      getCompanyDetailsQuery,
+      getCompanyShiftsForDateRangeQuery,
+      getCompanySpecialistsQuery,
+    ]
+  );
 
   const data: FormattedDataItem[] = useMemo(() => {
     if (
@@ -110,48 +103,43 @@ const TimeLineCalendar = ({ companyId, specialistIds, onStopLoading }: Props) =>
       if (specialistIds.includes(s.id)) {
         data.push({
           id: s.id,
-          company: s.company,
-          specialist: s as any,
+          company: s.company || companyId,
+          specialist: s,
           shifts: [],
           revalidateQueries: revalidateQueriesHandler,
         });
       }
     });
-    
+
     getBookingsQuery.data.results.forEach((item) => {
       const findedIdx = data.findIndex((i) => i?.id === item.specialist?.id);
-      
+
       if (findedIdx >= 0) {
         data[findedIdx]._booking = item;
         data[findedIdx].shifts.push({
           id: item.id,
-          client: item.client,
+          customer: item.customer,
           slots: item.slots,
           date: item.date,
           status: item.status,
-          updatedAt: item.updated_at,
-          services: item.services.map((s) => ({
-            ...s.service,
-            selectedOption: s.service_option,
-          })),
+          updatedAt: item.updatedAt,
+          services: item.services,
         });
       }
     });
 
     data = data.map((i) => {
       const findedCustomShift = getCompanyShiftsForDateRangeQuery.data.results.find(
-        (s) => s.id === i.specialist.id
+        (entry) => entry.specialist.id === i.specialist.id
       );
 
-      if (findedCustomShift?.shifts.length) {
-        const findedNotDefault = findedCustomShift.shifts.find((s) => !s.is_default);
+      const effectiveShift =
+        findedCustomShift?.shifts.find((shift) => shift.kind === "override") ||
+        findedCustomShift?.defaultShift ||
+        undefined;
 
-        if (findedNotDefault) {
-          return {
-            ...i,
-            customWorkingShift: findedNotDefault,
-          };
-        }
+      if (effectiveShift) {
+        return { ...i, customWorkingShift: effectiveShift };
       }
 
       return i;
@@ -165,6 +153,7 @@ const TimeLineCalendar = ({ companyId, specialistIds, onStopLoading }: Props) =>
     getCompanySpecialistsQuery.data,
     getBookingsQuery.data,
     getCompanyShiftsForDateRangeQuery.data,
+    companyId,
     selectedDate,
     specialistIds,
     revalidateQueriesHandler,
@@ -173,7 +162,7 @@ const TimeLineCalendar = ({ companyId, specialistIds, onStopLoading }: Props) =>
   const { HEADER_TIMES, COMPANY_SLOTS } = useMemo(() => {
     const slotManager = new TimeManager();
 
-    const workingSchedule = getCompanyDetailsQuery?.data?.working_schedule;
+    const workingSchedule = getCompanyDetailsQuery?.data?.workingSchedule;
 
     if (workingSchedule) {
       const currWorkingTime = slotManager.getCompanyWorkingScheduleSlotsByWeekDay({
@@ -243,10 +232,7 @@ const TimeLineCalendar = ({ companyId, specialistIds, onStopLoading }: Props) =>
     setSelectedDate((prev) => addDays(prev, -1));
   };
 
-  const selectBookingHandler = (
-    rowData: FormattedDataItem,
-    shift: FormattedDataItem["shifts"][number]
-  ) => {
+  const selectBookingHandler = (rowData: FormattedDataItem) => {
     if (rowData._booking) {
       setSelectedBooking(rowData._booking);
     }
@@ -348,7 +334,7 @@ const TimeLineCalendar = ({ companyId, specialistIds, onStopLoading }: Props) =>
                   key={item.specialist.id}
                   className="w-full h-[48.8px] px-1 flex justify-start items-center text-left border-b last:border-b-0 text-sm text-greyPrimary border-greyOutlineSecondary"
                 >
-                  {item.specialist.full_name}
+                  {item.specialist.fullName}
                 </div>
               ))}
             </div>

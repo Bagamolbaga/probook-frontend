@@ -3,7 +3,7 @@ import { ApiClientCore } from "@/api/core";
 import { removeEmptyFields } from "@/utils/removeEmptyFields";
 
 export type TGetBookingsArgs<T = unknown> = {
-  companyId: number;
+  companyId: string | number;
   queryParams?: {
     start_date: Date;
     end_date: Date;
@@ -17,20 +17,26 @@ export type TGetBookingByTokenArgs = {
 };
 
 export type TCreateBookingArgs = {
-  companyId: number;
+  companyId: string;
   data: {
-    services: {id: number, option_id: number}[];
-    specialist: number;
+    services: string[];
+    specialist: string;
+    customer: {
+      email: string;
+      first_name: string;
+      last_name: string;
+    };
     date: Date;
     slots: number[];
+    status?: "BLOCKED" | "PENDING" | "COMPLETED" | "OFF" | "CONFIRMED";
   };
 };
 
 export type TUpdateBookingByTokenArgs = {
   token: string;
   data: {
-    services: {id: number, option_id: number}[];
-    specialist: number
+    services: { id: number; option_id: number }[];
+    specialist: number;
     date: Date;
     slots: number[];
   };
@@ -38,9 +44,9 @@ export type TUpdateBookingByTokenArgs = {
 
 export type TUpdateBookingByAdminArgs = {
   data: {
-    bookingId: number
-    services: {id: number, option_id: number}[];
-    specialist: number
+    bookingId: number;
+    services: { id: number; option_id: number }[];
+    specialist: number;
     date: Date;
     slots: number[];
   };
@@ -59,7 +65,7 @@ export type TCancelBookingArgs = {
   token: string;
 };
 
-export type TConfirmBookingArgs = TCancelBookingArgs
+export type TConfirmBookingArgs = TCancelBookingArgs;
 
 export type TGetBookingComments = {
   bookingId: number;
@@ -109,22 +115,15 @@ export class ApiClientBookings extends ApiClientCore {
 
     const params = new URLSearchParams(formattedQueryParams);
 
-    let instance = this.instanceWithoutAuth
-    
-    if (this.isAuth) {
-      instance = this.instance
-    }
-    
-
-    return this.instanceWithoutAuth.get<TGetResponse<TBooking<true>[]>>(
+    return this.instanceWithoutAuth.get<TGetResponse<TApiBooking[]>>(
       `/companies/${companyId}/bookings?${params.toString()}`
     );
   }
-  
+
   async getBookingsMin({
     companyId,
     queryParams = { start_date: new Date(), end_date: new Date() },
-  }: TGetBookingsArgs<{specialist_id?: string}>) {
+  }: TGetBookingsArgs<{ specialist_id?: string }>) {
     const formattedQueryParams = {
       ...removeEmptyFields(queryParams),
       start_date: format(queryParams.start_date, "yyyy-MM-dd"),
@@ -133,14 +132,13 @@ export class ApiClientBookings extends ApiClientCore {
 
     const params = new URLSearchParams(formattedQueryParams);
 
-    let instance = this.instanceWithoutAuth
-    
-    if (this.isAuth) {
-      instance = this.instance
-    }
-    
+    let instance = this.instanceWithoutAuth;
 
-    return instance.get<TGetResponse<TBookingMin[]>>(
+    if (this.isAuth) {
+      instance = this.instance;
+    }
+
+    return instance.get<TGetResponse<TApiBookingMin[]>>(
       `/companies/${companyId}/bookings/min?${params.toString()}`
     );
   }
@@ -155,7 +153,7 @@ export class ApiClientBookings extends ApiClientCore {
       date: format(data.date, "yyyy-MM-dd"),
     };
 
-    return this.instanceWithoutAuth.post<TBooking & {otp_sent?: boolean}>(
+    return this.instanceWithoutAuth.post<TApiBooking>(
       `/companies/${companyId}/bookings`,
       formattedDate
     );
@@ -168,10 +166,7 @@ export class ApiClientBookings extends ApiClientCore {
       date: format(data.date, "yyyy-MM-dd"),
     };
 
-    return this.instanceWithoutAuth.post<TBooking>(
-      `/bookings/edit/`,
-      formattedDate
-    );
+    return this.instanceWithoutAuth.post<TBooking>(`/bookings/edit/`, formattedDate);
   }
 
   async updateBookingByAdmin({ data }: TUpdateBookingByAdminArgs) {
@@ -181,10 +176,7 @@ export class ApiClientBookings extends ApiClientCore {
       date: format(data.date, "yyyy-MM-dd"),
     };
 
-    return this.instance.post<TBooking>(
-      `/bookings/admin-edit/`,
-      formattedDate
-    );
+    return this.instance.post<TBooking>(`/bookings/admin-edit/`, formattedDate);
   }
 
   // async updateBooking({ companyId }: TUpdateBookingsArgs) {
@@ -198,7 +190,7 @@ export class ApiClientBookings extends ApiClientCore {
   async cancelBooking({ token }: TCancelBookingArgs) {
     return this.instance.post(`/bookings/cancel/`, { token });
   }
-  
+
   async confirmBooking({ token }: TConfirmBookingArgs) {
     return this.instance.post(`/bookings/confirm/`, { token });
   }

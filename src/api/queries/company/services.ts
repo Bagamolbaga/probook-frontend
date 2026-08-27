@@ -12,9 +12,7 @@ import {
   TDeleteCompanyServiceArgs,
   TUploadServiceImageArgs,
 } from "@/api/entities/company";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
 import { TGetServicesTypesArgs } from "@/api/entities/services";
-import { useAppSession } from "@/hooks/useAppSession";
 
 type Options<T> = T & {
   queryOptions?: UndefinedInitialDataOptions;
@@ -22,27 +20,29 @@ type Options<T> = T & {
 
 export const useGetCompanyServicesQuery = (options: Options<TGetCompanyServicesArgs>) => {
   const apiClient = useApiClient();
-  const { queryOptions, companyId, queryParams = {} } = options;
+  const { companyId, queryParams = {} } = options;
 
   const fetcherFn = async () => {
-    return (await apiClient.company.getCompanyServices({companyId, queryParams})).data;
+    return (await apiClient.company.getCompanyServices({ companyId, queryParams })).data;
   };
 
   return useQuery({
     queryKey: ["services", companyId, ...Object.values(queryParams)],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: !!companyId
+    enabled: !!companyId,
     // ...queryOptions,
   });
 };
 
-export const useGetCompanyServicesTypesQuery = (options: Options<TGetServicesTypesArgs>) => {
+export const useGetCompanyServicesTypesQuery = (
+  options: Options<TGetServicesTypesArgs>
+) => {
   const apiClient = useApiClient();
-  const { queryOptions, companyId } = options;
+  const { companyId } = options;
 
   const fetcherFn = async () => {
-    return (await apiClient.services.getServicesTypes({companyId})).data;
+    return (await apiClient.services.getServicesTypes({ companyId })).data;
   };
 
   return useQuery({
@@ -56,8 +56,6 @@ export const useGetCompanyServicesTypesQuery = (options: Options<TGetServicesTyp
 export const useCreateCompanyServiceQuery = () => {
   const apiClient = useApiClient();
   const queryClient = useQueryClient();
-  const { data: session } = useAppSession();
-  const { companyId } = useGetCompanyId();
 
   return useMutation({
     mutationFn: (input: TCreateCompanyServiceArgs) => {
@@ -76,8 +74,6 @@ export const useCreateCompanyServiceQuery = () => {
 export const useUpdateCompanyServiceQuery = () => {
   const apiClient = useApiClient();
   const queryClient = useQueryClient();
-  const { data: session } = useAppSession();
-  const { companyId } = useGetCompanyId();
 
   return useMutation({
     mutationFn: (input: TUpdateCompanyServiceArgs) => {
@@ -87,7 +83,7 @@ export const useUpdateCompanyServiceQuery = () => {
     },
     onSuccess: (_, args) => {
       return queryClient.invalidateQueries({
-        queryKey: ["services", _.data.company],
+        queryKey: ["services", args.data.companyId],
       });
     },
   });
@@ -96,7 +92,6 @@ export const useUpdateCompanyServiceQuery = () => {
 export const useDeleteCompanyServiceQuery = () => {
   const apiClient = useApiClient();
   const queryClient = useQueryClient();
-  const { data: session } = useAppSession();
 
   return useMutation({
     mutationFn: (input: TDeleteCompanyServiceArgs) => {
@@ -115,8 +110,6 @@ export const useDeleteCompanyServiceQuery = () => {
 export const useUploadServiceImageQuery = () => {
   const apiClient = useApiClient();
   const queryClient = useQueryClient();
-  const { data: session } = useAppSession();
-  const { companyId } = useGetCompanyId();
 
   return useMutation({
     mutationFn: (input: TUploadServiceImageArgs) => {
@@ -134,6 +127,7 @@ export const useUploadServiceImageQuery = () => {
 
 export const useGetNewestServicesQuery = (options: Options<object>) => {
   const apiClient = useApiClient();
+  void options;
 
   const fetcherFn = async () => {
     return (await apiClient.services.getNewestServices()).data;

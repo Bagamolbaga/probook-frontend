@@ -8,11 +8,11 @@ import { useTranslations } from "next-intl";
 import { Form } from "..";
 import AppSelect from "@/components/ui/inputs/AppSelect";
 import Spinner from "@/components/ui/loaders/Spinner";
-import { TimeSlotsManager } from "@/utils/timeSlotManager";
+import { TimeManager } from "@/utils/timeManager";
 import { cn } from "@/utils/cn";
 import PlusRight from "@/components/ui/icons/Plus";
 
-const WEEK_DAYS: { id: keyof Form["workingShedule"]; text: string }[] = [
+const WEEK_DAYS: { id: keyof Form["workingSchedule"]; text: string }[] = [
   {
     id: "Monday",
     text: "Monday",
@@ -53,7 +53,7 @@ type RowItem = {
 };
 
 type RowItemProps = {
-  weekDay: keyof Form["workingShedule"];
+  weekDay: keyof Form["workingSchedule"];
   form: UseFormReturn<Form>;
 };
 
@@ -67,7 +67,7 @@ const RowItem = ({ weekDay, form }: RowItemProps) => {
   };
 
   const allTimeSlots = useMemo(() => {
-    const slotManager = new TimeSlotsManager();
+    const slotManager = new TimeManager();
     const slots = slotManager.SLOTS.filter((s) => s.minute === 0 || s.minute === 30);
     return slots;
   }, []);
@@ -75,45 +75,45 @@ const RowItem = ({ weekDay, form }: RowItemProps) => {
   //  WORK SLOTS SECTION
 
   useEffect(() => {
-    const value = form.watch(`workingShedule.${weekDay}.slots.from`);
+    const value = form.watch(`workingSchedule.${weekDay}.slots.from`);
 
     //@ts-ignore
     if (value?.id === "off") {
-      form.setValue(`workingShedule.${weekDay}.slots.from`, undefined);
+      form.setValue(`workingSchedule.${weekDay}.slots.from`, undefined);
     }
-  }, [form.watch(`workingShedule.${weekDay}.slots.from`), weekDay]);
+  }, [form.watch(`workingSchedule.${weekDay}.slots.from`), weekDay]);
 
   useEffect(() => {
-    const value = form.watch(`workingShedule.${weekDay}.slots.to`);
+    const value = form.watch(`workingSchedule.${weekDay}.slots.to`);
 
     //@ts-ignore
     if (value?.id === "off") {
-      form.setValue(`workingShedule.${weekDay}.slots.to`, undefined);
+      form.setValue(`workingSchedule.${weekDay}.slots.to`, undefined);
     }
-  }, [form.watch(`workingShedule.${weekDay}.slots.to`), weekDay]);
+  }, [form.watch(`workingSchedule.${weekDay}.slots.to`), weekDay]);
 
   const fromTimeOptions = useMemo(() => {
-    const slots = form.watch(`workingShedule.${weekDay}.slots.to`)
+    const slots = form.watch(`workingSchedule.${weekDay}.slots.to`)
       ? allTimeSlots.filter(
-          (s) => s.slot < form.watch(`workingShedule.${weekDay}.slots.to`)!.slot
+          (s) => s.slot < form.watch(`workingSchedule.${weekDay}.slots.to`)!.slot
         )
       : allTimeSlots;
 
     return [{ id: "off", value: null }, ...slots.map((s) => ({ id: s.label, ...s }))];
-  }, [allTimeSlots, form.watch(`workingShedule.${weekDay}.slots.to`)]);
+  }, [allTimeSlots, form.watch(`workingSchedule.${weekDay}.slots.to`)]);
 
   const toTimeOptions = useMemo(() => {
-    const slots = form.watch(`workingShedule.${weekDay}.slots.from`)
+    const slots = form.watch(`workingSchedule.${weekDay}.slots.from`)
       ? allTimeSlots.filter(
-          (s) => s.slot > form.watch(`workingShedule.${weekDay}.slots.from`)!.slot
+          (s) => s.slot > form.watch(`workingSchedule.${weekDay}.slots.from`)!.slot
         )
       : allTimeSlots;
 
     return [{ id: "off", value: null }, ...slots.map((s) => ({ id: s.label, ...s }))];
-  }, [allTimeSlots, weekDay, form.watch(`workingShedule.${weekDay}.slots.from`)]);
+  }, [allTimeSlots, weekDay, form.watch(`workingSchedule.${weekDay}.slots.from`)]);
 
   const fromSelectedOption = useMemo(() => {
-    const data = form.watch(`workingShedule.${weekDay}.slots.from`);
+    const data = form.watch(`workingSchedule.${weekDay}.slots.from`);
 
     if (data) {
       return {
@@ -123,10 +123,10 @@ const RowItem = ({ weekDay, form }: RowItemProps) => {
     }
 
     return undefined;
-  }, [form.watch(`workingShedule.${weekDay}.slots.from`), weekDay]);
+  }, [form.watch(`workingSchedule.${weekDay}.slots.from`), weekDay]);
 
   const toSelectedOption = useMemo(() => {
-    const data = form.watch(`workingShedule.${weekDay}.slots.to`);
+    const data = form.watch(`workingSchedule.${weekDay}.slots.to`);
 
     if (data) {
       return {
@@ -136,60 +136,60 @@ const RowItem = ({ weekDay, form }: RowItemProps) => {
     }
 
     return undefined;
-  }, [form.watch(`workingShedule.${weekDay}.slots.to`), weekDay]);
+  }, [form.watch(`workingSchedule.${weekDay}.slots.to`), weekDay]);
 
   //  BREAK SLOTS SECTION
 
   useEffect(() => {
-    const value = form.watch(`workingShedule.${weekDay}.break.from`);
+    const value = form.watch(`workingSchedule.${weekDay}.break.from`);
 
     //@ts-ignore
     if (value?.id === "off") {
-      form.setValue(`workingShedule.${weekDay}.break.from`, undefined);
+      form.setValue(`workingSchedule.${weekDay}.break.from`, undefined);
     }
-  }, [form.watch(`workingShedule.${weekDay}.break.from`), weekDay]);
+  }, [form.watch(`workingSchedule.${weekDay}.break.from`), weekDay]);
 
   useEffect(() => {
-    const value = form.watch(`workingShedule.${weekDay}.break.to`);
+    const value = form.watch(`workingSchedule.${weekDay}.break.to`);
 
     //@ts-ignore
     if (value?.id === "off") {
-      form.setValue(`workingShedule.${weekDay}.break.to`, undefined);
+      form.setValue(`workingSchedule.${weekDay}.break.to`, undefined);
     }
-  }, [form.watch(`workingShedule.${weekDay}.break.to`), weekDay]);
+  }, [form.watch(`workingSchedule.${weekDay}.break.to`), weekDay]);
 
   const breakFromTimeOptions = useMemo(() => {
-    const slots = form.watch(`workingShedule.${weekDay}.break.to`)
+    const slots = form.watch(`workingSchedule.${weekDay}.break.to`)
       ? allTimeSlots
           .filter(
             (s) =>
-              s.slot > form.watch(`workingShedule.${weekDay}.slots.from`)!.slot &&
-              s.slot < form.watch(`workingShedule.${weekDay}.slots.to`)!.slot
+              s.slot > form.watch(`workingSchedule.${weekDay}.slots.from`)!.slot &&
+              s.slot < form.watch(`workingSchedule.${weekDay}.slots.to`)!.slot
           )
-          .filter((s) => s.slot < form.watch(`workingShedule.${weekDay}.break.to`)!.slot)
+          .filter((s) => s.slot < form.watch(`workingSchedule.${weekDay}.break.to`)!.slot)
       : allTimeSlots;
 
     return [{ id: "off", value: null }, ...slots.map((s) => ({ id: s.label, ...s }))];
-  }, [allTimeSlots, form.watch(`workingShedule.${weekDay}.break.to`)]);
+  }, [allTimeSlots, form.watch(`workingSchedule.${weekDay}.break.to`)]);
 
   const breakToTimeOptions = useMemo(() => {
-    const slots = form.watch(`workingShedule.${weekDay}.break.from`)
+    const slots = form.watch(`workingSchedule.${weekDay}.break.from`)
       ? allTimeSlots
           .filter(
             (s) =>
-              s.slot > form.watch(`workingShedule.${weekDay}.slots.from`)!.slot &&
-              s.slot < form.watch(`workingShedule.${weekDay}.slots.to`)!.slot
+              s.slot > form.watch(`workingSchedule.${weekDay}.slots.from`)!.slot &&
+              s.slot < form.watch(`workingSchedule.${weekDay}.slots.to`)!.slot
           )
           .filter(
-            (s) => s.slot > form.watch(`workingShedule.${weekDay}.break.from`)!.slot
+            (s) => s.slot > form.watch(`workingSchedule.${weekDay}.break.from`)!.slot
           )
       : allTimeSlots;
 
     return [{ id: "off", value: null }, ...slots.map((s) => ({ id: s.label, ...s }))];
-  }, [allTimeSlots, weekDay, form.watch(`workingShedule.${weekDay}.break.from`)]);
+  }, [allTimeSlots, weekDay, form.watch(`workingSchedule.${weekDay}.break.from`)]);
 
   const breakFromSelectedOption = useMemo(() => {
-    const data = form.watch(`workingShedule.${weekDay}.break.from`);
+    const data = form.watch(`workingSchedule.${weekDay}.break.from`);
 
     if (data) {
       return {
@@ -199,10 +199,10 @@ const RowItem = ({ weekDay, form }: RowItemProps) => {
     }
 
     return undefined;
-  }, [form.watch(`workingShedule.${weekDay}.break.from`), weekDay]);
+  }, [form.watch(`workingSchedule.${weekDay}.break.from`), weekDay]);
 
   const breakToSelectedOption = useMemo(() => {
-    const data = form.watch(`workingShedule.${weekDay}.break.to`);
+    const data = form.watch(`workingSchedule.${weekDay}.break.to`);
 
     if (data) {
       return {
@@ -212,15 +212,15 @@ const RowItem = ({ weekDay, form }: RowItemProps) => {
     }
 
     return undefined;
-  }, [form.watch(`workingShedule.${weekDay}.break.to`), weekDay]);
+  }, [form.watch(`workingSchedule.${weekDay}.break.to`), weekDay]);
 
   const isCanShowBreakPickers = useMemo(
     () =>
-      form.watch(`workingShedule.${weekDay}.slots.from`)?.slot &&
-      form.watch(`workingShedule.${weekDay}.slots.to`)?.slot,
+      form.watch(`workingSchedule.${weekDay}.slots.from`)?.slot &&
+      form.watch(`workingSchedule.${weekDay}.slots.to`)?.slot,
     [
-      form.watch(`workingShedule.${weekDay}.slots.from`),
-      form.watch(`workingShedule.${weekDay}.slots.to`),
+      form.watch(`workingSchedule.${weekDay}.slots.from`),
+      form.watch(`workingSchedule.${weekDay}.slots.to`),
       weekDay,
     ]
   );
@@ -236,7 +236,7 @@ const RowItem = ({ weekDay, form }: RowItemProps) => {
             <Controller
               render={() => (
                 <AppSelect
-                  id={`workingShedule.${weekDay}.slots.from`}
+                  id={`workingSchedule.${weekDay}.slots.from`}
                   classNames={{
                     selectContainer: "w-full",
                   }}
@@ -268,7 +268,7 @@ const RowItem = ({ weekDay, form }: RowItemProps) => {
                   }}
                 />
               )}
-              name={`workingShedule.${weekDay}.slots.from`}
+              name={`workingSchedule.${weekDay}.slots.from`}
               control={form.control}
             />
           </FormControl>
@@ -277,7 +277,7 @@ const RowItem = ({ weekDay, form }: RowItemProps) => {
             <Controller
               render={() => (
                 <AppSelect
-                  id={`workingShedule.${weekDay}.slots.to`}
+                  id={`workingSchedule.${weekDay}.slots.to`}
                   classNames={{
                     selectContainer: "w-full",
                   }}
@@ -309,20 +309,20 @@ const RowItem = ({ weekDay, form }: RowItemProps) => {
                   }}
                 />
               )}
-              name={`workingShedule.${weekDay}.slots.to`}
+              name={`workingSchedule.${weekDay}.slots.to`}
               control={form.control}
             />
           </FormControl>
         </div>
       </div>
       <div className="w-1/2 pl-5 flex items-center gap-2">
-        {showBreakPickers || form.watch(`workingShedule.${weekDay}.break`)?.from ? (
+        {showBreakPickers || form.watch(`workingSchedule.${weekDay}.break`)?.from ? (
           <div className="w-full flex items-center gap-2">
             <FormControl fullWidth>
               <Controller
                 render={() => (
                   <AppSelect
-                    id={`workingShedule.${weekDay}.break.from`}
+                    id={`workingSchedule.${weekDay}.break.from`}
                     classNames={{
                       selectContainer: "w-full",
                     }}
@@ -354,7 +354,7 @@ const RowItem = ({ weekDay, form }: RowItemProps) => {
                     }}
                   />
                 )}
-                name={`workingShedule.${weekDay}.break.from`}
+                name={`workingSchedule.${weekDay}.break.from`}
                 control={form.control}
               />
             </FormControl>
@@ -363,7 +363,7 @@ const RowItem = ({ weekDay, form }: RowItemProps) => {
               <Controller
                 render={() => (
                   <AppSelect
-                    id={`workingShedule.${weekDay}.break.to`}
+                    id={`workingSchedule.${weekDay}.break.to`}
                     classNames={{
                       selectContainer: "w-full",
                     }}
@@ -395,7 +395,7 @@ const RowItem = ({ weekDay, form }: RowItemProps) => {
                     }}
                   />
                 )}
-                name={`workingShedule.${weekDay}.break.to`}
+                name={`workingSchedule.${weekDay}.break.to`}
                 control={form.control}
               />
             </FormControl>

@@ -4,7 +4,7 @@ import { CSSProperties, useState } from "react";
 import { BOOKING_ITEM_FIX_WIDTH } from "./ByWeek";
 
 type Props = {
-  booking: TBooking;
+  booking: TApiBooking;
   className?: string;
   withHover?: boolean;
   withShowMore?: boolean;
@@ -22,14 +22,13 @@ const BookingItem = (props: Props) => {
 
   const renderTime = (show?: boolean) => {
     if (show) {
-      return `${slots[0].label} - ${slots.at(-1)?.label}`;
+      const end = new TimeManager().getFullSlotsFromArr([
+        (booking.slots.at(-1) ?? -1) + 1,
+      ])[0];
+      return `${slots[0]?.label || ""} - ${end?.label || ""}`;
     }
 
     return null;
-  };
-
-  const getPrice = () => {
-    return booking.services.reduce((acc, i) => (acc += i.service_option?.price || 0), 0);
   };
 
   const containerStyles = {
@@ -60,9 +59,7 @@ const BookingItem = (props: Props) => {
   };
 
   const containerClasses = {
-    [containerStyles.walkin]:
-      (!booking.client.phone && !booking.client.email) || booking.status === "WALK_IN",
-    [containerStyles.byPhone]: booking.client.phone?.length,
+    [containerStyles.walkin]: !booking.customer.email,
     [containerStyles.confirmed]:
       booking.status === "COMPLETED" || booking.status === "CONFIRMED",
     [containerStyles.pending]: booking.status === "PENDING",
@@ -71,9 +68,7 @@ const BookingItem = (props: Props) => {
   };
 
   const textClasses = {
-    [textStyles.walkin]:
-      (!booking.client.phone && !booking.client.email) || booking.status === "WALK_IN",
-    [textStyles.byPhone]: booking.client.phone?.length,
+    [textStyles.walkin]: !booking.customer.email,
     [textStyles.confirmed]:
       booking.status === "COMPLETED" || booking.status === "CONFIRMED",
     [textStyles.pending]: booking.status === "PENDING",
@@ -82,9 +77,7 @@ const BookingItem = (props: Props) => {
   };
 
   const popupClasses = {
-    [popupStyles.walkin]:
-      (!booking.client.phone && !booking.client.email) || booking.status === "WALK_IN",
-    [popupStyles.byPhone]: booking.client.phone?.length,
+    [popupStyles.walkin]: !booking.customer.email,
     [popupStyles.confirmed]:
       booking.status === "COMPLETED" || booking.status === "CONFIRMED",
     [popupStyles.pending]: booking.status === "PENDING",
@@ -110,10 +103,9 @@ const BookingItem = (props: Props) => {
           onClick={handleClick}
         >
           <p className={cn("text-sm font-bold", textClasses)}>
-            {booking.client.first_name} {booking.client.last_name}
+            {booking.customer.first_name} {booking.customer.last_name}
           </p>
           <p className={cn("mt-[2px] text-xs", textClasses)}>{renderTime(true)}</p>
-          <p className={cn("mt-[2px] text-xs", textClasses)}>{`฿ ${getPrice()}`}</p>
         </div>
       )}
 
@@ -129,7 +121,7 @@ const BookingItem = (props: Props) => {
         onMouseLeave={() => setIsHover(false)}
       >
         <p className={cn("text-sm font-bold", textClasses)}>
-          {booking.client.first_name} {booking.client.last_name}
+          {booking.customer.first_name} {booking.customer.last_name}
         </p>
         <p className={cn("mt-[2px] text-xs", textClasses)}>{renderTime(withTime)}</p>
       </div>

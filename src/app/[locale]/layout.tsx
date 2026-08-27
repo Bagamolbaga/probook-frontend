@@ -59,9 +59,9 @@ export default async function RootLayout({
   const { locale } = params;
   let dictionary: any;
 
-  if (session?.user?.company_id) {
-    Sentry.setTag("auth_user_store_id", session?.user?.company_id)
-  }
+  // if (session?.user?.company) {
+  //   Sentry.setTag("auth_user_store_id", String(session.user.company))
+  // }
 
   try {
     //@ts-ignore

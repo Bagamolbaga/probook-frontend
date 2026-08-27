@@ -1,7 +1,7 @@
 import {
-  useCreateCompanyServicesTypeQuery,
-  useUpdateCompanyServicesTypeQuery,
-} from "@/api/queries/company/serviceTypes";
+  useCreateCompanyServiceCategoryQuery,
+  useUpdateCompanyServiceCategoryQuery,
+} from "@/api/queries/company/serviceCategories";
 import Button from "@/components/ui/button";
 import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
 import CloseIcon from "@/components/ui/icons/Close";
@@ -12,18 +12,30 @@ import Modal from "@/components/ui/modal";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { toaster } from "@/components/ui/toaster";
+import { AxiosError } from "axios";
 
 type Props = {
   actionType: "create" | "update";
   isOpen?: boolean;
   headerTitle: string;
-  defaultValue?: TServiceType_new;
+  defaultValue?: TServiceCategory;
   closeHandler: () => void;
-  afterActionHandler?: (category?: TServiceType_new) => void;
+  afterActionHandler?: (category?: TServiceCategory) => void;
 };
 
 type CategoryForm = {
   name: string;
+};
+
+type ApiError = {
+  message?: string | string[];
+};
+
+const getErrorMessage = (error: unknown) => {
+  const message = (error as AxiosError<ApiError>).response?.data?.message;
+
+  return Array.isArray(message) ? message.join(", ") : message;
 };
 
 const CreateUpdateServiceCategoryModal = ({
@@ -38,14 +50,12 @@ const CreateUpdateServiceCategoryModal = ({
 
   const form = useForm<CategoryForm>({});
 
-  const createCompanyServicesTypeQuery = useCreateCompanyServicesTypeQuery();
-  const updateCompanyServicesTypeQuery = useUpdateCompanyServicesTypeQuery();
+  const createCompanyServiceCategoryQuery = useCreateCompanyServiceCategoryQuery();
+  const updateCompanyServiceCategoryQuery = useUpdateCompanyServiceCategoryQuery();
 
   useEffect(() => {
-    if (defaultValue) {
-      form.setValue("name", defaultValue.name);
-    }
-  }, [defaultValue]);
+    form.reset({ name: defaultValue?.name || "" });
+  }, [defaultValue, form, isOpen]);
 
   const localCloseHandler = () => {
     form.reset();
@@ -53,39 +63,51 @@ const CreateUpdateServiceCategoryModal = ({
   };
 
   const createServiceTypeHandler = async (formData: CategoryForm) => {
-    const res = await createCompanyServicesTypeQuery.mutateAsync({
-      companyId,
-      data: formData,
-    });
-
-    if (res.data) {
-      afterActionHandler && afterActionHandler(res.data);
-    }
-
-    localCloseHandler();
-  };
-
-  const updateServiceTypeHandler = async (formData: CategoryForm) => {
-    if (defaultValue) {
-      const res = await updateCompanyServicesTypeQuery.mutateAsync({
+    try {
+      const res = await createCompanyServiceCategoryQuery.mutateAsync({
         companyId,
-        serviceTypeId: defaultValue.id,
         data: formData,
       });
 
       if (res.data) {
-        afterActionHandler && afterActionHandler(res.data);
+        afterActionHandler?.(res.data);
       }
 
       localCloseHandler();
+    } catch (error) {
+      toaster.error(getErrorMessage(error) || "Could not create category");
     }
   };
 
-  const createBtnActive = form.watch("name") && !createCompanyServicesTypeQuery.isPending;
-  const updateBtnActive = form.watch("name") && !updateCompanyServicesTypeQuery.isPending;
+  const updateServiceTypeHandler = async (formData: CategoryForm) => {
+    if (defaultValue) {
+      try {
+        const res = await updateCompanyServiceCategoryQuery.mutateAsync({
+          companyId,
+          categoryId: defaultValue.id,
+          data: formData,
+        });
+
+        if (res.data) {
+          afterActionHandler?.(res.data);
+        }
+
+        localCloseHandler();
+      } catch (error) {
+        toaster.error(getErrorMessage(error) || "Could not update category");
+      }
+    }
+  };
+
+  const createBtnActive =
+    (form.watch("name") || "").trim().length > 0 &&
+    !createCompanyServiceCategoryQuery.isPending;
+  const updateBtnActive =
+    (form.watch("name") || "").trim().length > 0 &&
+    !updateCompanyServiceCategoryQuery.isPending;
 
   return (
-    <Modal isOpen={!!isOpen} handleClose={closeHandler}>
+    <Modal isOpen={!!isOpen} handleClose={localCloseHandler}>
       <div className="w-[620px] py-6 sm:w-full">
         <div className="px-6 flex items-center justify-between sm:px-5">
           <div className="flex items-center gap-4">
@@ -111,10 +133,13 @@ const CreateUpdateServiceCategoryModal = ({
             placeholder={"Name"}
             iconLeft={<FlashIcon />}
             register={form.register}
+            rules={{ required: true, maxLength: 255 }}
           />
 
           <div className="w-full mt-12 flex items-center justify-between">
-            <Button variant="resting">Cancel</Button>
+            <Button variant="resting" onClick={localCloseHandler}>
+              Cancel
+            </Button>
 
             {actionType === "create" && (
               <Button

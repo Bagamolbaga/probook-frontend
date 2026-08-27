@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 
 const withNextIntl = require("next-intl/plugin")("./src/i18n/index.ts");
-const { withSentryConfig } = require("@sentry/nextjs");
+// const { withSentryConfig } = require("@sentry/nextjs");
 
 const config = {
   reactStrictMode: true,
@@ -36,19 +36,20 @@ const config = {
 };
 
 // Injected content via Sentry wizard below
-const configWithSentry = withSentryConfig(config, {
-  // For all available options, see:
-  // https://www.npmjs.com/package/@sentry/webpack-plugin#options
+// const configWithSentry = withSentryConfig(config, {
+//   // For all available options, see:
+//   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 
-  org: "bowers-ww",
-  project: "frontend-main",
-  authToken: process.env.NEXT_PUBLIC_SENTRY_AUTH_TOKEN,
+//   org: "bowers-ww",
+//   project: "frontend-main",
+//   authToken: process.env.NEXT_PUBLIC_SENTRY_AUTH_TOKEN,
 
-  // Only print logs for uploading source maps in CI
-  silent: !process.env.CI,
-  deploy: {
-    env: process.env.NEXT_PUBLIC_APP_ENV,
-  }
-});
+//   // Only print logs for uploading source maps in CI
+//   silent: !process.env.CI,
+//   deploy: {
+//     env: process.env.NEXT_PUBLIC_APP_ENV,
+//   }
+// });
 
-module.exports = withNextIntl(configWithSentry)
+// module.exports = withNextIntl(configWithSentry)
+module.exports = withNextIntl(config)

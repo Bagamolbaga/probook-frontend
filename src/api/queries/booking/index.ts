@@ -1,7 +1,4 @@
-import { getDefaultQueryOptions } from "./../defaultQueryOptions";
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
-  UndefinedInitialDataOptions,
   useMutation,
   useQueries,
   useQuery,
@@ -21,10 +18,9 @@ import {
   TGetCompanySalesAndCustomerStatRes,
 } from "@/api/entities/company";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import { useGetCompanyServicesQuery } from "../company/services";
 
 type TGetBookings<T = unknown> = {
-  companyId: number;
+  companyId: string | number;
   queryParams?: T & {
     start_date: Date;
     end_date: Date;
@@ -34,7 +30,7 @@ type TGetBookings<T = unknown> = {
 };
 
 type TGetAllBookings = {
-  companyId: number;
+  companyId: string;
   queryParams: {
     start_date: Date;
     end_date: Date;
@@ -54,65 +50,18 @@ type Options<TArgs, TRes> = {
 } & TArgs;
 
 export const useGetBookingsQuery = (
-  options: Options<TGetBookings, TGetResponse<TBooking[]>>
+  options: Options<TGetBookings, TGetResponse<TApiBooking[]>>
 ) => {
   const apiClient = useApiClient();
   const { queryOptions, companyId, queryParams } = options;
 
-  // const servicesResult = useGetCompanyServicesQuery({
-  //   companyId,
-  //   queryParams: {
-  //     offset: "0",
-  //     limit: "1000",
-  //   },
-  // });
-
   const fetcherFn = async () => {
-    return (await apiClient.bookings.getBookings({
-      companyId,
-      queryParams,
-    })).data;
-    // const bookings = bookingsResponse.data.results;
-
-    // if (!servicesResult.data){
-
-    //   return {
-    //     ...bookingsResponse.data,
-    //     results: [],
-    //   };
-    // }
-
-    // const servicesMap = new Map<string, TService>();
-    // servicesResult.data.results.forEach((service) => {
-    //   servicesMap.set(service._id, service);
-    // });
-
-    // const data = bookings.map((booking) => {
-    //   const enrichedServices = booking.services
-    //     .map(({ service_id, service_option_id }) => {
-    //       const service = servicesMap.get(service_id);
-    //       if (!service) return null;
-
-    //       const option = service.options.find((opt) => opt.id === service_option_id);
-    //       if (!option) return null;
-
-    //       return {
-    //         service,
-    //         service_option: option,
-    //       };
-    //     })
-    //     .filter((s): s is NonNullable<typeof s> => s !== null); 
-
-    //   return {
-    //     ...booking,
-    //     services: enrichedServices,
-    //   };
-    // });
-
-    // return {
-    //   ...bookingsResponse.data,
-    //   results: bookings,
-    // };
+    return (
+      await apiClient.bookings.getBookings({
+        companyId,
+        queryParams,
+      })
+    ).data;
   };
 
   return useQuery({
@@ -121,7 +70,6 @@ export const useGetBookingsQuery = (
       companyId,
       queryParams?.start_date?.getTime(),
       queryParams?.end_date?.getTime(),
-      // servicesResult.dataUpdatedAt,
     ],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
@@ -131,7 +79,10 @@ export const useGetBookingsQuery = (
 };
 
 export const useGetBookingsMinQuery = (
-  options: Options<TGetBookings<{ specialist_id?: string }>, TGetResponse<TBooking[]>>
+  options: Options<
+    TGetBookings<{ specialist_id?: string }>,
+    TGetResponse<TApiBookingMin[]>
+  >
 ) => {
   const apiClient = useApiClient();
   const { queryOptions, companyId, queryParams } = options;
@@ -139,16 +90,6 @@ export const useGetBookingsMinQuery = (
   const fetcherFn = async () => {
     const res = (await apiClient.bookings.getBookingsMin({ companyId, queryParams }))
       .data;
-
-    if (res.results) {
-      res.results = res.results.map((b) => ({
-        ...b,
-        specialist:
-          typeof b.specialist === "number"
-            ? { id: b.specialist as unknown as number }
-            : b.specialist,
-      }));
-    }
 
     return res;
   };
@@ -164,25 +105,17 @@ export const useGetBookingsMinQuery = (
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
     enabled: !!companyId,
-    // ...queryOptions,
+    ...queryOptions,
   });
 };
 
 export const useGetAllBookingsQuery = (
-  options: Options<TGetAllBookings, TGetResponse<TBooking[]>>
+  options: Options<TGetAllBookings, TGetResponse<TApiBooking[]>>
 ) => {
   const apiClient = useApiClient();
   const { queryOptions, companyId, queryParams } = options;
 
-  const servicesResult = useGetCompanyServicesQuery({
-    companyId,
-    queryParams: {
-      offset: "0",
-      limit: "1000",
-    },
-  });
-
-  const d: any = useGetBookingsQuery({
+  const d = useGetBookingsQuery({
     companyId,
     queryParams: {
       start_date: queryParams?.start_date,
@@ -202,45 +135,7 @@ export const useGetAllBookingsQuery = (
         offset: offset.toString(),
       },
     });
-    const bookings = bookingsResponse.data.results;
-
-    if (!servicesResult.data)
-      return {
-        ...bookingsResponse.data,
-        results: [],
-      };
-
-    const servicesMap = new Map<number, TService>();
-    servicesResult.data.results.forEach((service) => {
-      servicesMap.set(service.id, service);
-    });
-
-    const data = bookings.map((booking) => {
-      const enrichedServices = booking.services
-        .map(({ service_id, service_option_id }) => {
-          const service = servicesMap.get(service_id);
-          if (!service) return null;
-
-          const option = service.options.find((opt) => opt.id === service_option_id);
-          if (!option) return null;
-
-          return {
-            service,
-            service_option: option,
-          };
-        })
-        .filter((s): s is NonNullable<typeof s> => s !== null);
-
-      return {
-        ...booking,
-        services: enrichedServices,
-      };
-    });
-
-    return {
-      ...bookingsResponse.data,
-      results: data,
-    };
+    return bookingsResponse.data;
   };
 
   return useQueries({
@@ -255,7 +150,6 @@ export const useGetAllBookingsQuery = (
         queryParams.end_date.getTime(),
         queryParams.limit,
         queryParams.offset + queryParams.limit * idx,
-        servicesResult.dataUpdatedAt,
       ],
       queryFn: () =>
         fetcherFn({
@@ -263,8 +157,8 @@ export const useGetAllBookingsQuery = (
           offset: queryParams.offset + queryParams.limit * idx,
         }),
       staleTime: 1000 * 60,
-      enabled: companyId > 0 && servicesResult.isSuccess,
-      // ...queryOptions,
+      enabled: Boolean(companyId),
+      ...queryOptions,
     })),
   });
 };
@@ -296,15 +190,18 @@ export const useCreateBookingQuery = () => {
     mutationFn: (input: TCreateBookingArgs) => {
       return apiClient.bookings.createBooking(input);
     },
-    onSuccess: (_, args) => {
-      void queryClient.invalidateQueries({
-        queryKey: ["all_bookings", args.companyId],
-      });
-
-      return queryClient.invalidateQueries({
-        queryKey: ["bookings", args.companyId],
-      });
-    },
+    onSuccess: (_, args) =>
+      Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["all_bookings", args.companyId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings", args.companyId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings_min", args.companyId],
+        }),
+      ]),
   });
 };
 
@@ -357,7 +254,10 @@ export const useDeleteBookingQuery = () => {
 };
 
 export const useGetCompanySalesAndCustomerStatQuery = (
-  options: Options<TGetCompanySalesAndCustomerStat, TGetCompanySalesAndCustomerStatRes>
+  options: Options<
+    TGetCompanySalesAndCustomerStat,
+    TGetCompanySalesAndCustomerStatRes | null
+  >
 ) => {
   const apiClient = useApiClient();
   const { companyId } = useGetCompanyId();
@@ -375,7 +275,7 @@ export const useGetCompanySalesAndCustomerStatQuery = (
     queryKey: ["sales_and_customer_stat", args.companyId, args.startDate, args.endDate],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: companyId > 0,
-    // ...queryOptions,
+    enabled: Boolean(companyId),
+    ...queryOptions,
   });
 };

@@ -61,12 +61,12 @@ const getMonthGrid = (year: number, monthIndex: number) => {
 };
 
 type Props = {
-  bookings: TBooking[];
+  bookings: TApiBooking[];
   dateRange: {
     from: Date;
     to: Date;
   };
-  handleBookingClick: (b: TBooking) => void;
+  handleBookingClick: (b: TApiBooking) => void;
 };
 
 const ByMonth = ({ bookings, dateRange, handleBookingClick }: Props) => {

@@ -1,19 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { format } from "date-fns";
 import { Link, useRouter, useTranslations } from "@/i18n";
 
-import { useApiClient } from "@/api/context";
 import { useCreateBookingQuery } from "@/api/queries/booking";
 import { useGetCompanyDetailsQuery } from "@/api/queries/company";
 import { useGetCompanyServicesQuery } from "@/api/queries/company/services";
-import { useGetCompanyServicesTypesQuery } from "@/api/queries/company/serviceTypes";
+import { useGetCompanyServiceCategoriesQuery } from "@/api/queries/company/serviceCategories";
 import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
+import type { TCreateBookingArgs } from "@/api/entities/booking";
 
 import AuthModal, { AuthForm } from "@/scenes/bookingFlow/components/AuthModal";
-import PhoneVerifyModal, {
-  PhoneVerifyForm,
-} from "@/scenes/bookingFlow/components/PhoneVerifyModal";
 import ServiceSelection from "@/scenes/bookingFlow/components/ServiceSelection";
 import StaffSelection from "@/scenes/bookingFlow/components/StaffSelection";
 import TimeSelection from "@/scenes/bookingFlow/components/TimeSelection";
@@ -68,7 +65,6 @@ const BookingCreation = () => {
   const { companyId } = useGetCompanyId();
 
   const router = useRouter();
-  const apiClient = useApiClient();
   const rightPanelRef = useRef<HTMLDivElement>(null);
 
   const [prevBookedServiceToLocalStorage, setBookedServiceToLocalStorage] =
@@ -81,14 +77,13 @@ const BookingCreation = () => {
     companyId,
   });
   const getCompanySpecialistsQuery = useGetCompanySpecialistsQuery({ companyId });
-  const getCompanyServicesTypesQuery = useGetCompanyServicesTypesQuery({ companyId });
+  const getCompanyServiceCategoriesQuery = useGetCompanyServiceCategoriesQuery({
+    companyId,
+  });
 
   const createBookingQuery = useCreateBookingQuery();
 
-  const [createdBooking, setCreatedBooking] = useState<TBooking>();
-
   const [isOpenAuthModal, setIsOpenAuthModal] = useState(false);
-  const [isOpenPhoneVerifyModal, setIsOpenPhoneVerifyModal] = useState(false);
   const [isSuccessBooked, setIsSuccessBooked] = useState(false);
   const [isCreateBookingLoading, setIsCreateBookingLoading] = useState(false);
 
@@ -102,9 +97,8 @@ const BookingCreation = () => {
   });
 
   const confirmHandler = () => {
+    setIsSuccessBooked(true);
     form.reset();
-
-    form.setValue("_stepId", "services");
   };
 
   const createBookingHandler = async () => {
@@ -118,51 +112,40 @@ const BookingCreation = () => {
         formData.client
       ) {
         setIsCreateBookingLoading(true);
-        const data: {
-          services: { id: number; option_id: number }[];
-          specialist: number;
-          date: Date;
-          slots: number[];
-          first_name: string;
-          phone?: string;
-          email?: string;
-          auth?: string; //TODO Add this parametr for dont send OTP code when user auth with social
-        } = {
-          services: formData.selectedServices.map((s) => ({
-            id: s.id,
-            option_id: s.selectedOption.id,
-          })),
-          specialist:
-            formData.selectedStaff === "ANY"
-              ? formData.selectedAnyStaff!.id
-              : formData.selectedStaff.id,
+        const specialist =
+          formData.selectedStaff === "ANY"
+            ? formData.selectedAnyStaff
+            : formData.selectedStaff;
+
+        if (!specialist || !formData.client.email) {
+          toaster.error("Client email and specialist are required");
+          return false;
+        }
+
+        const data: TCreateBookingArgs["data"] = {
+          services: formData.selectedServices.map((service) => service.id),
+          specialist: specialist.id,
+          customer: {
+            email: formData.client.email,
+            first_name: formData.client.first_name,
+            last_name: formData.client.last_name || "",
+          },
           date: formData.selectedDate,
           slots: [],
-          first_name: formData.client.first_name,
         };
-
-        if (formData.client.email) {
-          data.email = formData.client.email;
-          data.auth = "email";
-        } else if (formData.client.phone.length > 4) {
-          data.phone = formData.client.phone;
-          data.auth = "sms";
-        } else {
-          data.email = undefined;
-          data.phone = undefined;
-        }
 
         const timeSlots = [...TIME_SLOTS];
         const selectedTimeIdx = timeSlots.findIndex(
           (s) => s.slot === formData.selectedTime!.slot
         );
-        const allTimeDurationInSlotsCount =
+        const allTimeDurationInSlotsCount = Math.ceil(
           formData.selectedServices.reduce(
             (acc, c) => (acc += c.selectedOption.duration),
             0
-          ) / 15;
+          ) / 15
+        );
         const slots = timeSlots
-          .splice(selectedTimeIdx, allTimeDurationInSlotsCount + 1)
+          .slice(selectedTimeIdx, selectedTimeIdx + allTimeDurationInSlotsCount)
           .map((s) => s.slot);
 
         data.slots = slots;
@@ -170,8 +153,6 @@ const BookingCreation = () => {
         const res = await createBookingQuery.mutateAsync({ companyId, data });
 
         if (res.data) {
-          setCreatedBooking(res.data);
-
           setBookedServiceToLocalStorage([
             ...formData.selectedServices,
             ...prevBookedServiceToLocalStorage,
@@ -192,38 +173,11 @@ const BookingCreation = () => {
     }
   };
 
-  const autoSelectAnyStaff = () => {
-    const formData = form.getValues();
-
-    const everySelectedServicesHaveDontShowStaff = formData.selectedServices.every(
-      (s) => !s.show_specialist
-    );
-    const selectedStaff = formData.selectedStaff;
-
-    if (
-      everySelectedServicesHaveDontShowStaff &&
-      (!selectedStaff || selectedStaff === "ANY")
-    ) {
-      selectSpecialistHandler("ANY");
-      form.setValue("_stepId", "time");
-
-      return true;
-    }
-
-    return false;
-  };
-
   const handleNextStep = () => {
     const idx = STEPS.findIndex((s) => s.id === form.watch("_stepId"));
 
     if (form.watch("_stepId") === "time") {
       setIsOpenAuthModal(true);
-      return;
-    }
-
-    const isSkipIncrementStep = autoSelectAnyStaff();
-
-    if (isSkipIncrementStep) {
       return;
     }
 
@@ -283,7 +237,9 @@ const BookingCreation = () => {
     try {
       // form.setValue("_stepId", "confirm");
       form.setValue("client", authModalFormData);
-      await createBookingHandler();
+      const isCreated = await createBookingHandler();
+      if (!isCreated) return;
+
       closeAuthModalHandler();
 
       if (!form.watch("isPhoneVerified")) {
@@ -322,16 +278,12 @@ const BookingCreation = () => {
   const companyLocation = useMemo(() => {
     const arr = [];
 
-    if (getCompanyDetailsQuery.data?.country?.name) {
-      arr.push(getCompanyDetailsQuery.data?.country?.name);
-    }
-
     if (getCompanyDetailsQuery.data?.city) {
       arr.push(getCompanyDetailsQuery.data?.city);
     }
 
-    if (getCompanyDetailsQuery.data?.address1) {
-      arr.push(getCompanyDetailsQuery.data?.address1);
+    if (getCompanyDetailsQuery.data?.address) {
+      arr.push(getCompanyDetailsQuery.data.address);
     }
 
     return arr.join(", ");
@@ -349,13 +301,7 @@ const BookingCreation = () => {
     return (mins / 60).toFixed(1);
   }, [form.watch("selectedServices")]);
 
-  const companyServicesTypes = useMemo(() => {
-    if (getCompanyServicesTypesQuery.data?.results) {
-      return getCompanyServicesTypesQuery.data.results;
-    }
-
-    return [];
-  }, [getCompanyServicesTypesQuery.data]);
+  const companyServiceCategories = getCompanyServiceCategoriesQuery.data?.results || [];
 
   const servicesCanSelect = useMemo(() => {
     if (getCompanyServicesQuery.data?.results) {
@@ -368,18 +314,18 @@ const BookingCreation = () => {
   const specialistForOnlySelectedServices = useMemo(() => {
     const services = form.watch("selectedServices");
 
-    if (services.length && !services[0].show_specialist) {
-      return [];
-    }
-
     if (getCompanySpecialistsQuery.data?.results) {
-      const servicesStaffIds = services.reduce<number[]>(
-        (acc, s) => (acc = [...acc, ...s.specialists]),
-        []
+      const serviceSpecialistIds = services.map(
+        (service) =>
+          new Set(
+            service.specialists.map((specialist) =>
+              typeof specialist === "string" ? specialist : specialist.id
+            )
+          )
       );
 
-      return getCompanySpecialistsQuery.data.results.filter((st) =>
-        servicesStaffIds.includes(st.id)
+      return getCompanySpecialistsQuery.data.results.filter((specialist) =>
+        serviceSpecialistIds.every((ids) => ids.has(specialist.id))
       );
     }
 
@@ -433,7 +379,7 @@ const BookingCreation = () => {
           {form.watch("_stepId") === "services" && (
             <ServiceSelection
               rightPanelHeight={rightPanelRef.current?.clientHeight}
-              serviceTypes={companyServicesTypes}
+              serviceTypes={companyServiceCategories}
               services={servicesCanSelect}
               selectedServices={form.watch("selectedServices")}
               selectServiceHandler={selectServiceHandler}
@@ -568,13 +514,13 @@ const BookingCreation = () => {
                               <div className="size-5 rounded-full border-2 border-greyLight"></div>
 
                               {/* <div className="w-[48px] h-[48px] mr-5 rounded-lg overflow-hidden bg-greyLight">
-                                {selectedStaff.specialist_details.avatar ? (
+                                {selectedStaff.avatar ? (
                                   <Image
                                     className="w-full h-full object-cover"
                                     width={48}
                                     height={48}
-                                    src={selectedStaff.specialist_details.avatar}
-                                    alt={selectedStaff.specialist_details.first_name}
+                                    src={selectedStaff.avatar}
+                                    alt={selectedStaff.fullName}
                                   />
                                 ) : (
                                   <div className="w-[48px] h-[48px] rounded-lg bg-greyLight"></div>
@@ -582,7 +528,7 @@ const BookingCreation = () => {
                               </div> */}
                               <div className="flex-1 flex flex-col gap-1">
                                 <p className="text-sm font-bold">
-                                  {selectedStaff.full_name}
+                                  {selectedStaff.fullName}
                                 </p>
                                 <p className="text-sm text-greyPrimary">
                                   {/* {selectedStaff.bio} */}

@@ -24,7 +24,7 @@ type Props = {
 };
 
 const CompanyAvailableWorkHoursStep: FC<Props> = ({ form, handleSignUpStep }) => {
-  const t = useTranslations()
+  const t = useTranslations();
   const renderSlots = useMemo(() => {
     const timeSlotsInWorkRange = TIME_SLOTS.filter((sl) => !sl.minute);
 
@@ -89,32 +89,42 @@ const CompanyAvailableWorkHoursStep: FC<Props> = ({ form, handleSignUpStep }) =>
   const isNextBtnActive =
     form.watch("weekDays").length && form.watch("time")[0] && form.watch("time")[1];
 
-  const WEEK_DAYS_i18n = useMemo(() => Object.values(WEEK_DAYS).map(w => t(`ui.months.${w}` as any)), [])
+  const WEEK_DAYS_i18n = useMemo(
+    () =>
+      Object.entries(WEEK_DAYS).map(([key, value]) => ({
+        key,
+        value,
+        label: t(`ui.months.${value}` as any),
+      })),
+    [t]
+  );
 
   return (
     <div className="w-full mt-16">
-      <p className="text-sm font-bold text-greyPrimary">{t("auth.selectAvailableDaysOfWeek")}</p>
+      <p className="text-sm font-bold text-greyPrimary">
+        {t("auth.selectAvailableDaysOfWeek")}
+      </p>
       <div className={cn("w-full mt-4 flex justify-between gap-2")}>
         {WEEK_DAYS_i18n.map((d) => (
           <div
-            key={d}
+            key={d.key}
             className={cn(
               "py-2 flex-1 flex flex-col items-center rounded-lg cursor-pointer border transition-all border-greyOutlineSecondary hover:border-purplePrimary",
               {
                 "font-bold text-white border-purplePrimary bg-purplePrimary": form
                   .watch("weekDays")
-                  .find((p) => p === d),
+                  .includes(d.value),
               }
             )}
-            onClick={() => selectDayHandler(d)}
+            onClick={() => selectDayHandler(d.value)}
           >
-            <p className="text-sm text-[inherit]">{d}</p>
+            <p className="text-sm text-[inherit]">{d.label}</p>
           </div>
         ))}
       </div>
 
       <p className="mt-10 text-sm font-bold text-greyPrimary">
-      {t("auth.selectAvailableHoursOfDay")}
+        {t("auth.selectAvailableHoursOfDay")}
       </p>
       <div className="w-full mt-4 grid grid-cols-12 gap-2">
         {renderSlots.map((s) => (
@@ -135,14 +145,18 @@ const CompanyAvailableWorkHoursStep: FC<Props> = ({ form, handleSignUpStep }) =>
       </div>
       <div className="py-12 flex gap-[100px] sm:gap-0 sm:justify-between">
         <Button variant="resting" onClick={() => form.setValue("_step", 3)}>
-        {t("ui.actions.cancel")}
+          {t("ui.actions.cancel")}
         </Button>
         <Button
           variant="primary"
           onClick={form.handleSubmit(handleSignUpStep)}
           disabled={!isNextBtnActive || form.getValues("_loading")}
         >
-           {form.getValues("_loading") ? <Spinner className="size-5"/> : t("ui.actions.finish")}
+          {form.getValues("_loading") ? (
+            <Spinner className="size-5" />
+          ) : (
+            t("ui.actions.finish")
+          )}
         </Button>
       </div>
     </div>

@@ -3,7 +3,7 @@ import { useSuperAdminStore } from "@/stores/superAdmin";
 import { useAppSession } from "./useAppSession";
 
 type UseGetCompanyIdArgs = {
-  companyId?: number;
+  companyId?: string;
 };
 
 export const useGetCompanyId = (options?: UseGetCompanyIdArgs) => {
@@ -11,9 +11,20 @@ export const useGetCompanyId = (options?: UseGetCompanyIdArgs) => {
 
   const selectCompany = useStore(useSuperAdminStore, (st) => st.selectCompany);
   const setSelectCompany = useStore(useSuperAdminStore, (st) => st.setSelectCompany);
+  const sessionCompany = session?.user?.company;
+  const sessionCompanyId =
+    typeof sessionCompany === "string"
+      ? sessionCompany
+      : sessionCompany && typeof sessionCompany === "object" && "id" in sessionCompany
+        ? String(sessionCompany.id)
+        : null;
 
   return {
-    companyId: localStorage.getItem("companyId") || "69659c81f8f44cd8cda03ac8",
+    companyId:
+      options?.companyId ||
+      sessionCompanyId ||
+      localStorage.getItem("companyId") ||
+      "69659c81f8f44cd8cda03ac8",
     setSelectCompany,
   };
 };

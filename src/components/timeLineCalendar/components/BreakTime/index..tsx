@@ -18,33 +18,17 @@ export const BreakTime = ({
 }) => {
   const rowData = data[row];
 
-  let workingSlots =
-    new TimeManager().getWorkingScheduleSlotsByWeekDay({
-      workingSchedule: rowData.specialist.default_shift.working_schedule,
-      date: selectedDate,
-    })?.slots || [];
-  rowData.customWorkingShift &&
-    (workingSlots =
-      new TimeManager().getWorkingScheduleSlotsByWeekDay({
-        workingSchedule: rowData.customWorkingShift.working_schedule,
-        date: selectedDate,
-      })?.slots || []);
+  const workingSlots = rowData.customWorkingShift
+    ? new TimeManager().getFullSlots(rowData.customWorkingShift.workingSlots)
+    : [];
 
   if (!workingSlots.length) return null;
 
-  let defaultBreakSlot =
-    new TimeManager().getWorkingScheduleSlotsByWeekDay({
-      workingSchedule: rowData.specialist.default_shift.working_schedule,
-      date: selectedDate,
-    })?.breaks || [];
-  rowData.customWorkingShift &&
-    (defaultBreakSlot =
-      new TimeManager().getWorkingScheduleSlotsByWeekDay({
-        workingSchedule: rowData.customWorkingShift.working_schedule,
-        date: selectedDate,
-      })?.breaks || []);
+  const defaultBreakSlot = rowData.customWorkingShift
+    ? new TimeManager().getFullSlots(rowData.customWorkingShift.breakSlots)
+    : [];
 
-  const slots = defaultBreakSlot.map(s => s.slot);
+  const slots = defaultBreakSlot.map((slot) => slot.slot);
 
   const fullSlots = headerTimes.filter((s) => slots.includes(s.slot));
   const allFullSlots = TIME_SLOTS.filter(

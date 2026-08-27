@@ -4,17 +4,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { FC, useEffect, useMemo } from "react";
-import { useForm, UseFormReturn } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { parsePhoneNumber, isPossiblePhoneNumber } from "react-phone-number-input/input";
 import PhoneTextInput from "@/components/ui/inputs/PhoneTextInput";
 import Button from "@/components/ui/button";
 import CloseIcon from "@/components/ui/icons/Close";
 import TextField from "@/components/ui/inputs/TextField";
 import Modal from "@/components/ui/modal";
-import { CreateBookingForm } from "../bookingCreation";
 import PersonIcon from "@/components/ui/icons/Person";
 import { useTranslations } from "next-intl";
-import GoogleBrandIcon from "@/components/ui/icons/GoogleBrand";
 import GoogleIcon from "@/components/ui/icons/GoogleIcon";
 import { signIn } from "next-auth/react";
 import { Link, usePathname } from "@/i18n";
@@ -56,35 +54,21 @@ const AuthModal: FC<Props> = ({
   const socialAuth = searchParams.get("socialAuth");
   const storeId = searchParams.get("storeId");
 
-
-  const { handleSubmit, register, setError, setValue, watch, control, formState } =
-    useForm<AuthForm>();
+  const { handleSubmit, register, setError, setValue, formState } = useForm<AuthForm>();
 
   useEffect(() => {
     if (socialAuth === "google" || socialAuth === "facebook") {
       setValue("first_name", (session?.user as any)?.name || "");
       setValue("email", session?.user?.email || "");
     }
-  }, [socialAuth]);
+  }, [session?.user, setValue, socialAuth]);
 
   useEffect(() => {
     if (session && !session.user?.company_id && session.user?.email) {
       setValue("first_name", (session?.user as any)?.name || "");
       setValue("email", session?.user?.email || "");
     }
-  }, [session]);
-
-  useEffect(() => {
-    if (isDashboard && watch("phone")?.length) {
-      setValue("email", "");
-    }
-  }, [watch("phone")]);
-
-  useEffect(() => {
-    if (isDashboard && watch("email")?.length) {
-      setValue("phone", "");
-    }
-  }, [watch("email")]);
+  }, [session, setValue]);
 
   const handleContinueWithPhone = (formData: AuthForm) => {
     if (!isPossiblePhoneNumber(formData.phone)) {
@@ -103,17 +87,15 @@ const AuthModal: FC<Props> = ({
     if (isDashboard) {
       if (formData.phone && formData.phone.length > 4) {
         handleContinueWithPhone(formData);
-      } else if (formData.email) {
-        handleContinue({ ...formData, email: formData.email });
       } else {
-        handleContinue({ ...formData, phone: "", email: "" });
+        handleContinue({ ...formData, phone: "" });
       }
     } else {
       if (formData.phone && formData.phone.length > 4) {
         if (!isPossiblePhoneNumber(formData.phone)) {
           setError("phone", { type: "validate", message: "Phone is not valid" });
         } else {
-          handleContinueWithPhone(formData)
+          handleContinueWithPhone(formData);
         }
       }
     }
@@ -163,6 +145,9 @@ const AuthModal: FC<Props> = ({
             id="email"
             register={register}
             error={formState.errors.email}
+            rules={{
+              required: "Field is required",
+            }}
             showError
             highlightFullBorderWhenFocus
             iconLeft={<PersonIcon />}
@@ -206,7 +191,7 @@ const AuthModal: FC<Props> = ({
             setValue={(value: string) => setValue("phone", value)}
             register={register}
             rules={{
-              minLength: 10
+              minLength: 10,
             }}
             error={formState.errors.phone}
           />

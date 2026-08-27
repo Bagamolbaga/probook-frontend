@@ -4,69 +4,51 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import React, { FC, ReactNode, useEffect, useMemo, useState } from "react";
+import { FC, ReactNode } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { Checkbox, FormControl, FormControlLabel, MenuItem } from "@mui/material";
+import { Checkbox, FormControl, FormControlLabel } from "@mui/material";
 
 import Button from "@/components/ui/button";
 import TextField from "@/components/ui/inputs/TextField";
 import Modal from "@/components/ui/modal";
 import { CreateServiceForm } from "..";
 import PersonIcon from "@/components/ui/icons/Person";
-import FileUploadButton from "@/components/ui/button/FileUploadButton";
-import { useCreateCompanyServiceQuery } from "@/api/queries/company/services";
-import { useGetCompanyServicesTypesQuery } from "@/api/queries/company/serviceTypes";
 import EmployeeIcon from "@/components/ui/icons/Employee";
 import FlashIcon from "@/components/ui/icons/Flash";
-import ClockIcon from "@/components/ui/icons/Clock";
-import MoneyIcon from "@/components/ui/icons/Money";
 import CloseIcon from "@/components/ui/icons/Close";
-import { SERVICE_TYPES, SERVICE_TYPES_ENUM } from "@/constants/serviceTypes";
 import AppSelect from "@/components/ui/inputs/AppSelect";
-import FilterVerticalIcon from "@/components/ui/icons/FilterVertical";
 import { Switch } from "@/components/ui/inputs/Switch";
-import { cn } from "@/utils/cn";
 import ServiceVariants from "./ServiceVariants";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import PaperIcon from "@/components/ui/icons/Paper";
 import NoteIcon from "@/components/ui/icons/Note";
-import CustomSelect from "@/components/ui/inputs/Select";
-import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
-import CreateUpdateServiceCategoryModal from "../../createCategoryModal";
 import SelectCategory from "./SelectCategory";
 
 type Props = {
-  isUpdate?: boolean;
   isOpen: boolean;
   headerTitle: string;
   form: UseFormReturn<CreateServiceForm>;
   staffs: TSpecialist[];
+  categories: TServiceCategory[];
   actionButton: ReactNode;
   handleClose: () => void;
 };
 
 const CreateUpdateServiceModal_123: FC<Props> = ({
-  isUpdate,
   isOpen,
   headerTitle,
   form,
   staffs,
+  categories,
   actionButton,
   handleClose,
 }) => {
   const t = useTranslations();
   const { companyId } = useGetCompanyId();
 
-  const createCompanyServiceQuery = useCreateCompanyServiceQuery();
-
-  const staffAssigneed = useMemo(() => {
-    const staffs = form.watch("specialists");
-    return staffs;
-  }, [form.watch("specialists")]);
-
-  const staffOptions = useMemo(() => staffs, [staffs]);
+  const staffAssigned = form.watch("specialists");
+  const staffOptions = staffs;
 
   const localCloseHandler = () => {
     form.reset();
@@ -82,7 +64,7 @@ const CreateUpdateServiceModal_123: FC<Props> = ({
   };
 
   const handleToggleSelectAll = () => {
-    const isSameLength = staffOptions.length === staffAssigneed.length;
+    const isSameLength = staffOptions.length === staffAssigned.length;
 
     if (isSameLength) {
       form.setValue("specialists", []);
@@ -122,7 +104,11 @@ const CreateUpdateServiceModal_123: FC<Props> = ({
               </div>
 
               <div className="mt-5">
-                <SelectCategory companyId={companyId} form={form} />
+                <SelectCategory
+                  companyId={companyId}
+                  form={form}
+                  categories={categories}
+                />
               </div>
 
               <div className="mt-5 flex justify-between gap-5">
@@ -170,7 +156,7 @@ const CreateUpdateServiceModal_123: FC<Props> = ({
                       {t("businessServices.createUpdateModal.staff.label")}
                     </p>
                     <Controller
-                      render={({ field, formState }) => {
+                      render={() => {
                         return (
                           <AppSelect
                             multiple
@@ -200,7 +186,7 @@ const CreateUpdateServiceModal_123: FC<Props> = ({
                                     <Checkbox
                                       className="w-4 h-4"
                                       checked={
-                                        staffAssigneed.length === staffOptions.length
+                                        staffAssigned.length === staffOptions.length
                                       }
                                     />
                                     <div className="w-5 h-5 rounded overflow-hidden">
@@ -220,7 +206,7 @@ const CreateUpdateServiceModal_123: FC<Props> = ({
                                   <Checkbox
                                     className="w-4 h-4"
                                     checked={
-                                      !!staffAssigneed.find((s) => s.id === option.id)
+                                      !!staffAssigned.find((s) => s.id === option.id)
                                     }
                                   />
                                   <div className="relative w-5 h-5 rounded overflow-hidden">
@@ -256,7 +242,7 @@ const CreateUpdateServiceModal_123: FC<Props> = ({
                                 <div className="flex items-center gap-2">
                                   {/* <EmployeeIcon className="stroke-darkPrimary" /> */}
                                   <div className="flex items-center gap-2">
-                                    {staffAssigneed.map((item) => (
+                                    {staffAssigned.map((item) => (
                                       <div
                                         key={item.id}
                                         className="relative w-6 h-6 rounded overflow-hidden"
@@ -291,11 +277,7 @@ const CreateUpdateServiceModal_123: FC<Props> = ({
               </div>
 
               <div className="mt-5 flex items-center justify-between gap-5">
-                <Button
-                  variant="resting"
-                  onClick={localCloseHandler}
-                  disabled={createCompanyServiceQuery.isPending}
-                >
+                <Button variant="resting" onClick={localCloseHandler}>
                   {t("ui.actions.cancel")}
                 </Button>
                 {actionButton}

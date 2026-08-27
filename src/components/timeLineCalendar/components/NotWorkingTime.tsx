@@ -18,25 +18,25 @@ export const NotWorkingTime = ({
 }) => {
   const rowData = data[row];
 
-  let defaultSlots = new TimeManager().getWorkingScheduleSlotsByWeekDay({
-    workingSchedule: rowData.specialist.default_shift.working_schedule,
-    date: selectedDate,
-  });
-  rowData.customWorkingShift &&
-    (defaultSlots = new TimeManager().getWorkingScheduleSlotsByWeekDay({
-      workingSchedule: rowData.customWorkingShift.working_schedule,
-      date: selectedDate,
-    }));
+  const defaultSlots = rowData.customWorkingShift
+    ? { slots: new TimeManager().getFullSlots(rowData.customWorkingShift.workingSlots) }
+    : null;
 
   const beforeWorkingTimeBreakSlots = headerTimes
     .filter((s) => defaultSlots && s.slot < defaultSlots.slots[0].slot)
     .map((s) => s.slot);
   const afterWorkingTimeBreakSlots = headerTimes
-    .filter((s) => defaultSlots && s.slot >= defaultSlots.slots[defaultSlots.slots.length - 1].slot)
+    .filter(
+      (s) =>
+        defaultSlots && s.slot >= defaultSlots.slots[defaultSlots.slots.length - 1].slot
+    )
     .map((s) => s.slot);
 
   const allAfterWorkingTimeBreakSlots = companySlots
-    .filter((s) => defaultSlots && s.slot >= defaultSlots.slots[defaultSlots.slots.length - 1].slot)
+    .filter(
+      (s) =>
+        defaultSlots && s.slot >= defaultSlots.slots[defaultSlots.slots.length - 1].slot
+    )
     .map((s) => s.slot);
 
   const getContent = ({
@@ -47,7 +47,9 @@ export const NotWorkingTime = ({
     type: "beforeWorkingTime" | "afterWorkingTime";
   }) => {
     const fullSlots = headerTimes.filter((s) => slots.includes(s.slot));
-    const fullWorkingSlots = TIME_SLOTS.filter((s) => defaultSlots?.slots.map(s => s.slot).includes(s.slot));
+    const fullWorkingSlots = TIME_SLOTS.filter((s) =>
+      defaultSlots?.slots.map((s) => s.slot).includes(s.slot)
+    );
 
     const lastWorkingSlotIsNotFullHour =
       fullWorkingSlots[fullWorkingSlots.length - 1].minute === 30;

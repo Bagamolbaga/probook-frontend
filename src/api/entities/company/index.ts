@@ -1,8 +1,8 @@
-import { TIME_SLOTS } from "@/constants/timeSlots";
 import { ApiClientCore } from "@/api/core";
 import { format } from "date-fns";
 import { AxiosResponse } from "axios";
 import { removeEmptyFields } from "@/utils/removeEmptyFields";
+import { BackendShift, toFrontendShift } from "@/api/entities/company/shift";
 
 export type TGetCompaniesArgs = {
   queryParams?: {
@@ -27,94 +27,68 @@ export type TGetCompanySpecialistByIdArgs = {
   specialistId: number;
 };
 
+type BackendSpecialist = Omit<TSpecialist, "defaultShift"> & {
+  defaultShift?: string | BackendShift | null;
+};
+
 export type TGetCompanyShiftsForDateRangeArgs = {
-  companyId: number;
+  companyId: string;
   start: Date;
   end: Date;
 };
 export type TCreateCustomShiftForDateArgs = {
-  specialistId: TSpecialist["specialist_details"]["id"];
+  companyId: string;
+  specialistId: string;
   data: {
     name: TDefaultShiftsNameId;
-    description: string;
-    description_thai: string;
+    description?: string;
     date: Date | null;
-    slots: number[];
-    daily_break: number[];
+    workingSlots: number[];
+    breakSlots?: number[];
   };
 };
 
 export type TUpdateCustomShiftForDateArgs = {
+  companyId: string;
   shiftId: TShift["id"];
   data: {
     name?: TDefaultShiftsNameId;
     description?: string;
-    description_thai?: string;
-    date?: Date;
-    slots?: number[];
-    daily_break?: number[];
+    workingSlots?: number[];
+    breakSlots?: number[];
   };
 };
 
-export type TGetCompanyShiftsForDateRangeRes = Omit<TSpecialist, "specialist_details"> & {
-  specialist: TSpecialist["specialist_details"];
+export type TGetCompanyShiftsForDateRangeRes = TSpecialist & {
+  specialist: TSpecialist;
   shifts: TShift[];
+  defaultShift: TShift | null;
+  default_shift: TShift | null;
 };
 
 export type TCreateCompanySpecialistsArgs = {
-  // companyId: number;
-  data:
-    | {
-        user_data: {
-          email?: string;
-          phone?: string;
-        };
-        full_name: string;
-        default_shift: number;
-        services: number[];
-      }
-    | {
-        user_data: {
-          email?: string;
-          phone?: string;
-        };
-        full_name: string;
-        services: number[];
-        slots: number[];
-        daily_break: number[];
-      };
-};
-
-export type TCreateCompanySpecialistsRes = {
-  message: string;
-  specialist: TSpecialist["specialist_details"];
-  profile: TSpecialist;
+  companyId: string;
+  data: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    specialties?: string[];
+    bio?: string;
+    rating?: number;
+    defaultShift?: string | null;
+    services?: string[];
+  };
 };
 
 export type TUpdateCompanySpecialistsArgs = {
-  specialistId: number;
-  data:
-    | {
-        user_data: {
-          email?: string;
-          phone?: string;
-        };
-        full_name: string;
-        default_shift: number;
-      }
-    | {
-        user_data: {
-          email?: string;
-          phone?: string;
-        };
-        full_name: string;
-        slots: number[];
-        daily_break: number[];
-      };
+  companyId: string;
+  specialistId: string;
+  data: Partial<TCreateCompanySpecialistsArgs["data"]>;
 };
 
 export type TDeleteCompanySpecialistsArgs = {
-  specialistId: number;
+  companyId: string;
+  specialistId: string;
 };
 
 export type TGetCompanyDetailsArgs = {
@@ -122,9 +96,8 @@ export type TGetCompanyDetailsArgs = {
 };
 
 export type TUpdateCompanyDetailsArgs = {
-  companyId: number;
+  companyId: string;
   data: Partial<TCompany>;
-  accessToken?: string;
 };
 
 export type TGetCompanyServicesArgs = {
@@ -135,6 +108,26 @@ export type TGetCompanyServicesArgs = {
     ordering?: OrderingFields<TService>;
     search?: string;
   };
+};
+
+export type TGetCompanyServiceCategoriesArgs = {
+  companyId: string;
+};
+
+export type TCreateCompanyServiceCategoryArgs = {
+  companyId: string;
+  data: {
+    name: string;
+  };
+};
+
+export type TUpdateCompanyServiceCategoryArgs = TCreateCompanyServiceCategoryArgs & {
+  categoryId: string;
+};
+
+export type TDeleteCompanyServiceCategoryArgs = {
+  companyId: string;
+  categoryId: string;
 };
 
 export type TSearchCompanysArgs = {
@@ -152,17 +145,27 @@ export type TSearchCompanysArgs = {
 export type TSearchCompanysRes = (TCompany & { price_from: string; price_to: string })[];
 
 export type TCreateCompanyServiceArgs = {
-  data: { companyId: string } & Pick<
-    TService,
-    "name" | "description" | "specialists" | "options"
-  >;
+  data: {
+    companyId: string;
+    categoryId: string;
+    name?: string;
+    description?: string;
+    image?: string;
+    options?: {
+      name: string;
+      description?: string;
+      price: number;
+      duration: number;
+    }[];
+    specialistIds?: string[];
+  };
 };
 
 export type TUpdateCompanyServiceArgs = {
   serviceId: string;
-  data: {
+  data: Partial<Omit<TCreateCompanyServiceArgs["data"], "companyId">> & {
     companyId: string;
-  } & Pick<TService, "name" | "description" | "options" | "specialists">;
+  };
 };
 
 export type TDeleteCompanyServiceArgs = {
@@ -180,25 +183,25 @@ export type TUploadServiceImageArgs = {
 export type TGetCompanyImagesRes = IUploadImage[];
 
 export type TGetCompanyImagesArgs = {
-  companyId: number;
+  companyId: string;
 };
 
 export type TUploadCompanyImagesArgs = {
-  companyId: number;
+  companyId: string;
   data: {
     files: File[];
   };
 };
 
 export type TDeleteCompanyImagesArgs = {
-  companyId: number;
+  companyId: string;
   data: {
     imageIds: number[];
   };
 };
 
 export type TUploadCompanyLogoArgs = {
-  companyId: number;
+  companyId: string;
   data: {
     logo: File;
   };
@@ -230,17 +233,8 @@ export class ApiClientCompany extends ApiClientCore {
   async updateCompanyDetails({
     companyId,
     data,
-    accessToken,
-  }: TUpdateCompanyDetailsArgs): Promise<AxiosResponse<TCompany, any>> {
-    if (accessToken) {
-      return this.instance.patch<TCompany>(`/companies/${companyId}/update/`, data, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-    }
-
-    return this.instance.patch<TCompany>(`/companies/${companyId}/update/`, data);
+  }: TUpdateCompanyDetailsArgs): Promise<AxiosResponse<TCompany>> {
+    return this.instance.put<TCompany>(`/companies/${companyId}`, data);
   }
 
   async getCompanies({ queryParams }: TGetCompaniesArgs) {
@@ -262,9 +256,23 @@ export class ApiClientCompany extends ApiClientCore {
 
     const params = new URLSearchParams(formattedQueryParams);
 
-    return this.instanceWithoutAuth.get<TGetResponse<TSpecialist[]>>(
-      `/companies/${companyId}/specialists?${params.toString()}`
-    );
+    const response = await this.instanceWithoutAuth.get<
+      TGetResponse<BackendSpecialist[]>
+    >(`/companies/${companyId}/specialists?${params.toString()}`);
+
+    return {
+      ...response,
+      data: {
+        ...response.data,
+        results: response.data.results.map((specialist) => ({
+          ...specialist,
+          defaultShift:
+            specialist.defaultShift && typeof specialist.defaultShift === "object"
+              ? toFrontendShift(specialist.defaultShift)
+              : specialist.defaultShift,
+        })),
+      } satisfies TGetResponse<TSpecialist[]>,
+    };
   }
 
   async getCompanySpecialistById({ specialistId }: TGetCompanySpecialistByIdArgs) {
@@ -273,23 +281,27 @@ export class ApiClientCompany extends ApiClientCore {
     );
   }
 
-  async createCompanySpecialist({ data }: TCreateCompanySpecialistsArgs) {
-    return this.instance.post<TCreateCompanySpecialistsRes>(
-      `/users/company/create-specialist/`,
+  async createCompanySpecialist({ companyId, data }: TCreateCompanySpecialistsArgs) {
+    return this.instance.post<TSpecialist>(`/companies/${companyId}/specialists`, data);
+  }
+
+  async updateCompanySpecialist({
+    companyId,
+    specialistId,
+    data,
+  }: TUpdateCompanySpecialistsArgs) {
+    return this.instance.put<TSpecialist>(
+      `/companies/${companyId}/specialists/${specialistId}`,
       data
     );
   }
 
-  async updateCompanySpecialist({ specialistId, data }: TUpdateCompanySpecialistsArgs) {
-    return this.instance.patch<TSpecialist>(
-      `/users/company/specialist/${specialistId}/`,
-      data
-    );
-  }
-
-  async deleteCompanySpecialist({ specialistId }: TDeleteCompanySpecialistsArgs) {
+  async deleteCompanySpecialist({
+    companyId,
+    specialistId,
+  }: TDeleteCompanySpecialistsArgs) {
     return this.instance.delete<TSpecialist>(
-      `/users/company/specialist/${specialistId}/`
+      `/companies/${companyId}/specialists/${specialistId}`
     );
   }
 
@@ -302,6 +314,42 @@ export class ApiClientCompany extends ApiClientCore {
 
     return this.instanceWithoutAuth.get<TGetResponse<TService[]>>(
       `/companies/${companyId}/services?${params.toString()}`
+    );
+  }
+
+  async getCompanyServiceCategories({ companyId }: TGetCompanyServiceCategoriesArgs) {
+    return this.instanceWithoutAuth.get<TGetResponse<TServiceCategory[]>>(
+      `/companies/${companyId}/service-categories`
+    );
+  }
+
+  async createCompanyServiceCategory({
+    companyId,
+    data,
+  }: TCreateCompanyServiceCategoryArgs) {
+    return this.instance.post<TServiceCategory>(
+      `/companies/${companyId}/service-categories`,
+      data
+    );
+  }
+
+  async updateCompanyServiceCategory({
+    companyId,
+    categoryId,
+    data,
+  }: TUpdateCompanyServiceCategoryArgs) {
+    return this.instance.put<TServiceCategory>(
+      `/companies/${companyId}/service-categories/${categoryId}`,
+      data
+    );
+  }
+
+  async deleteCompanyServiceCategory({
+    companyId,
+    categoryId,
+  }: TDeleteCompanyServiceCategoryArgs) {
+    return this.instance.delete<TServiceCategory>(
+      `/companies/${companyId}/service-categories/${categoryId}`
     );
   }
 
@@ -318,21 +366,22 @@ export class ApiClientCompany extends ApiClientCore {
   }
 
   async createCompanyService({ data }: TCreateCompanyServiceArgs) {
-    return this.instanceWithoutAuth.post<TService>(
-      `/companies/${data.companyId}/services`,
-      data
-    );
+    const { companyId, ...body } = data;
+
+    return this.instance.post<TService>(`/companies/${companyId}/services`, body);
   }
 
   async updateCompanyService({ serviceId, data }: TUpdateCompanyServiceArgs) {
-    return this.instanceWithoutAuth.put<TService>(
-      `/companies/${data.companyId}/services/${serviceId}`,
-      data
+    const { companyId, ...body } = data;
+
+    return this.instance.put<TService>(
+      `/companies/${companyId}/services/${serviceId}`,
+      body
     );
   }
 
   async deleteCompanyService({ companyId, serviceId }: TDeleteCompanyServiceArgs) {
-    return this.instanceWithoutAuth.delete<TService>(
+    return this.instance.delete<TService>(
       `/companies/${companyId}/services/${serviceId}`
     );
   }
@@ -342,35 +391,69 @@ export class ApiClientCompany extends ApiClientCore {
     start,
     end,
   }: TGetCompanyShiftsForDateRangeArgs) {
-    const s = format(start, "yyyy-MM-dd");
-    const e = format(end, "yyyy-MM-dd");
-    return this.instanceWithoutAuth.get<TGetResponse<TGetCompanyShiftsForDateRangeRes[]>>(
-      `/companies/${companyId}/specialists/shifts`
-    );
+    const params = new URLSearchParams({
+      start: format(start, "yyyy-MM-dd"),
+      end: format(end, "yyyy-MM-dd"),
+    });
+    const response = await this.instanceWithoutAuth.get<
+      TGetResponse<
+        {
+          specialist: TSpecialist;
+          shifts: BackendShift[];
+          defaultShift: BackendShift | null;
+        }[]
+      >
+    >(`/companies/${companyId}/specialists/shifts?${params.toString()}`);
+
+    return {
+      ...response,
+      data: {
+        ...response.data,
+        results: response.data.results.map(({ specialist, shifts, defaultShift }) => {
+          const frontendDefaultShift = defaultShift
+            ? toFrontendShift(defaultShift)
+            : null;
+          return {
+            ...specialist,
+            specialist,
+            shifts: shifts.map(toFrontendShift),
+            defaultShift: frontendDefaultShift,
+            default_shift: frontendDefaultShift,
+          };
+        }),
+      },
+    };
   }
 
-  async createCustomShiftForDate({ specialistId, data }: TCreateCustomShiftForDateArgs) {
-    const formattedData = {
-      ...data,
-      date: data.date ? format(data.date, "yyyy-MM-dd") : null,
-    };
-
-    return this.instance.post<TShift>(
-      `/companies/specialists/shifts/${specialistId}/`,
-      formattedData
+  async createCustomShiftForDate({
+    companyId,
+    specialistId,
+    data,
+  }: TCreateCustomShiftForDateArgs) {
+    const response = await this.instance.post<BackendShift>(
+      `/companies/${companyId}/shifts`,
+      {
+        ...data,
+        specialistId,
+        date: data.date ? format(data.date, "yyyy-MM-dd") : null,
+        breakSlots: data.breakSlots || [],
+      }
     );
+
+    return { ...response, data: toFrontendShift(response.data) };
   }
 
-  async updateCustomShiftForDate({ shiftId, data }: TUpdateCustomShiftForDateArgs) {
-    const formattedData = {
-      ...data,
-      ...(data.date && { date: format(data.date, "yyyy-MM-dd") }),
-    };
-
-    return this.instance.patch<TShift>(
-      `/companies/specialists/shift/${shiftId}/`,
-      formattedData
+  async updateCustomShiftForDate({
+    companyId,
+    shiftId,
+    data,
+  }: TUpdateCustomShiftForDateArgs) {
+    const response = await this.instance.put<BackendShift>(
+      `/companies/${companyId}/shifts/${shiftId}`,
+      data
     );
+
+    return { ...response, data: toFrontendShift(response.data) };
   }
 
   async uploadServiceImage(inputDto: TUploadServiceImageArgs) {

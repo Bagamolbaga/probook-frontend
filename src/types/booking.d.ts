@@ -1,11 +1,33 @@
 type CalendarEventStatus = "booked" | "pending" | "completed" | "break" | "error" | "off";
 type BookingStatus =
-  | "BLOCKED"
-  | "PENDING"
-  | "COMPLETED"
-  | "OFF"
-  | "CONFIRMED"
-  | "WALK_IN";
+  "BLOCKED" | "PENDING" | "COMPLETED" | "OFF" | "CONFIRMED" | "WALK_IN";
+
+type TApiBookingCustomer = {
+  email: string;
+  first_name: string;
+  last_name: string;
+};
+
+type TApiBooking = {
+  id: string;
+  _id?: string;
+  company: string;
+  specialist: TSpecialist;
+  services: TService[];
+  customer: TApiBookingCustomer;
+  date: string;
+  slots: number[];
+  status: Exclude<BookingStatus, "WALK_IN">;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+type TApiBookingMin = Pick<
+  TApiBooking,
+  "id" | "specialist" | "date" | "slots" | "status"
+> & {
+  company?: TApiBooking["company"];
+};
 
 type CalendarEvent = {
   id: string | number;
@@ -65,5 +87,3 @@ type TBookingMin = {
   status: BookingStatus;
   company: TBooking["company"];
 };
-
-

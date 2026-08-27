@@ -13,7 +13,6 @@ import {
   TGetCompanySpecialistsArgs,
   TUpdateCompanySpecialistsArgs,
 } from "@/api/entities/company";
-import { useAppSession } from "@/hooks/useAppSession";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
 
 type Options<T> = T & {
@@ -24,19 +23,22 @@ type TGetSpecialists = {
   companyId: number;
 };
 
-export const useGetCompanySpecialistsQuery = (options: Options<TGetCompanySpecialistsArgs>) => {
+export const useGetCompanySpecialistsQuery = (
+  options: Options<TGetCompanySpecialistsArgs>
+) => {
   const apiClient = useApiClient();
   const { queryOptions, companyId, queryParams } = options;
 
   const fetcherFn = async () => {
-    return (await apiClient.company.getCompanySpecialists({ companyId, queryParams })).data;
+    return (await apiClient.company.getCompanySpecialists({ companyId, queryParams }))
+      .data;
   };
 
   return useQuery({
     queryKey: ["specialists", companyId, queryParams?.limit, queryParams?.offset],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: !!companyId
+    enabled: !!companyId,
     // ...queryOptions,
   });
 };
@@ -44,18 +46,14 @@ export const useGetCompanySpecialistsQuery = (options: Options<TGetCompanySpecia
 export const useCreateCompanySpecialistsQuery = () => {
   const apiClient = useApiClient();
   const queryClient = useQueryClient();
-  const { data: session } = useAppSession();
   const { companyId } = useGetCompanyId();
 
   return useMutation({
-    mutationFn: (input: TCreateCompanySpecialistsArgs) => {
-      if (session?.user?.is_superuser) return apiClient.admin.specialists.createCompanySpecialist({companyId, ...input});
-      
-      return apiClient.company.createCompanySpecialist(input);
-    },
-    onSuccess: (_, specialist) => {
+    mutationFn: (input: Omit<TCreateCompanySpecialistsArgs, "companyId">) =>
+      apiClient.company.createCompanySpecialist({ companyId, ...input }),
+    onSuccess: () => {
       return queryClient.invalidateQueries({
-        queryKey: ["specialists"],
+        queryKey: ["specialists", companyId],
       });
     },
   });
@@ -64,18 +62,14 @@ export const useCreateCompanySpecialistsQuery = () => {
 export const useUpdateCompanySpecialistsQuery = () => {
   const apiClient = useApiClient();
   const queryClient = useQueryClient();
-  const { data: session } = useAppSession();
   const { companyId } = useGetCompanyId();
 
   return useMutation({
-    mutationFn: (input: TUpdateCompanySpecialistsArgs) => {
-      if (session?.user?.is_superuser) return apiClient.admin.specialists.updateCompanySpecialist({companyId, ...input});
-
-      return apiClient.company.updateCompanySpecialist(input);
-    },
-    onSuccess: (_, args) => {
+    mutationFn: (input: Omit<TUpdateCompanySpecialistsArgs, "companyId">) =>
+      apiClient.company.updateCompanySpecialist({ companyId, ...input }),
+    onSuccess: () => {
       return queryClient.invalidateQueries({
-        queryKey: ["specialists", _.data.company],
+        queryKey: ["specialists", companyId],
       });
     },
   });
@@ -84,18 +78,14 @@ export const useUpdateCompanySpecialistsQuery = () => {
 export const useDeleteCompanySpecialistsQuery = () => {
   const apiClient = useApiClient();
   const queryClient = useQueryClient();
-  const { data: session } = useAppSession();
   const { companyId } = useGetCompanyId();
 
   return useMutation({
-    mutationFn: (input: TDeleteCompanySpecialistsArgs) => {
-      if (session?.user?.is_superuser) return apiClient.admin.specialists.deleteCompanySpecialist({companyId, ...input});
-
-      return apiClient.company.deleteCompanySpecialist(input);
-    },
-    onSuccess: (_, specialist) => {
+    mutationFn: (input: Omit<TDeleteCompanySpecialistsArgs, "companyId">) =>
+      apiClient.company.deleteCompanySpecialist({ companyId, ...input }),
+    onSuccess: () => {
       return queryClient.invalidateQueries({
-        queryKey: ["specialists"],
+        queryKey: ["specialists", companyId],
       });
     },
   });

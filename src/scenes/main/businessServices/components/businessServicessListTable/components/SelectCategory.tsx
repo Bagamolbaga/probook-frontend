@@ -3,70 +3,71 @@ import CustomSelect from "@/components/ui/inputs/Select";
 import { FormControl, MenuItem } from "@mui/material";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { CreateServiceForm } from "..";
-import {
-  useDeleteCompanyServicesTypeQuery,
-  useGetCompanyServicesTypesQuery,
-} from "@/api/queries/company/serviceTypes";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import CreateUpdateServiceCategoryModal from "../../createCategoryModal";
 import EditIcon from "@/components/ui/icons/Edit";
 import DeleteIcon from "@/components/ui/icons/Delete";
+import { useDeleteCompanyServiceCategoryQuery } from "@/api/queries/company/serviceCategories";
+import { toaster } from "@/components/ui/toaster";
+import { AxiosError } from "axios";
 
 type Props = {
   companyId: string;
   form: UseFormReturn<CreateServiceForm>;
+  categories: TServiceCategory[];
 };
 
-const SelectCategory = ({ companyId, form }: Props) => {
+type ApiError = {
+  message?: string | string[];
+};
+
+const getErrorMessage = (error: unknown) => {
+  const message = (error as AxiosError<ApiError>).response?.data?.message;
+
+  return Array.isArray(message) ? message.join(", ") : message;
+};
+
+const SelectCategory = ({ companyId, form, categories }: Props) => {
   const [isOpenCategoryModal, setIsOpenCategoryModal] = useState(false);
   const [selectedCategoryForUpdate, setSelectedCategoryForUpdate] =
-    useState<TServiceType_new>();
+    useState<TServiceCategory>();
 
-  const getCompanyServicesTypesQuery = useGetCompanyServicesTypesQuery({
-    companyId,
-  });
+  const deleteCompanyServiceCategoryQuery = useDeleteCompanyServiceCategoryQuery();
 
-  const deleteCompanyServicesTypeQuery = useDeleteCompanyServicesTypeQuery();
-
-  const serviceTypes = useMemo(() => {
-    if (getCompanyServicesTypesQuery.data?.results) {
-      return getCompanyServicesTypesQuery.data.results;
-    }
-
-    return [];
-  }, [getCompanyServicesTypesQuery.data]);
-
-  const openCategoryModalHander = (category?: TServiceType_new) => {
+  const openCategoryModalHandler = (category?: TServiceCategory) => {
     setSelectedCategoryForUpdate(category);
     setIsOpenCategoryModal(true);
   };
 
-  const closeCategoryModalHander = () => {
+  const closeCategoryModalHandler = () => {
+    setSelectedCategoryForUpdate(undefined);
     setIsOpenCategoryModal(false);
   };
 
-  const deleteCategoryHandler = async (serviceTypeId: TServiceType_new["id"]) => {
-    void deleteCompanyServicesTypeQuery.mutateAsync({
-      companyId,
-      serviceTypeId,
-    });
+  const deleteCategoryHandler = async (categoryId: TServiceCategory["id"]) => {
+    try {
+      await deleteCompanyServiceCategoryQuery.mutateAsync({
+        companyId,
+        categoryId,
+      });
 
-    if (form.getValues("service_type.id") === serviceTypeId) {
-      form.setValue("service_type", undefined);
+      if (form.getValues("category")?.id === categoryId) {
+        form.setValue("category", null, { shouldValidate: true });
+      }
+    } catch (error) {
+      toaster.error(getErrorMessage(error) || "Could not delete category");
     }
   };
 
-  const afterCreateCategoryHandler = (category?: TServiceType_new) => {
+  const afterCreateCategoryHandler = (category?: TServiceCategory) => {
     if (category) {
-      form.setValue("service_type", category);
-      void getCompanyServicesTypesQuery.refetch();
+      form.setValue("category", category, { shouldValidate: true });
     }
   };
 
-  const afterUpdateCategoryHandler = (category?: TServiceType_new) => {
+  const afterUpdateCategoryHandler = (category?: TServiceCategory) => {
     if (category) {
-      form.setValue("service_type", category);
-      void getCompanyServicesTypesQuery.refetch();
+      form.setValue("category", category, { shouldValidate: true });
     }
   };
 
@@ -74,73 +75,79 @@ const SelectCategory = ({ companyId, form }: Props) => {
     <div>
       <CreateUpdateServiceCategoryModal
         isOpen={isOpenCategoryModal}
-        actionType="create"
-        headerTitle={"Add Service Category"}
-        closeHandler={closeCategoryModalHander}
-        afterActionHandler={afterCreateCategoryHandler}
-      />
-      <CreateUpdateServiceCategoryModal
-        isOpen={Boolean(isOpenCategoryModal && selectedCategoryForUpdate)}
+        actionType={selectedCategoryForUpdate ? "update" : "create"}
         defaultValue={selectedCategoryForUpdate}
-        actionType="update"
-        headerTitle={"Add Service Category"}
-        closeHandler={closeCategoryModalHander}
-        afterActionHandler={afterUpdateCategoryHandler}
+        headerTitle={
+          selectedCategoryForUpdate ? "Update Service Category" : "Add Service Category"
+        }
+        closeHandler={closeCategoryModalHandler}
+        afterActionHandler={
+          selectedCategoryForUpdate
+            ? afterUpdateCategoryHandler
+            : afterCreateCategoryHandler
+        }
       />
       <FormControl fullWidth>
         <p className="mb-2 text-sm text-greyPrimary">Service Category</p>
         <Controller
-          render={({ field, formState }) => {
+          render={({ field }) => {
             return (
               <CustomSelect
                 IconComponent={ArrowSecondaryDownIcon}
-                id={"service_type"}
+                id="category"
                 {...field}
-                value={form.watch("service_type")?.name}
+                value={field.value?.id || ""}
                 onChange={(e) => {
-                  field.onChange(serviceTypes.find((i) => i.name === e.target.value));
+                  field.onChange(
+                    categories.find((category) => category.id === e.target.value) || null
+                  );
                 }}
-                renderValue={(value) => <p>{value as TServiceType_new["name"]}</p>}
+                renderValue={(value) => (
+                  <p>{categories.find((category) => category.id === value)?.name}</p>
+                )}
               >
-                {serviceTypes.map((st) => (
+                {categories.map((category) => (
                   <MenuItem
-                    key={st.name}
-                    value={st.name}
+                    key={category.id}
+                    value={category.id}
                     className="w-full flex !items-center !justify-between"
                   >
-                    {st.name}
-                    <div className="flex items-center">
-                      <div
-                        className="ml-2"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openCategoryModalHander(st);
-                        }}
-                      >
-                        <EditIcon className="cursor-pointer transition-all hover:stroke-purplePrimary" />
+                    {category.name}
+                    {!category.isGlobal && category.company !== null ? (
+                      <div className="flex items-center">
+                        <div
+                          className="ml-2"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            openCategoryModalHandler(category);
+                          }}
+                        >
+                          <EditIcon className="cursor-pointer transition-all hover:stroke-purplePrimary" />
+                        </div>
+                        <div
+                          className="ml-2"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void deleteCategoryHandler(category.id);
+                          }}
+                        >
+                          <DeleteIcon className="cursor-pointer transition-all hover:stroke-redPrimary" />
+                        </div>
                       </div>
-                      <div
-                        className="ml-2"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          void deleteCategoryHandler(st.id);
-                        }}
-                      >
-                        <DeleteIcon className="cursor-pointer transition-all hover:stroke-redPrimary" />
-                      </div>
-                    </div>
+                    ) : null}
                   </MenuItem>
                 ))}
               </CustomSelect>
             );
           }}
-          name="service_type"
+          name="category"
           control={form.control}
+          rules={{ required: true }}
         />
       </FormControl>
       <p
         className="mt-3 text-xs font-extrabold uppercase cursor-pointer text-purplePrimary"
-        onClick={() => openCategoryModalHander()}
+        onClick={() => openCategoryModalHandler()}
       >
         add new category
       </p>

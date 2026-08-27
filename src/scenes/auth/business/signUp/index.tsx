@@ -5,14 +5,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 
 import LogoIcon from "@/components/ui/icons/LogoFull";
-import TwitterBrandIcon from "@/components/ui/icons/TwitterBrand";
-import GoogleBrandIcon from "@/components/ui/icons/GoogleBrand";
-import FacebookBrandIcon from "@/components/ui/icons/FacebookBrand";
 import ImageStep1 from "@/assets/business_signUp_step_1.svg";
 import ImageStep2 from "@/assets/business_signUp_step_2.svg";
 import { toaster } from "@/components/ui/toaster";
@@ -23,16 +19,14 @@ import CompanyAvailableWorkHoursStep, {
   WEEK_DAYS,
 } from "./components/CompanyAvailableWorkHoursStep";
 import { TTimeSlot } from "@/constants/timeSlots";
-import { useApiClient } from "@/api/context";
 import { signIn } from "next-auth/react";
-import { useAppSession } from "@/hooks/useAppSession";
 import { Link, useRouter, useTranslations } from "@/i18n";
-import AccountCreatedStep from "./components/AccountCreatedStep";
+import axios, { AxiosError } from "axios";
 
 export type SignUpForm = {
   _step: number;
   _loading?: boolean;
-  firtsName: string;
+  firstName: string;
   lastName: string;
   email: string;
   password: string;
@@ -41,15 +35,12 @@ export type SignUpForm = {
   agreeNewsSubscribe: boolean;
 
   companyName: string;
-  employees: NUM_EMPLOYEES;
   business: string;
   phone: string;
 
   address1: string;
-  address2: string;
   zip_code: string;
   city: string;
-  country: string;
   lat?: number;
   lng?: number;
 
@@ -57,202 +48,111 @@ export type SignUpForm = {
   time: [TTimeSlot | undefined, TTimeSlot | undefined];
 };
 
-const NUMBER_OF_EMPLOYEESS_OPTIONS: { label: string; value: NUM_EMPLOYEES }[] = [
-  {
-    label: "1 - 10",
-    value: "LOW",
-  },
-  {
-    label: "10 - 100",
-    value: "MEDIUM",
-  },
-  {
-    label: "100 - 10,000",
-    value: "HIGH",
-  },
-  {
-    label: "Above 10,000",
-    value: "VERY_HIGH",
-  },
-];
-type NUM_EMPLOYEES = "LOW" | "MEDIUM" | "HIGH" | "VERY_HIGH";
-
-type BusinessOption = {
-  label: string;
-  value: string;
-};
-const BUSINESS_OPTIONS: BusinessOption[] = [
-  {
-    label: "Business type 1",
-    value: "type_1",
-  },
-  {
-    label: "Business type 2",
-    value: "type_2",
-  },
-];
-
 const BusinessSignInScene = () => {
   const t = useTranslations();
-  const { data: session, update } = useAppSession();
   const router = useRouter();
-  const apiClient = useApiClient();
-
-  const [accountCreatedWithFullData, setAccountCreatedWithFullData] = useState(false);
 
   const form = useForm<SignUpForm>({
     mode: "onSubmit",
     defaultValues: {
       _step: 1,
-      employees: NUMBER_OF_EMPLOYEESS_OPTIONS[0].value,
-      business: "Entertainment",
-      country: "TH",
+      business: "",
       weekDays: [],
       time: [undefined, undefined],
     },
   });
 
-  const createCompanyAccount = async (addressFormData: SignUpForm, working_schedule: TCompany["working_schedule"]) => {
-    const body = {
-      user_data: {
-        first_name: addressFormData.firtsName,
-        last_name: addressFormData.lastName,
-        email: addressFormData.email,
-        // password: addressFormData.password,
-        // subscribe_news: userFormData.agreeNewsSubscribe,
-      },
-      company_data: {
-        name: addressFormData.companyName,
-        num_employees: addressFormData.employees,
-        business_type: addressFormData.business,
-        phone: addressFormData.phone,
-        address1: addressFormData.address1,
-        address2: addressFormData.address2,
-        zip_code: addressFormData.zip_code,
-        city: addressFormData.city,
-        country: addressFormData.country,
-        pos: {
-          lat: addressFormData.lat || 0,
-          lng: addressFormData.lng || 0,
-        },
-        working_schedule
-      },
-    };
-
-    return await apiClient.businessUser.register(body);
-  };
-
   const handleSignUpStep1 = async (data: SignUpForm) => {
-    // if (data.password !== data.confirmPassword) {
-    //   toaster.error(t("ui.errors.passwordDontMatch"));
-    //   return;
-    // }
+    if (data.password !== data.confirmPassword) {
+      toaster.error(t("ui.errors.passwordDontMatch"));
+      return;
+    }
     if (!data.agreeTermsAndCond) {
       toaster.error("You should agree to terms and conditions!");
       return;
     }
 
-    form.setValue("_step", form.getValues("_step") + 1);
+    form.setValue("_step", 2);
   };
 
   const handleSignUpStep2 = async (data: SignUpForm) => {
-    form.setValue("_step", form.getValues("_step") + 1);
+    form.setValue("_step", 3);
   };
 
   const handleSignUpStep3 = async (addressFormData: SignUpForm) => {
     try {
-      form.setValue("_step", form.getValues("_step") + 1);
-
-      // const loginRes = await signIn("credentials", {
-      //   redirect: false,
-      //   email: addressFormData.email,
-      //   password: addressFormData.password,
-      // });
-
-      // if (loginRes?.ok) {
-      //   toaster.success("Subscribed!");
-      //   form.setValue("_step", form.getValues("_step") + 1);
-      // }
+      form.setValue("_step", 4);
     } catch (error) {
       console.error(error);
       toaster.error(t("ui.errors.wentWrong"));
     }
   };
 
-  const handleSignUpStep4 = async (addressFormData: SignUpForm) => {
+  const handleSignUpStep4 = async () => {
     try {
       form.setValue("_loading", true);
 
-      const working_schedule: TCompany["working_schedule"] = {
-        Friday: {
-          times: [],
-          breaks: [],
-        },
-        Monday: {
-          times: [],
-          breaks: [],
-        },
-        Sunday: {
-          times: [],
-          breaks: [],
-        },
-        Tuesday: {
-          times: [],
-          breaks: [],
-        },
-        Saturday: {
-          times: [],
-          breaks: [],
-        },
-        Thursday: {
-          times: [],
-          breaks: [],
-        },
-        Wednesday: {
-          times: [],
-          breaks: [],
-        },
-      };
-      const time = form.watch("time");
+      const values = form.getValues();
+      const time = values.time;
+      if (!time[0] || !time[1] || values.weekDays.length === 0) {
+        toaster.error(t("ui.errors.fieldIsRequired"));
+        return;
+      }
 
       const [start, end] =
-        time[0]!.slot > time[1]!.slot ? [time[1], time[0]] : [time[0], time[1]];
+        time[0].slot > time[1].slot ? [time[1], time[0]] : [time[0], time[1]];
+      const workingSchedule = Object.values(WEEK_DAYS).reduce<
+        Record<string, { workingSlots: number[]; breakSlots: number[] }>
+      >((schedule, day) => {
+        schedule[day] = values.weekDays.includes(day)
+          ? {
+              workingSlots: Array.from(
+                { length: end.slot - start.slot + 1 },
+                (_, i) => start.slot + i
+              ),
+              breakSlots: [],
+            }
+          : { workingSlots: [], breakSlots: [] };
+        return schedule;
+      }, {});
 
-      // Object.entries(WEEK_DAYS).forEach(([key, fullKey]) => {
-      //   if (form.getValues("weekDays").includes(key)) {
-      //     //@ts-ignore
-      //     working_schedule[fullKey] = {
-      //       times: [`${start?.label}-${end?.label}`],
-      //       breaks: [],
-      //     };
-      //   }
-      // });
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
+        email: values.email.trim().toLowerCase(),
+        password: values.password,
+        firstName: values.firstName.trim(),
+        lastName: values.lastName.trim(),
+        company: {
+          name: values.companyName.trim(),
+          businessType: values.business.trim() || undefined,
+          phone: values.phone.trim() || undefined,
+          address: values.address1.trim(),
+          zipCode: values.zip_code.trim(),
+          city: values.city.trim(),
+          pos: { lat: values.lat!, lng: values.lng! },
+          workingSchedule,
+        },
+      });
 
-      // const accontCreatedRes = await createCompanyAccount(addressFormData, working_schedule);
+      const loginRes = await signIn("credentials", {
+        redirect: false,
+        email: values.email,
+        password: values.password,
+      });
 
-      // if (accontCreatedRes) {
-      //   // await apiClient.company.updateCompanyDetails({
-      //   //   companyId: accontCreatedRes.data.company.id,
-      //   //   data: {
-      //   //     working_schedule: working_schedule,
-      //   //   },
-      //   //   // accessToken: session.access_token,
-      //   // });
-
-      //   setAccountCreatedWithFullData(true);
-      //   form.setValue("_loading", false);
-      // }
-
-      toaster.success("Account create successfully!");
+      if (!loginRes?.ok) throw new Error("Registration succeeded but sign in failed");
+      toaster.success("Account created successfully!");
+      router.push("/dashboard");
     } catch (error) {
       console.error(error);
-      toaster.error(t("ui.errors.wentWrong"));
+      const apiError = error as AxiosError<{ message?: string | string[] }>;
+      const message = apiError.response?.data?.message;
+      toaster.error(
+        Array.isArray(message) ? message[0] : message || t("ui.errors.wentWrong")
+      );
+    } finally {
+      form.setValue("_loading", false);
     }
   };
-
-  if (accountCreatedWithFullData) {
-    return <AccountCreatedStep />;
-  }
 
   return (
     <div className="relative w-full min-h-screen flex bg-darkPrimary">
@@ -284,12 +184,6 @@ const BusinessSignInScene = () => {
                 handleSignUpStep={handleSignUpStep4}
               />
             )}
-            {/* <div className="flex items-center gap-[6px]">
-              <TwitterBrandIcon className="cursor-pointer transition-all fill-greyPrimary hover:fill-purplePrimary" />
-              <GoogleBrandIcon className="cursor-pointer transition-all fill-greyPrimary hover:fill-purplePrimary" />
-              <FacebookBrandIcon className="cursor-pointer transition-all fill-greyPrimary hover:fill-purplePrimary" />
-              <p className="ml-2 text-sm text-greyPrimary">{t("auth.orSignInWith")}</p>
-            </div> */}
           </div>
         </div>
       </div>

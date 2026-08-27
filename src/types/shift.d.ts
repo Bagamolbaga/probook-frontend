@@ -1,128 +1,56 @@
 type TDefaultShiftsNameId = "FULL_DAY" | "AFTERNOON" | "MORNING" | "CUSTOM" | "OFF";
 
-type TShift = TDefaultShift | TOneDayShift;
+type ShiftKind = "default" | "override";
 
-type TShiftCore = {
-  id: number;
+type TShift = {
+  id: string | number;
+  companyId: string;
+  specialistId: string | null;
+  kind: ShiftKind;
   name: string;
-  description: string;
+  description?: string;
   color: string;
+  date: string | null;
+  workingSlots: number[];
+  breakSlots: number[];
+  createdAt?: string;
+  updatedAt?: string;
+
+  // Transitional aliases used by the existing calendar UI.
+  specialist: string | null;
   is_default: boolean;
-  created_at: string;
-  updated_at: string;
   working_schedule: WorkingSchedule;
+  daily_break: number[];
+  created_at?: string;
+  updated_at?: string;
 };
 
-type TDefaultShift = TShiftCore & {
-  date: null;
-  specialist: null;
-};
-
-type TOneDayShift = TShiftCore & {
-  date: string;
-  specialist: number;
+type WorkingScheduleDay = {
+  slots: number[];
+  breaks: number[];
 };
 
 type WorkingSchedule = {
-  Friday: {
-    slots: number[];
-    breaks: number[];
-  };
-  Monday: {
-    slots: number[];
-    breaks: number[];
-  };
-  Sunday: {
-    slots: number[];
-    breaks: number[];
-  };
-  Tuesday: {
-    slots: number[];
-    breaks: number[];
-  };
-  Saturday: {
-    slots: number[];
-    breaks: number[];
-  };
-  Thursday: {
-    slots: number[];
-    breaks: number[];
-  };
-  Wednesday: {
-    slots: number[];
-    breaks: number[];
-  };
+  Friday: WorkingScheduleDay;
+  Monday: WorkingScheduleDay;
+  Sunday: WorkingScheduleDay;
+  Tuesday: WorkingScheduleDay;
+  Saturday: WorkingScheduleDay;
+  Thursday: WorkingScheduleDay;
+  Wednesday: WorkingScheduleDay;
+};
+
+type WorkingScheduleTimeRange = {
+  from?: TTimeSlot;
+  to?: TTimeSlot;
 };
 
 type WorkingScheduleWithTimeSlots = {
-  Friday: {
-    slots: {
-      from?: TTimeSlot;
-      to?: TTimeSlot;
-    };
-    breaks: {
-      from?: TTimeSlot;
-      to?: TTimeSlot;
-    };
-  };
-  Monday: {
-    slots: {
-      from?: TTimeSlot;
-      to?: TTimeSlot;
-    };
-    breaks: {
-      from?: TTimeSlot;
-      to?: TTimeSlot;
-    };
-  };
-  Sunday: {
-    slots: {
-      from?: TTimeSlot;
-      to?: TTimeSlot;
-    };
-    breaks: {
-      from?: TTimeSlot;
-      to?: TTimeSlot;
-    };
-  };
-  Tuesday: {
-    slots: {
-      from?: TTimeSlot;
-      to?: TTimeSlot;
-    };
-    breaks: {
-      from?: TTimeSlot;
-      to?: TTimeSlot;
-    };
-  };
-  Saturday: {
-    slots: {
-      from?: TTimeSlot;
-      to?: TTimeSlot;
-    };
-    breaks: {
-      from?: TTimeSlot;
-      to?: TTimeSlot;
-    };
-  };
-  Thursday: {
-    slots: {
-      from?: TTimeSlot;
-      to?: TTimeSlot;
-    };
-    breaks: {
-      from?: TTimeSlot;
-      to?: TTimeSlot;
-    };
-  };
-  Wednesday: {
-    slots: {
-      from?: TTimeSlot;
-      to?: TTimeSlot;
-    };
-    breaks: {
-      from?: TTimeSlot;
-      to?: TTimeSlot;
-    };
-  };
+  Friday: { slots: WorkingScheduleTimeRange; breaks: WorkingScheduleTimeRange };
+  Monday: { slots: WorkingScheduleTimeRange; breaks: WorkingScheduleTimeRange };
+  Sunday: { slots: WorkingScheduleTimeRange; breaks: WorkingScheduleTimeRange };
+  Tuesday: { slots: WorkingScheduleTimeRange; breaks: WorkingScheduleTimeRange };
+  Saturday: { slots: WorkingScheduleTimeRange; breaks: WorkingScheduleTimeRange };
+  Thursday: { slots: WorkingScheduleTimeRange; breaks: WorkingScheduleTimeRange };
+  Wednesday: { slots: WorkingScheduleTimeRange; breaks: WorkingScheduleTimeRange };
 };

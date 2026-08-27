@@ -2,9 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import TimeLineCalendar from "./components/timeLineCalendar";
-import SubscriptionChecker from "@/components/subscriptionChecker";
 import MainPagesTitle from "@/components/mainPagesTitle";
-import SuperAdminChecker from "@/components/superAdminChecker";
 import { useMemo, useState } from "react";
 import Tabs from "@/components/ui/tab";
 import Calendar from "./components/calendar";
@@ -22,24 +20,20 @@ const TABS = [
 
 type Tab = (typeof TABS)[number];
 
-type Props = {
-  token?: string;
-};
-
-const BookingManagementScene = ({ token }: Props) => {
+const BookingManagementScene = () => {
   const t = useTranslations();
 
   const [activeTab, setActiveTab] = useState<Tab>(TABS[0]);
-  
-    const content = useMemo(() => {
-      switch (activeTab.id) {
-        case "calendar":
-          return <Calendar />;
-  
-        default:
-          return <TimeLineCalendar token={token} />;
-      }
-    }, [activeTab]);
+
+  const content = useMemo(() => {
+    switch (activeTab.id) {
+      case "calendar":
+        return <Calendar />;
+
+      default:
+        return <TimeLineCalendar />;
+    }
+  }, [activeTab]);
 
   return (
     <div className="w-full min-h-[100vh] px-7 py-6 bg-greyOutline sm:px-5 sm:py-6 sm:pb-[64px]">
@@ -55,9 +49,9 @@ const BookingManagementScene = ({ token }: Props) => {
       </div>
       <div className="w-full min-h-[calc(100vh-62px-52px)] flex sm:min-h-[calc(100vh-62px-86px)] sm:pb-5">
         {/* <SuperAdminChecker> */}
-          {/* <SubscriptionChecker> */}
-            {content}
-          {/* </SubscriptionChecker> */}
+        {/* <SubscriptionChecker> */}
+        {content}
+        {/* </SubscriptionChecker> */}
         {/* </SuperAdminChecker> */}
       </div>
     </div>

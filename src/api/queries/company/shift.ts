@@ -19,7 +19,6 @@ import {
   TUpdateCompanyShift,
 } from "@/api/entities/company/shift";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import { useAppSession } from "@/hooks/useAppSession";
 
 type CustomUseQueryOptions<TRes> = Omit<UseQueryOptions<TRes, Error>, "queryKey">;
 
@@ -34,7 +33,6 @@ export const useGetCompanyShiftsForDateRangeQuery = (
   >
 ) => {
   const apiClient = useApiClient();
-  const { data: session } = useAppSession();
   const { queryOptions, companyId, ...args } = options;
 
   const fetcherFn = async () => {
@@ -56,15 +54,12 @@ export const useGetCompanyShiftsForDateRangeQuery = (
 
 export const useCreateCompanyShiftForDateQuery = () => {
   const apiClient = useApiClient();
-  const { data: session } = useAppSession();
   const queryClient = useQueryClient();
   const { companyId } = useGetCompanyId();
 
   return useMutation({
-    mutationFn: (input: TCreateCustomShiftForDateArgs) => {
-      if (session?.user?.is_superuser) return apiClient.admin.shifts.createCustomShiftForDate({companyId, ...input});
-
-      return apiClient.company.createCustomShiftForDate(input);
+    mutationFn: (input: Omit<TCreateCustomShiftForDateArgs, "companyId">) => {
+      return apiClient.company.createCustomShiftForDate({ companyId, ...input });
     },
     onSuccess: (_, shift) => {
       void queryClient.invalidateQueries({
@@ -79,15 +74,14 @@ export const useCreateCompanyShiftForDateQuery = () => {
 
 export const useUpdateCompanyShiftForDateQuery = () => {
   const apiClient = useApiClient();
-  const { data: session } = useAppSession();
   const queryClient = useQueryClient();
   const { companyId } = useGetCompanyId();
 
   return useMutation({
-    mutationFn: (input: TUpdateCustomShiftForDateArgs) => {
+    mutationFn: (input: Omit<TUpdateCustomShiftForDateArgs, "companyId">) => {
       // if (session?.user?.is_superuser) return apiClient.admin.shifts.updateCustomShiftForDate({companyId, ...input});
 
-      return apiClient.company.updateCustomShiftForDate(input);
+      return apiClient.company.updateCustomShiftForDate({ companyId, ...input });
     },
     onSuccess: (_, shift) => {
       void queryClient.invalidateQueries({
@@ -104,7 +98,6 @@ export const useGetCompanyShiftsQuery = (
   options: Options<TGetCompanyShifts, TGetResponse<TShift[]>>
 ) => {
   const apiClient = useApiClient();
-  const { data: session } = useAppSession();
   const { queryOptions, queryParams, companyId } = options;
 
   const fetcherFn = async () => {
@@ -133,16 +126,11 @@ export const useGetCompanyShiftByIdQuery = (
   options: Options<Omit<TGetCompanyShiftById, "companyId">, TShift>
 ) => {
   const apiClient = useApiClient();
-  const { data: session } = useAppSession();
 
   const { companyId } = useGetCompanyId();
   const { queryOptions, ...args } = options;
 
   const fetcherFn = async () => {
-    if (session?.user?.is_superuser)
-      return (await apiClient.admin.shifts.getCompanyShiftById({ companyId, ...args }))
-        .data;
-
     return (await apiClient.shifts.getCompanyShiftById({ companyId, ...args })).data;
   };
 
@@ -151,22 +139,18 @@ export const useGetCompanyShiftByIdQuery = (
     queryKey: ["operation_hour_shifts", companyId],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: companyId > 0,
+    enabled: !!companyId,
   });
 };
 
 export const useCreateCompanyShiftQuery = () => {
   const apiClient = useApiClient();
-  const { data: session } = useAppSession();
 
   const queryClient = useQueryClient();
   const { companyId } = useGetCompanyId();
 
   return useMutation({
     mutationFn: (input: TCreateCompanyShift) => {
-      if (session?.user?.is_superuser)
-        return apiClient.admin.shifts.createCompanyShift(input);
-
       return apiClient.shifts.createCompanyShift(input);
     },
     onSuccess: (res, shift) => {
@@ -182,16 +166,12 @@ export const useCreateCompanyShiftQuery = () => {
 
 export const useUpdateCompanyShiftQuery = () => {
   const apiClient = useApiClient();
-  const { data: session } = useAppSession();
 
   const queryClient = useQueryClient();
   const { companyId } = useGetCompanyId();
 
   return useMutation({
     mutationFn: (input: TUpdateCompanyShift) => {
-      if (session?.user?.is_superuser)
-        return apiClient.admin.shifts.updateCompanyShift(input);
-
       return apiClient.shifts.updateCompanyShift(input);
     },
     onSuccess: (res, shift) => {
@@ -207,16 +187,12 @@ export const useUpdateCompanyShiftQuery = () => {
 
 export const useDeleteCompanyShiftQuery = () => {
   const apiClient = useApiClient();
-  const { data: session } = useAppSession();
 
   const queryClient = useQueryClient();
   const { companyId } = useGetCompanyId();
 
   return useMutation({
     mutationFn: (input: TDeleteCompanyShift) => {
-      if (session?.user?.is_superuser)
-        return apiClient.admin.shifts.deleteCompanyShift(input);
-
       return apiClient.shifts.deleteCompanyShift(input);
     },
     onSuccess: (res, shift) => {

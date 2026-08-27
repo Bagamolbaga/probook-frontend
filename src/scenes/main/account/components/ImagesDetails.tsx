@@ -111,7 +111,7 @@ const UploadedImageCard = ({
 };
 
 const ImagesDetails = () => {
-  const {companyId} = useGetCompanyId()
+  const { companyId } = useGetCompanyId();
 
   const getCompaniesImagesQuery = useGetCompaniesImagesQuery({
     companyId,

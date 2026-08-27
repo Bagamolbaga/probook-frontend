@@ -21,11 +21,9 @@ const authMiddleware = withAuth(
     return intlMiddleware(req);
   },
   {
-    // callbacks: {
-    //   authorized: ({ token }) => {
-    //     return token !== null;
-    //   },
-    // },
+    callbacks: {
+      authorized: ({ token }) => Boolean(token?.accessToken && !token.error),
+    },
     pages: {
       signIn: "/sign-in",
     },
@@ -45,11 +43,11 @@ export default function middleware(req: NextRequest) {
     "i"
   );
 
-  const [slash, ...publicRoutesWithoutSlash] = PUBLIC_ROUTES
+  const [slash, ...publicRoutesWithoutSlash] = PUBLIC_ROUTES;
   const isPublicPage =
     publicPathnameRegex.test(req.nextUrl.pathname) ||
     publicRoutesWithoutSlash.some((r) => req.nextUrl.pathname.includes(r));
-    return intlMiddleware(req);
+  return intlMiddleware(req);
 
   if (isPublicPage) {
     return intlMiddleware(req);

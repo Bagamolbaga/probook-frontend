@@ -1,31 +1,24 @@
-/* eslint-disable jsx-a11y/alt-text */
-/* eslint-disable @next/next/no-img-element */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { useCreateCompanySpecialistsQuery } from "@/api/queries/company/specialists";
 import Button from "@/components/ui/button";
 import StoreIcon from "@/components/ui/icons/Store";
 import TextField from "@/components/ui/inputs/TextField";
 import Modal from "@/components/ui/modal";
 import { FormControl } from "@mui/material";
-import { FC, ReactNode, useEffect, useMemo } from "react";
+import { FC, ReactNode, useMemo } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { CreateSpecialistForm } from "..";
-import PersonIcon from "@/components/ui/icons/Person";
 import CloseIcon from "@/components/ui/icons/Close";
-import FileUploadButton from "@/components/ui/button/FileUploadButton";
 import AppSelect from "@/components/ui/inputs/AppSelect";
 import { useGetCompanyShiftsQuery } from "@/api/queries/company/shift";
 import { TimeManager } from "@/utils/timeManager";
 import { SHIFT_COLORS } from "@/constants/shiftColors";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import PhoneNumberTextField from "@/components/ui/inputs/PhoneNumberTextField";
 import WorkingTimePicker from "@/components/WorkingTimePicker";
 import { useGetCompanyDetailsQuery } from "@/api/queries/company";
-import { TimeSlotsManager } from "@/utils/timeSlotManager";
 import { WEEK_DAYS } from "@/constants/other";
 import { cn } from "@/utils/cn";
 
@@ -39,7 +32,6 @@ type Props = {
 };
 
 const CreateUpdateSpecialistModal: FC<Props> = ({
-  isUpdate,
   isOpen,
   headerTitle,
   form,
@@ -63,46 +55,35 @@ const CreateUpdateSpecialistModal: FC<Props> = ({
 
   const shiftPresets = useMemo(() => {
     if (getCompanyShiftsQuery.data) {
-      // const presets = getCompanyShiftsQuery.data.results
-      //   .filter((s) => s.is_default && !s.specialist)
-      //   .sort((a, b) => a.id - b.id);
-
-      // const onlyForCurrStaff = getCompanyShiftsQuery.data.results
-      //   .filter(
-      //     (s) => s.specialist === form.watch("_specialistId") && s.name === "CUSTOM"
-      //   )
-      //   .sort((a, b) => a.id - b.id);
-
-      // const arr = [].map((s) => {
-      //   const tm = new TimeManager();
-
-      //   const workingScheduleWithFromTo = tm.getWorkingScheduleWithFromAndToPropertys(
-      //     s.working_schedule
-      //   );
-
-      //   return {
-      //     ...s,
-      //     workingScheduleWithFromTo,
-      //   };
-      // });
+      const tm = new TimeManager();
+      const presets = getCompanyShiftsQuery.data.results
+        .filter((shift) => shift.kind === "default")
+        .map((shift) => ({
+          ...shift,
+          workingScheduleWithFromTo: tm.getWorkingScheduleWithFromAndToPropertys(
+            shift.working_schedule
+          ),
+        }));
 
       return [
+        ...presets,
         {
           id: -1,
           name: "Custom time",
           color: "",
+          workingScheduleWithFromTo: undefined,
         },
       ];
     }
 
     return [];
-  }, [getCompanyShiftsQuery.data, form.watch("_specialistId")]);
+  }, [getCompanyShiftsQuery.data]);
 
   const companyWorkingTimeSlots = useMemo(() => {
-    const workingSchedule = getCompanyDetailsQuery?.data?.working_schedule;
+    const workingSchedule = getCompanyDetailsQuery.data?.workingSchedule;
 
     if (workingSchedule) {
-      const slotManager = new TimeSlotsManager();
+      const slotManager = new TimeManager();
       const slots = slotManager
         .getWorkingTimeSlotsCompany(workingSchedule)
         .filter((s) => s.minute === 0 || s.minute === 30);
@@ -111,7 +92,7 @@ const CreateUpdateSpecialistModal: FC<Props> = ({
     }
 
     return [];
-  }, [getCompanyDetailsQuery?.data?.working_schedule]);
+  }, [getCompanyDetailsQuery.data?.workingSchedule]);
 
   return (
     <Modal isOpen={isOpen} handleClose={localCloseHandler}>
@@ -129,63 +110,36 @@ const CreateUpdateSpecialistModal: FC<Props> = ({
           </div>
         </div>
 
-        <div className="w-full pt-12 pb-9 flex justify-center items-center">
-          <FileUploadButton
-            accept="image/png, image/jpg, image/jpeg"
-            onSelected={(file) => {
-              form.setValue("avatar", file);
-            }}
-            renderChildren={({ fileBase64, handleClick }) => (
-              <div
-                className="w-[108px] h-[108px] flex justify-center items-center rounded-lg cursor-pointer overflow-hidden bg-purpleLightSecondary transition-all hover:bg-purpleExtraLight"
-                onClick={handleClick}
-              >
-                {fileBase64 ? (
-                  <img className="w-full h-full object-cover" src={fileBase64} />
-                ) : typeof form.getValues("avatar") === "string" ? (
-                  <img
-                    className="w-full h-full object-cover"
-                    src={form.getValues("avatar") as string}
-                  />
-                ) : (
-                  <PersonIcon className="w-10 h-10 stroke-blueDark" />
-                )}
-              </div>
-            )}
-          />
-        </div>
-
-        <div className="mt-5">
-          <div className="w-full">
+        <div className="mt-12">
+          <div className="flex justify-between gap-5">
             <TextField
               className="mb-2 !py-1"
-              id="name"
-              label="Name"
-              placeholder="Name..."
+              id="firstName"
+              label="First name"
+              placeholder="First name..."
               register={form.register}
               rules={{ required: true }}
-              error={form.formState.errors.name}
+              error={form.formState.errors.firstName}
+            />
+            <TextField
+              className="mb-2 !py-1"
+              id="lastName"
+              label="Last name"
+              placeholder="Last name..."
+              register={form.register}
+              rules={{ required: true }}
+              error={form.formState.errors.lastName}
             />
           </div>
-          <div className="mt-5 flex justify-between gap-5">
+          <div className="mt-5">
             <TextField
               className="mb-2 !py-1"
               id="email"
               label="Email"
               placeholder="Email..."
               register={form.register}
-              // rules={{ required: true }}
-              // disabled={isUpdate}
+              rules={{ required: true }}
               error={form.formState.errors.email}
-            />
-            <PhoneNumberTextField
-              className="mb-2 !py-1"
-              id="phone"
-              label="Phone"
-              control={form.control as any}
-              // disabled={isUpdate}
-              // rules={{ required: true }}
-              error={form.formState.errors.phone}
             />
           </div>
           <div className="mt-5">
@@ -212,7 +166,7 @@ const CreateUpdateSpecialistModal: FC<Props> = ({
                       }
 
                       const days =
-                        option.name === "CUSTOM"
+                        option.name === "CUSTOM" && "working_schedule" in option
                           ? WEEK_DAYS.map((day) => ({
                               isWorking: Boolean(
                                 option.working_schedule[day.id].slots.length

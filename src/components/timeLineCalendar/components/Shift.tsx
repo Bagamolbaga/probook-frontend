@@ -35,7 +35,7 @@ const Shift = ({ data, row, col, headerTimes, handleOpenBookingDetails }: Props)
       [60 / 45]: "75%",
     };
 
-    const minShiftLength = (((shift.slots.length - 1) * 15) / 60) * 100;
+    const minShiftLength = ((shift.slots.length * 15) / 60) * 100;
 
     const firstSlotIsEven = shift.slots[0] % 2 === 0;
     const lastSlotIsEven = shift.slots.at(-1) && shift.slots.at(-1)! % 2 === 0;
@@ -43,7 +43,7 @@ const Shift = ({ data, row, col, headerTimes, handleOpenBookingDetails }: Props)
     const status = shift.status;
     const content = (
       <div
-        key={shift.client.username}
+        key={shift.id}
         className={cn("absolute z-[5] top-0 left-0 h-full py-[6px]", {
           "pl-[6px] pr-[3px]": shift.slots.length === 1 && firstSlotIsEven,
           "pl-[3px] pr-[6px]": shift.slots.length === 1 && !firstSlotIsEven,
@@ -64,17 +64,10 @@ const Shift = ({ data, row, col, headerTimes, handleOpenBookingDetails }: Props)
             className={cn(
               "w-full h-full px-[6px] flex items-center rounded overflow-hidden cursor-pointer ",
               {
-                "bg-purplePrimary/10 hover:bg-purplePrimary/20":
-                  (!shift.client.phone && !shift.client.email) || status === "WALK_IN",
-                "bg-[#40E1FA1A]/10 hover:bg-[#40E1FA1A]": shift.client.phone?.length,
-                "bg-yellowPrimary/10 hover:bg-yellowPrimary/20":
-                  !shift.client.phone?.length &&
-                  shift.client.email &&
-                  status === "PENDING",
+                "bg-purplePrimary/10 hover:bg-purplePrimary/20": !shift.customer.email,
+                "bg-yellowPrimary/10 hover:bg-yellowPrimary/20": status === "PENDING",
                 "bg-greenPrimary/10 hover:bg-greenPrimary/20":
-                  !shift.client.phone?.length &&
-                  shift.client.email &&
-                  status === "COMPLETED",
+                  status === "COMPLETED" || status === "CONFIRMED",
                 "bg-redExtraLight/10 hover:bg-redExtraLight/20": status === "BLOCKED",
                 // "bg-blueExtraLight/10 hover:bg-blueExtraLight/20": status === "break",
                 "bg-greyPrimary/10 hover:bg-greyPrimary/20": status === "OFF",
@@ -85,23 +78,15 @@ const Shift = ({ data, row, col, headerTimes, handleOpenBookingDetails }: Props)
               className={cn(
                 "text-sm font-bold text-nowrap text-ellipsis overflow-hidden",
                 {
-                  "text-purplePrimary":
-                    (!shift.client.phone && !shift.client.email) || status === "WALK_IN",
-                  "text-[#2CE5F6]": shift.client.phone?.length,
-                  "text-yellowPrimary":
-                    !shift.client.phone?.length &&
-                    shift.client.email &&
-                    status === "PENDING",
-                  "text-greenPrimary":
-                    !shift.client.phone?.length &&
-                    shift.client.email &&
-                    status === "COMPLETED",
+                  "text-purplePrimary": !shift.customer.email,
+                  "text-yellowPrimary": status === "PENDING",
+                  "text-greenPrimary": status === "COMPLETED" || status === "CONFIRMED",
                   "text-redPrimary": status === "BLOCKED",
                   "text-greyPrimary": status === "OFF",
                 }
               )}
             >
-              {shift.client.first_name} {shift.client.last_name}
+              {shift.customer.first_name} {shift.customer.last_name}
             </p>
           </div>
         </div>

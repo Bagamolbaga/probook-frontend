@@ -8,9 +8,10 @@ import CloseIcon from "@/components/ui/icons/Close";
 import { cn } from "@/utils/cn";
 import { TServiceAndSelectedOption } from "@/scenes/main/bookingCreation/components/BookingCreation";
 import { toaster } from "@/components/ui/toaster";
+import type { ServiceCategoryTab } from "../ServiceSelection";
 
 type TServiceData = {
-  type: TServiceType_new;
+  type: ServiceCategoryTab;
   services: TService[];
 };
 
@@ -18,7 +19,7 @@ type Props = {
   services: TServiceData[];
   selectedServices: TServiceAndSelectedOption[];
   selectServiceHandler: (s: TServiceAndSelectedOption) => void;
-  renderTypeRow: (type: TServiceType_new) => ReactNode;
+  renderTypeRow: (type: ServiceCategoryTab) => ReactNode;
 };
 
 const ServicesList: FC<Props> = ({

@@ -1,6 +1,5 @@
 import { FormattedDataItem } from "@/scenes/main/bookingManagement/components/timeLineCalendar";
 import TimeLineBreakItem from "./BreakTime/TimeLineBreakItem";
-import { TimeManager } from "@/utils/timeManager";
 
 export const FullDayOff = ({
   data,
@@ -15,21 +14,13 @@ export const FullDayOff = ({
 }) => {
   const rowData = data[row];
 
-  let defaultSlots = new TimeManager().getWorkingScheduleSlotsByWeekDay({
-    workingSchedule: rowData.specialist.default_shift.working_schedule,
-    date: selectedDate,
-  });
-  rowData.customWorkingShift &&
-    (defaultSlots = new TimeManager().getWorkingScheduleSlotsByWeekDay({
-      workingSchedule: rowData.customWorkingShift.working_schedule,
-      date: selectedDate,
-    }));
+  const defaultSlots = rowData.customWorkingShift?.workingSlots || [];
 
   const width = 100;
   const paddingRight = 6;
   const paddingLeft = 0;
 
-  if (!defaultSlots?.slots.length) {
+  if (rowData.customWorkingShift && !defaultSlots.length) {
     return (
       <TimeLineBreakItem
         key={`${rowData.id}-fullDayOff`}

@@ -1,82 +1,104 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/require-await */
-import { AuthOptions } from "next-auth";
+import axios from "axios";
+import type { AuthOptions, User as NextAuthUser } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import FacebookProvider from "next-auth/providers/facebook";
-import axios from "axios";
-import { User } from "@/types/user";
+import type { User } from "@/types/user";
 
-type LoginRes = {
-  access_token: string;
-  expires_in: number;
-  token_type: string;
-  scope: string;
-  refresh_token: string;
+type AuthResponse = {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  tokenType: "Bearer";
+  user: User;
 };
 
+type BackendAuthUser = NextAuthUser & {
+  accessToken: string;
+  refreshToken: string;
+  accessTokenExpires: number;
+  backendUser: User;
+};
+
+type BackendJwt = {
+  accessToken?: string;
+  refreshToken?: string;
+  accessTokenExpires?: number;
+  user?: User;
+  error?: "RefreshAccessTokenError";
+};
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+async function exchangeGoogleToken(idToken: string): Promise<AuthResponse> {
+  const { data } = await axios.post<AuthResponse>(`${apiUrl}/auth/google`, { idToken });
+  return data;
+}
+
+async function refreshAccessToken(token: BackendJwt): Promise<BackendJwt> {
+  if (!token.refreshToken) return { ...token, error: "RefreshAccessTokenError" };
+
+  try {
+    const { data } = await axios.post<AuthResponse>(`${apiUrl}/auth/refresh`, {
+      refreshToken: token.refreshToken,
+    });
+
+    return {
+      ...token,
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+      accessTokenExpires: Date.now() + data.expiresIn * 1000,
+      user: data.user,
+      error: undefined,
+    };
+  } catch {
+    return { ...token, error: "RefreshAccessTokenError" };
+  }
+}
+
 export const authOptions: AuthOptions = {
-  // trustHost: true,
   secret: process.env.NEXTAUTH_SECRET,
-  pages: {
-    signIn: "/sign-in",
-    newUser: "/sign-up",
-  },
+  pages: { signIn: "/sign-in", newUser: "/sign-up" },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       authorization: {
         params: {
-          prompt: "consent",
+          prompt: "select_account",
           access_type: "offline",
           response_type: "code",
         },
       },
-      httpOptions: {
-        timeout: 10000
-      }
-    }),
-    FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID || "",
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || "",
+      httpOptions: { timeout: 10000 },
     }),
     CredentialsProvider({
       name: "credentials",
-      type: "credentials",
       credentials: {
-        email: { type: "text" },
+        email: { type: "email" },
         password: { type: "password" },
       },
       async authorize(credentials) {
-        if (credentials) {
-          const sendData = {
-            grant_type: "password",
-            username: credentials.email,
+        if (!credentials?.email || !credentials.password) return null;
+
+        try {
+          const { data } = await axios.post<AuthResponse>(`${apiUrl}/auth/login`, {
+            email: credentials.email,
             password: credentials.password,
-            client_id: process.env.CLIENT_ID_BUSINESS,
-            client_secret: process.env.CLIENT_SECRET_BUSINESS,
-          };
+          });
 
-          const { data } = await axios.post<LoginRes>(
-            `${process.env.NEXT_PUBLIC_API_URL}/o/token/`,
-            sendData,
-            {
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-              },
-            }
-          );
-
-          return data as any;
+          return {
+            id: String(data.user.id),
+            name: data.user.fullName || `${data.user.firstName} ${data.user.lastName}`,
+            email: data.user.email,
+            image: data.user.avatar || null,
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken,
+            accessTokenExpires: Date.now() + data.expiresIn * 1000,
+            backendUser: data.user,
+          } satisfies BackendAuthUser;
+        } catch {
+          return null;
         }
-
-        return null;
       },
     }),
   ],
@@ -87,73 +109,89 @@ export const authOptions: AuthOptions = {
         httpOnly: true,
         sameSite: "strict",
         path: "/",
-        secure: process.env.DISABLE_COOKIE_SECURE === "true" ? false : true,
+        secure: process.env.DISABLE_COOKIE_SECURE !== "true",
       },
     },
   },
-  session: {
-    strategy: "jwt",
-    maxAge: 60 * 60 * 10,
+  session: { strategy: "jwt", maxAge: 60 * 60 * 10 },
+  events: {
+    async signOut({ token }) {
+      const backendToken = token as BackendJwt;
+      if (!backendToken.refreshToken) return;
+
+      try {
+        await axios.post(`${apiUrl}/auth/logout`, {
+          refreshToken: backendToken.refreshToken,
+        });
+      } catch {
+        // The local NextAuth session is still removed if the backend is unavailable.
+      }
+    },
   },
   callbacks: {
-    async signIn({ account, profile }) {
-      if (account?.provider === "google" || account?.provider === "facebook") {
-        if (!account.access_token || !profile) {
-          return false;
-        }
+    async jwt({ token, user, account, trigger }) {
+      const backendToken = token as BackendJwt;
 
-        return true;
+      if (user && account?.provider === "credentials") {
+        const backendUser = user as BackendAuthUser;
+        return {
+          ...backendToken,
+          accessToken: backendUser.accessToken,
+          refreshToken: backendUser.refreshToken,
+          accessTokenExpires: backendUser.accessTokenExpires,
+          user: backendUser.backendUser,
+          error: undefined,
+        };
       }
 
-      return true;
-    },
-    //@ts-ignore
-    async jwt({ trigger, token, user, account, profile }) {
+      if (account?.provider === "google") {
+        if (!account.id_token)
+          return { ...backendToken, error: "RefreshAccessTokenError" };
 
-      if (user) {
-        token.access_token = (user as any).access_token as string;
-        token.refresh_token = (user as any).refresh_token as string;
-        token.scope = (user as any).scope as string;
-        token.user = (user as any).user as User;
-        token.exp = 36000;
-
-        if (account?.provider === "google" || account?.provider === "facebook") {
-          token.user = {
-            ...user,
-            first_name: (profile as any).given_name,
-            last_name: (profile as any).family_name,
+        try {
+          const data = await exchangeGoogleToken(account.id_token);
+          return {
+            ...backendToken,
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken,
+            accessTokenExpires: Date.now() + data.expiresIn * 1000,
+            user: data.user,
+            error: undefined,
           };
+        } catch {
+          return { ...backendToken, error: "RefreshAccessTokenError" };
         }
       }
 
-      if (trigger === "update") {
-        const { data } = await axios.get<{ user: User }>(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/session`,
-          {
-            headers: {
-              Authorization: `Bearer ${(token as any).access_token}`,
-            },
-          }
-        );
-
-
-        token.user = data.user;
+      if (
+        backendToken.accessToken &&
+        backendToken.accessTokenExpires &&
+        Date.now() < backendToken.accessTokenExpires - 30_000
+      ) {
+        return backendToken;
       }
 
-      return token;
+      if (backendToken.refreshToken) return refreshAccessToken(backendToken);
+
+      if (trigger === "update" && backendToken.accessToken) {
+        try {
+          const { data } = await axios.get<{ user: User }>(`${apiUrl}/auth/me`, {
+            headers: { Authorization: `Bearer ${backendToken.accessToken}` },
+          });
+          return { ...backendToken, user: data.user, error: undefined };
+        } catch {
+          return { ...backendToken, error: "RefreshAccessTokenError" };
+        }
+      }
+
+      return backendToken;
     },
-
     async session({ token, session }) {
-
-      if (token) {
-        // if ("access_token" in token) {
-        session.access_token = token.access_token as string;
-        session.refresh_token = token.refresh_token as string;
-        session.scope = token.scope as string;
-        session.user = token.user as User;
-        // }
-      }
-
+      const backendToken = token as BackendJwt;
+      session.accessToken = backendToken.accessToken || "";
+      session.refreshToken = backendToken.refreshToken || "";
+      session.user = backendToken.user || null;
+      session.error = backendToken.error;
       return session;
     },
   },

@@ -11,7 +11,6 @@ type TimeLineBreakItemProps = {
   label?: string;
   type: "dailyBreak" | "beforeWorkingTime" | "afterWorkingTime" | "fullDayOff";
   currentDate: Date;
-  onClick?: (row: FormattedDataItem) => void;
 };
 
 const TimeLineBreakItem: FC<TimeLineBreakItemProps> = ({
@@ -22,7 +21,6 @@ const TimeLineBreakItem: FC<TimeLineBreakItemProps> = ({
   type,
   label,
   currentDate,
-  onClick,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -31,18 +29,18 @@ const TimeLineBreakItem: FC<TimeLineBreakItemProps> = ({
   };
 
   const closeHandler = () => {
-    void row.revalidateQueries()
+    void row.revalidateQueries();
     setIsOpen(false);
   };
 
   return (
     <>
-      {/* <ChangeDailyBreakTimePopup
+      <ChangeDailyBreakTimePopup
         isOpen={isOpen}
         row={row}
         currentDate={currentDate}
         handleClose={closeHandler}
-      /> */}
+      />
       <div
         key={row.specialist.id + "-break"}
         data-type={type}

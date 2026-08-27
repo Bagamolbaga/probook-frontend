@@ -20,7 +20,7 @@ const EmailPasswordStep: FC<Props> = ({ form, handleSignUpStep }) => {
     <div className="w-full mt-16">
       <div className="">
         <TextField
-          id="firtsName"
+          id="firstName"
           label={t("ui.labels.firstName")}
           placeholder={t("ui.labels.startTyping")}
           type="text"
@@ -28,7 +28,7 @@ const EmailPasswordStep: FC<Props> = ({ form, handleSignUpStep }) => {
           rules={{
             required: t("ui.errors.fieldIsRequired"),
           }}
-          error={form.formState.errors.firtsName}
+          error={form.formState.errors.firstName}
           requiredHideSymbol
         />
       </div>
@@ -65,7 +65,7 @@ const EmailPasswordStep: FC<Props> = ({ form, handleSignUpStep }) => {
           requiredHideSymbol
         />
       </div>
-      {/* <div className="mt-2">
+      <div className="mt-2">
         <TextField
           id="password"
           label={t("ui.labels.password")}
@@ -83,8 +83,8 @@ const EmailPasswordStep: FC<Props> = ({ form, handleSignUpStep }) => {
           showError
           requiredHideSymbol
         />
-      </div> */}
-      {/* <div className="mt-2">
+      </div>
+      <div className="mt-2">
         <TextField
           id="confirmPassword"
           label={t("ui.labels.confirmPassword")}
@@ -103,7 +103,7 @@ const EmailPasswordStep: FC<Props> = ({ form, handleSignUpStep }) => {
           showError
           requiredHideSymbol
         />
-      </div> */}
+      </div>
 
       <div className="mt-2">
         <FormControlLabel

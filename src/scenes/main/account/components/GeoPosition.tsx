@@ -31,7 +31,7 @@ const GeoPosition = ({ form, isLoading }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const cityDebounce: string = useDebounce(form.watch("address.city"), 500);
-  const addressDebounce: string = useDebounce(form.watch("address.address1"), 500);
+  const addressDebounce: string = useDebounce(form.watch("address.address"), 500);
 
   useEffect(() => {
     //FIX: add billing to google account
@@ -80,10 +80,10 @@ const GeoPosition = ({ form, isLoading }: Props) => {
           (i) => i.types.length === 1 && i.types.includes("postal_code")
         )?.long_name;
 
-        form.setValue("address.address1", res.results[0].formatted_address);
+        form.setValue("address.address", res.results[0].formatted_address);
         pos && form.setValue("address.lat", pos.lat);
         pos && form.setValue("address.lng", pos.lng);
-        postalCode && form.setValue("address.zip_code", postalCode);
+        postalCode && form.setValue("address.zipCode", postalCode);
       }
     };
 
@@ -106,7 +106,7 @@ const GeoPosition = ({ form, isLoading }: Props) => {
   };
 
   const toggleShowMapHandler = () => {
-    setIsOpen(p => !p);
+    setIsOpen((p) => !p);
   };
 
   const libraries = useMemo(() => ["places"], []);
@@ -154,7 +154,7 @@ const GeoPosition = ({ form, isLoading }: Props) => {
           </div>
           <div className="mt-2">
             <TextField
-              id="address.address1"
+              id="address.address"
               label={"Address"}
               placeholder={t("ui.labels.startTyping")}
               type="text"
@@ -162,7 +162,7 @@ const GeoPosition = ({ form, isLoading }: Props) => {
               rules={{
                 required: t("ui.errors.fieldIsRequired"),
               }}
-              error={form.formState.errors.address?.address1}
+              error={form.formState.errors.address?.address}
               requiredHideSymbol
             />
           </div>
@@ -173,8 +173,12 @@ const GeoPosition = ({ form, isLoading }: Props) => {
               adress on <span className="font-bold">map</span>
             </p>
             <div className="py-2 flex gap-[100px] sm:gap-0 sm:justify-between">
-              <Button variant={isOpen ? "outline" : "resting-active"} size="sm" onClick={toggleShowMapHandler}>
-              {isOpen ? "Hide map" : "Show map"}
+              <Button
+                variant={isOpen ? "outline" : "resting-active"}
+                size="sm"
+                onClick={toggleShowMapHandler}
+              >
+                {isOpen ? "Hide map" : "Show map"}
               </Button>
             </div>
             {isLoaded && isOpen && (

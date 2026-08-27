@@ -9,18 +9,14 @@ import { GridColDef, GridRowSelectionModel, GridSortModel } from "@mui/x-data-gr
 import { Player } from "@lottiefiles/react-lottie-player";
 import { differenceInSeconds } from "date-fns";
 
-import {
-  useGetCompanySpecialistsQuery,
-  useUpdateCompanySpecialistsQuery,
-} from "@/api/queries/company/specialists";
+import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
 import {
   useCreateCompanyServiceQuery,
   useDeleteCompanyServiceQuery,
   useGetCompanyServicesQuery,
   useUpdateCompanyServiceQuery,
-  useUploadServiceImageQuery,
 } from "@/api/queries/company/services";
-import { useGetCompanyServicesTypesQuery } from "@/api/queries/company/serviceTypes";
+import { useGetCompanyServiceCategoriesQuery } from "@/api/queries/company/serviceCategories";
 
 // import CreateUpdateServiceModal from "./components/CreateNewServiceModal";
 import CreateUpdateServiceModal from "./components/CreateServiceModal";
@@ -29,7 +25,6 @@ import Button from "@/components/ui/button";
 import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
 import TimeCell from "@/components/ui/table/customCells/Time";
 import PriceCell from "@/components/ui/table/customCells/Price";
-import UserNameWithAvatar from "@/components/ui/table/customCells/UserNameWithAvatar";
 import { toaster } from "@/components/ui/toaster";
 
 import EditIcon from "@/components/ui/icons/Edit";
@@ -38,7 +33,6 @@ import DeleteIcon from "@/components/ui/icons/Delete";
 import PersonIcon from "@/components/ui/icons/Person";
 import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
 import ServicesListEmptyImage from "@/assets/businessServices/ServicesListEmptyOverlay.svg";
-import ServiceTypeCell from "@/components/ui/table/serviceTypeCell";
 import { useTranslations } from "next-intl";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
 import Table from "@/components/ui/table";
@@ -51,13 +45,16 @@ export type CreateServiceForm = {
   description?: string;
   description_thai?: string;
   options: (Omit<TServiceOption, "id"> & { id?: number })[];
-  service_type?: TServiceType_new;
+  category: TServiceCategory | null;
   specialists: TSpecialist[];
   showSpecialists: boolean;
   featured: boolean;
 };
 
-type TRowItem = TService;
+type TRowItem = Omit<TService, "options" | "specialists"> & {
+  options: TServiceOption[];
+  specialists: TSpecialist[];
+};
 
 const BusinessServicesListTable = () => {
   const t = useTranslations();
@@ -77,10 +74,13 @@ const BusinessServicesListTable = () => {
     queryParams: {
       limit: paginationModel.pageSize.toString(),
       offset: (paginationModel.pageSize * paginationModel.page).toString(),
-      ordering: `${sortModel[0]?.sort === "asc" ? "" : "-"}${sortModel[0]?.field}` as any,
+      ordering:
+        `${sortModel[0]?.sort === "asc" ? "" : "-"}${sortModel[0]?.field}` as OrderingFields<TService>,
     },
   });
-  const getCompanyServicesTypesQuery = useGetCompanyServicesTypesQuery({ companyId });
+  const getCompanyServiceCategoriesQuery = useGetCompanyServiceCategoriesQuery({
+    companyId,
+  });
 
   const getCompanySpecialistsQuery = useGetCompanySpecialistsQuery({
     companyId,
@@ -103,6 +103,7 @@ const BusinessServicesListTable = () => {
   const createServiceForm = useForm<CreateServiceForm>({
     defaultValues: {
       specialists: [],
+      category: null,
       showSpecialists: false,
       options: [{ name: "", duration: 0 }],
     },
@@ -118,21 +119,15 @@ const BusinessServicesListTable = () => {
     return [
       ...(getCompanyServicesQuery.data?.results.map((s) => ({
         ...s,
-        id: s._id,
-        options: s.options.map((so) => ({ ...so, price: Number(so.price) })),
+        id: s.id || s._id || "",
+        options: (s.options as TServiceOption[]).map((so) => ({
+          ...so,
+          price: Number(so.price),
+        })),
+        specialists: s.specialists as TSpecialist[],
       })) || []),
     ].sort((a, b) => differenceInSeconds(a.createdAt, b.createdAt));
-  }, [getCompanyServicesQuery.data, getCompanyServicesTypesQuery.data]);
-
-  const timeOptions = useMemo(() => {
-    const MAX_DURATION_HOURS = 5;
-    const STEP = 15;
-
-    return Array.from({ length: (MAX_DURATION_HOURS * 60) / STEP }).map((i, idx) => ({
-      id: STEP * (idx + 1),
-      value: STEP * (idx + 1),
-    }));
-  }, []);
+  }, [getCompanyServicesQuery.data]);
 
   const showCreateModalHandler = () => {
     setIsOpenCreateModal(true);
@@ -141,7 +136,6 @@ const BusinessServicesListTable = () => {
   const hideCreateModalHandler = () => {
     createServiceForm.reset();
     void getCompanyServicesQuery.refetch();
-    void getCompanyServicesTypesQuery.refetch();
     void getCompanySpecialistsQuery.refetch();
 
     setIsOpenCreateModal(false);
@@ -150,73 +144,89 @@ const BusinessServicesListTable = () => {
   const hideUpdateModalHandler = () => {
     createServiceForm.reset();
     void getCompanyServicesQuery.refetch();
-    void getCompanyServicesTypesQuery.refetch();
     void getCompanySpecialistsQuery.refetch();
 
     setIsOpenUpdateModal(false);
   };
 
+  const showUpdateModalHandler = useCallback(
+    (rowData: TRowItem) => {
+      createServiceForm.setValue("_serviceId", rowData._id || rowData.id);
+      rowData.image && createServiceForm.setValue("avatar", rowData.image);
+      createServiceForm.setValue("name", rowData.name);
+      createServiceForm.setValue("description", rowData.description);
+      // createServiceForm.setValue("featured", rowData.featured);
+
+      createServiceForm.setValue(
+        "options",
+        rowData.options.map((so) => ({
+          ...so,
+          name: so.name || "",
+          price: so.price,
+        }))
+      );
+
+      const rowCategoryId = rowData.category
+        ? typeof rowData.category === "string"
+          ? rowData.category
+          : rowData.category.id || rowData.category._id
+        : undefined;
+      const category = getCompanyServiceCategoriesQuery.data?.results.find(
+        (item) => item.id === rowCategoryId || item._id === rowCategoryId
+      );
+
+      createServiceForm.setValue(
+        "category",
+        category ||
+          (!rowData.category || typeof rowData.category === "string"
+            ? null
+            : rowData.category)
+      );
+
+      const specialists = rowData.specialists;
+
+      // createServiceForm.setValue("showSpecialists", rowData.show_specialist);
+      createServiceForm.setValue("specialists", specialists);
+
+      setIsOpenUpdateModal(true);
+    },
+    [createServiceForm, getCompanyServiceCategoriesQuery.data?.results]
+  );
+
   const onSelectRowHandler = useCallback(
     (model: GridRowSelectionModel) => {
       if (model.length) {
-        const row = rows.find((r) => r._id === model[0]);
+        const row = rows.find((r) => r.id === model[0] || r._id === model[0]);
 
         if (row) {
           showUpdateModalHandler(row);
         }
       }
     },
-    [rows]
+    [rows, showUpdateModalHandler]
   );
-
-  const showUpdateModalHandler = (rowData: TRowItem) => {
-    createServiceForm.setValue("_serviceId", rowData._id);
-    rowData.image && createServiceForm.setValue("avatar", rowData.image);
-    createServiceForm.setValue("name", rowData.name);
-    createServiceForm.setValue("description", rowData.description);
-    // createServiceForm.setValue("featured", rowData.featured);
-
-    createServiceForm.setValue(
-      "options",
-      rowData.options.map((so) => ({
-        ...so,
-        name: so.name || "",
-        price: so.price,
-        time_in_minutes: timeOptions.find((to) => to.id === so.duration)!,
-      }))
-    );
-
-    // const serviceType = (getCompanyServicesTypesQuery.data?.results || []).find(
-    //   (s) => s.name === rowData.service_type
-    // );
-
-    // serviceType && createServiceForm.setValue("service_type", serviceType);
-
-    const specialists = rowData.specialists;
-
-    // createServiceForm.setValue("showSpecialists", rowData.show_specialist);
-    createServiceForm.setValue("specialists", specialists);
-
-    setIsOpenUpdateModal(true);
-  };
 
   const createNewServiceHandler = async (formData: CreateServiceForm) => {
     try {
+      if (!formData.category) {
+        toaster.error("Select a service category");
+        return;
+      }
+
       const body = {
         companyId,
+        categoryId: formData.category.id,
         name: formData.name,
         description: formData.description,
-        specialists: formData.specialists.map((s) => s.id),
-        //@ts-ignore
+        specialistIds: formData.specialists.map((s) => s.id),
         options: formData.options.map((so) => ({
-          ...so,
-          name: so.name,
+          name: so.name || "",
           duration: so.duration,
           price: Number(so.price),
         })),
       };
 
-      const { data, status } = await createCompanyServiceQuery.mutateAsync({
+      const { data } = await createCompanyServiceQuery.mutateAsync({
         data: body,
       });
 
@@ -231,23 +241,25 @@ const BusinessServicesListTable = () => {
 
   const updateServiceHandler = async (formData: CreateServiceForm) => {
     try {
+      if (!formData.category) {
+        toaster.error("Select a service category");
+        return;
+      }
+
       const initData = getCompanyServicesQuery.data?.results.find(
         (s) => s._id === formData._serviceId
       );
       if (initData) {
-        const { ...other } = initData;
-
         const { data } = await updateCompanyServiceQuery.mutateAsync({
           serviceId: formData._serviceId!,
           data: {
             companyId,
+            categoryId: formData.category.id,
             name: formData.name,
             description: formData.description,
-            specialists: formData.specialists.map((s) => s.id),
-            //@ts-ignore
+            specialistIds: formData.specialists.map((s) => s.id),
             options: formData.options.map((so) => ({
-              ...so,
-              name: so.name,
+              name: so.name || "",
               duration: so.duration,
               price: Number(so.price),
             })),
@@ -281,7 +293,7 @@ const BusinessServicesListTable = () => {
 
   const staffCell = (rowData: TRowItem) => {
     const SHOW_ITEMS = 3;
-    const staff = (rowData.specialists as TSpecialist[]) || [];
+    const staff = rowData.specialists || [];
 
     let hiddenStaff = -1;
     const slicedStaff = staff.length > SHOW_ITEMS ? staff.slice(0, SHOW_ITEMS) : staff;
@@ -363,13 +375,24 @@ const BusinessServicesListTable = () => {
         },
       },
       {
-        field: "service_type",
+        field: "category",
         headerName: t("businessServices.table.headerLabels.serviceType"),
         type: "string",
         minWidth: 200,
         flex: 0.2,
-        renderCell: (params) => {
-          return <ServiceTypeCell serviceTypeId={params.value} />;
+        valueGetter: (_, row: TRowItem) => {
+          if (!row.category) return "";
+
+          return typeof row.category === "string" ? row.category : row.category.name;
+        },
+        renderCell: ({ row }: { row: TRowItem }) => {
+          const categoryName = !row.category
+            ? "—"
+            : typeof row.category === "string"
+              ? row.category
+              : row.category.name;
+
+          return <div className="h-full flex items-center">{categoryName}</div>;
         },
       },
       {
@@ -413,30 +436,18 @@ const BusinessServicesListTable = () => {
         },
       },
     ],
-    [getCompanyServicesQuery.data?.results, getCompanySpecialistsQuery.data?.results]
+    [showUpdateModalHandler, t]
   );
 
-  const createBtnIsActive = useMemo(() => {
-    const formData = createServiceForm.getValues();
-
-    return (
-      formData.name &&
-      formData.options.length &&
-      formData.specialists.length &&
-      !createCompanyServiceQuery.isPending
-    );
-  }, [createServiceForm.watch(), createCompanyServiceQuery.isPending]);
-
-  const updateBtnIsActive = useMemo(() => {
-    const formData = createServiceForm.getValues();
-
-    return (
-      formData.name &&
-      formData.options.length &&
-      formData.specialists.length &&
-      !updateCompanyServiceQuery.isPending
-    );
-  }, [createServiceForm.watch(), updateCompanyServiceQuery.isPending]);
+  const formData = createServiceForm.watch();
+  const formIsReady = Boolean(
+    formData.name &&
+    formData.category &&
+    formData.options?.length &&
+    formData.specialists?.length
+  );
+  const createBtnIsActive = formIsReady && !createCompanyServiceQuery.isPending;
+  const updateBtnIsActive = formIsReady && !updateCompanyServiceQuery.isPending;
 
   if (firstLoading) {
     return (
@@ -454,6 +465,7 @@ const BusinessServicesListTable = () => {
           isOpen={isOpenCreateModal}
           form={createServiceForm}
           staffs={getCompanySpecialistsQuery.data?.results || []}
+          categories={getCompanyServiceCategoriesQuery.data?.results || []}
           handleClose={hideCreateModalHandler}
           actionButton={
             <Button
@@ -502,6 +514,7 @@ const BusinessServicesListTable = () => {
         isOpen={isOpenCreateModal}
         form={createServiceForm}
         staffs={getCompanySpecialistsQuery.data?.results || []}
+        categories={getCompanyServiceCategoriesQuery.data?.results || []}
         handleClose={hideCreateModalHandler}
         actionButton={
           <Button
@@ -516,11 +529,11 @@ const BusinessServicesListTable = () => {
         }
       />
       <CreateUpdateServiceModal
-        isUpdate
         headerTitle={t("businessServices.createUpdateModal.updateTitle")}
         isOpen={isOpenUpdateModal}
         form={createServiceForm}
         staffs={getCompanySpecialistsQuery.data?.results || []}
+        categories={getCompanyServiceCategoriesQuery.data?.results || []}
         handleClose={hideUpdateModalHandler}
         actionButton={
           <Button
@@ -579,6 +592,7 @@ const BusinessServicesListTable = () => {
             rowSelection={true}
             loading={
               getCompanySpecialistsQuery.isPending ||
+              getCompanyServiceCategoriesQuery.isPending ||
               createCompanyServiceQuery.isPending ||
               updateCompanyServiceQuery.isPending ||
               deleteCompanyServiceQuery.isPending

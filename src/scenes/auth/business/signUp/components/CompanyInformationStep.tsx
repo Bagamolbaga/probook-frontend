@@ -6,29 +6,10 @@ import Button from "@/components/ui/button";
 import TextField from "@/components/ui/inputs/TextField";
 import CustomSelect from "@/components/ui/inputs/Select";
 import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
-import { Link, useTranslations } from "@/i18n";
+import { useTranslations } from "@/i18n";
 import { SignUpForm } from "..";
 
-type NUM_EMPLOYEES = "LOW" | "MEDIUM" | "HIGH" | "VERY_HIGH";
-
-const NUMBER_OF_EMPLOYEESS_OPTIONS: { label: string; value: NUM_EMPLOYEES }[] = [
-  {
-    label: "1 - 10",
-    value: "LOW",
-  },
-  {
-    label: "10 - 100",
-    value: "MEDIUM",
-  },
-  {
-    label: "100 - 10,000",
-    value: "HIGH",
-  },
-  {
-    label: "Above 10,000",
-    value: "VERY_HIGH",
-  },
-];
+const BUSINESS_TYPES = ["Beauty salon", "Barbershop", "Spa", "Wellness", "Other"];
 
 type Props = {
   form: UseFormReturn<SignUpForm, any, undefined>;
@@ -38,7 +19,7 @@ type Props = {
 const CompanyInformationStep: FC<Props> = ({ form, handleSignUpStep }) => {
   const t = useTranslations();
   const isNextBtnActive =
-    form.watch("companyName") && form.watch("employees") && form.watch("phone");
+    form.watch("companyName") && form.watch("business") && form.watch("phone");
 
   return (
     <div className="w-full mt-16">
@@ -58,54 +39,29 @@ const CompanyInformationStep: FC<Props> = ({ form, handleSignUpStep }) => {
       </div>
       <div className="mt-5">
         <FormControl fullWidth>
-          <p className="mb-2 text-sm text-greyPrimary">{t("ui.labels.employess")}</p>
+          <p className="mb-2 text-sm text-greyPrimary">Business type</p>
           <Controller
             render={({ field, formState }) => (
               <CustomSelect
-                id="employees"
+                id="business"
                 placeholder={t("ui.labels.startTyping")}
                 IconComponent={ArrowSecondaryDownIcon}
-                error={!!formState.errors.employees}
+                error={!!formState.errors.business}
                 {...field}
               >
-                {NUMBER_OF_EMPLOYEESS_OPTIONS.map((item) => (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.label}
+                {BUSINESS_TYPES.map((businessType) => (
+                  <MenuItem key={businessType} value={businessType}>
+                    {businessType}
                   </MenuItem>
                 ))}
               </CustomSelect>
             )}
-            name="employees"
+            name="business"
             control={form.control}
             rules={{ required: true }}
           />
         </FormControl>
       </div>
-      {/* <div className="mt-5">
-      <FormControl fullWidth>
-        <p className="mb-2 text-sm text-greyPrimary">Business</p>
-        <Controller
-          render={({ field, formState }) => (
-            <CustomSelect
-              id="business"
-              placeholder={t("ui.labels.startTyping")}
-              IconComponent={ArrowSecondaryDownIcon}
-              error={!!formState.errors.employees}
-              {...field}
-            >
-              {BUSINESS_OPTIONS.map((item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.label}
-                </MenuItem>
-              ))}
-            </CustomSelect>
-          )}
-          name="business"
-          control={form.control}
-          rules={{ required: true }}
-        />
-      </FormControl>
-    </div> */}
       <div className="mt-2">
         <TextField
           id="phone"

@@ -2,9 +2,7 @@
 
 import BusinessServicesListTable from "./components/businessServicessListTable";
 import { useTranslations } from "next-intl";
-import SubscriptionChecker from "@/components/subscriptionChecker";
 import MainPagesTitle from "@/components/mainPagesTitle";
-import SuperAdminChecker from "@/components/superAdminChecker";
 
 const BusinessServicesScene = () => {
   const t = useTranslations();
@@ -16,9 +14,9 @@ const BusinessServicesScene = () => {
       </div>
       <div className="w-full min-h-[calc(100vh-62px-52px)] flex sm:min-h-[calc(100vh-62px-86px)] sm:pb-5">
         {/* <SuperAdminChecker> */}
-          {/* <SubscriptionChecker> */}
-            <BusinessServicesListTable />
-          {/* </SubscriptionChecker> */}
+        {/* <SubscriptionChecker> */}
+        <BusinessServicesListTable />
+        {/* </SubscriptionChecker> */}
         {/* </SuperAdminChecker> */}
       </div>
     </div>

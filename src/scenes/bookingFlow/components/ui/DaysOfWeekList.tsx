@@ -5,15 +5,24 @@ type Props = {
   selectedDate: Date;
   days: Date[];
   company?: TCompany;
+  isWorkingDay?: (date: Date) => boolean;
   selectDateHandler: (date: Date) => void;
 };
 
-const DaysOfWeekList = ({ selectedDate, days, company, selectDateHandler }: Props) => {
+const DaysOfWeekList = ({
+  selectedDate,
+  days,
+  company,
+  isWorkingDay: isWorkingDayProp,
+  selectDateHandler,
+}: Props) => {
   const isBeforeDay = (date: Date) => isBefore(date, new Date());
   const isWorkingDay = (date: Date) => {
+    if (isWorkingDayProp) return isWorkingDayProp(date);
+
     if (company?.workingSchedule) {
       const ws = company?.workingSchedule;
-      const weekDay = format(date, "EEEE") as keyof TCompany["working_schedule"];
+      const weekDay = format(date, "EEEE") as keyof TCompany["workingSchedule"];
 
       if (ws[weekDay].workingSlots.length) {
         return true;

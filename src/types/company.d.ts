@@ -5,7 +5,8 @@ type TCompany<T = unknown> = {
     name: string;
   };
   name: string;
-  status: "activated" | "deactivated";
+  staffLimit: number;
+  status: "created" | "activated" | "deactivated";
   num_employees: string;
   life_time_revenue: number;
   business_type: string;
@@ -14,41 +15,14 @@ type TCompany<T = unknown> = {
   address1?: string;
   address2?: string;
   zip_code?: string;
+  address?: string;
+  zipCode?: string;
   city?: string;
   pos: {
     lat: number | null;
     lng: number | null;
   };
-  workingSchedule: {
-    Friday: {
-      times: string[];
-      breaks: string[];
-    };
-    Monday: {
-      times: string[];
-      breaks: string[];
-    };
-    Sunday: {
-      times: string[];
-      breaks: string[];
-    };
-    Tuesday: {
-      times: string[];
-      breaks: string[];
-    };
-    Saturday: {
-      times: string[];
-      breaks: string[];
-    };
-    Thursday: {
-      times: string[];
-      breaks: string[];
-    };
-    Wednesday: {
-      times: string[];
-      breaks: string[];
-    };
-  };
+  workingSchedule: CompanyWorkingSchedule;
   created_at: string;
   updated_at: string;
   owner: number;
@@ -71,13 +45,14 @@ type IUploadImage = {
 };
 
 type WorkingScheduleWeekDays =
-  | "Friday"
-  | "Monday"
-  | "Sunday"
-  | "Tuesday"
-  | "Saturday"
-  | "Thursday"
-  | "Wednesday";
+  "Friday" | "Monday" | "Sunday" | "Tuesday" | "Saturday" | "Thursday" | "Wednesday";
+
+type CompanyWorkingDaySchedule = {
+  workingSlots: number[];
+  breakSlots: number[];
+};
+
+type CompanyWorkingSchedule = Record<WorkingScheduleWeekDays, CompanyWorkingDaySchedule>;
 
 type WorkingScheduleWeekDaysArr = [
   "Friday",

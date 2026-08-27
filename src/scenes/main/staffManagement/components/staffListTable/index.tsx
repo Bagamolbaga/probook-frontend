@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import Button from "@/components/ui/button";
 import PlusRight from "@/components/ui/icons/Plus";
@@ -19,7 +18,6 @@ import CreateUpdateSpecialistModal from "./components/CreateNewSpecialistModal";
 import { useForm } from "react-hook-form";
 import ListIsEmptyPlaceholderImage from "@/assets/staffManagement/SpecialistListEmptyOverlay.svg";
 import Image from "next/image";
-import { useUploadUserAvatarQuery } from "@/api/queries/users";
 import { Player } from "@lottiefiles/react-lottie-player";
 import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
 import { toaster } from "@/components/ui/toaster";
@@ -27,10 +25,8 @@ import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
 import { useTranslations } from "next-intl";
 import TableDefaultShift from "./components/TableDefaultShift";
 import {
-  useCreateCompanyShiftForDateQuery,
   useCreateCompanyShiftQuery,
   useGetCompanyShiftsQuery,
-  useUpdateCompanyShiftForDateQuery,
   useUpdateCompanyShiftQuery,
 } from "@/api/queries/company/shift";
 import { SHIFT_COLORS } from "@/constants/shiftColors";
@@ -41,12 +37,11 @@ import { TCreateCompanySpecialistsArgs } from "@/api/entities/company";
 import { TimeManager } from "@/utils/timeManager";
 
 export type CreateSpecialistForm = {
-  _specialistId: number | undefined;
-  _specialistUserId: number | undefined;
-  avatar?: File | string;
-  name: string;
-  email?: string;
-  phone?: string;
+  _specialistId?: string;
+  avatar?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
   shift: TShift & {
     workingScheduleWithFromTo: WorkingScheduleWithTimeSlots;
   };
@@ -55,18 +50,13 @@ export type CreateSpecialistForm = {
 type TRowItem = {
   id: string;
   name: {
-    name: string | null;
+    name: string;
     avatar: string | null;
   };
-  phone: string | null;
-  email: string | null;
-  defaultShift: TShift;
-  work_by: string;
-  no_of_client: number;
-  work_status: {
-    id: string;
-    name: string;
-  };
+  firstName: string;
+  lastName: string;
+  email: string;
+  defaultShift: TShift | null;
 };
 
 const StaffListTable = () => {
@@ -99,16 +89,12 @@ const StaffListTable = () => {
 
   const createCompanySpecialistsQuery = useCreateCompanySpecialistsQuery();
   const updateCompanySpecialistsQuery = useUpdateCompanySpecialistsQuery();
-  const createCompanyShiftForDateQuery = useCreateCompanyShiftForDateQuery();
-  const updateCompanyShiftForDateQuery = useUpdateCompanyShiftForDateQuery();
   const deleteCompanySpecialistsQuery = useDeleteCompanySpecialistsQuery();
-
-  const uploadUserAvatarQuery = useUploadUserAvatarQuery();
 
   const [isOpenCreateModal, setIsOpenCreateModal] = useState(false);
   const [isOpenUpdateModal, setIsOpenUpdateModal] = useState(false);
   const [specialistIdDeleteConfirmModal, setSpecialistIdDeleteConfirmModal] = useState<
-    number | null
+    string | null
   >(null);
 
   const createSpecialistForm = useForm<CreateSpecialistForm>({ mode: "onChange" });
@@ -137,32 +123,36 @@ const StaffListTable = () => {
 
   const rows: TRowItem[] = useMemo(() => {
     if (getCompanySpecialistsQuery.data?.results) {
-      const arr =
-        getCompanySpecialistsQuery.data?.results.map((i) => {
-          // const defaultShift = getCompanyShiftsQuery.data.results.find(
-          //   (sh) => sh.id === i.default_shift.id
-          // );
+      return getCompanySpecialistsQuery.data.results.map((specialist) => {
+        const populatedDefaultShift =
+          specialist.defaultShift && typeof specialist.defaultShift === "object"
+            ? specialist.defaultShift
+            : null;
+        const defaultShiftId =
+          typeof specialist.defaultShift === "string"
+            ? specialist.defaultShift
+            : populatedDefaultShift?.id;
+        const defaultShift =
+          populatedDefaultShift ||
+          getCompanyShiftsQuery.data?.results.find(
+            (shift) => String(shift.id) === defaultShiftId
+          ) ||
+          null;
 
-          const data: TRowItem = {
-            id: i.id,
-            name: {
-              name: i.fullName,
-              avatar: i.avatar || null,
-            },
-            email: i.email,
-            // defaultShift: defaultShift || i.default_shift,
-            phone: "",
-            work_by: "_fix-api_",
-            no_of_client: 0,
-            work_status: {
-              id: "124",
-              name: "Full day",
-            },
-          };
-
-          return data;
-        }) || [];
-      return arr;
+        return {
+          id: specialist.id,
+          name: {
+            name:
+              specialist.fullName ||
+              `${specialist.firstName} ${specialist.lastName}`.trim(),
+            avatar: specialist.avatar || null,
+          },
+          firstName: specialist.firstName,
+          lastName: specialist.lastName,
+          email: specialist.email,
+          defaultShift,
+        } satisfies TRowItem;
+      });
     }
 
     return [];
@@ -184,6 +174,31 @@ const StaffListTable = () => {
     setIsOpenUpdateModal(false);
   };
 
+  const showUpdateModalHandler = useCallback(
+    (rowData: TRowItem) => {
+      createSpecialistForm.setValue("_specialistId", rowData.id);
+      rowData.name.avatar && createSpecialistForm.setValue("avatar", rowData.name.avatar);
+      createSpecialistForm.setValue("firstName", rowData.firstName);
+      createSpecialistForm.setValue("lastName", rowData.lastName);
+      createSpecialistForm.setValue("email", rowData.email);
+
+      if (rowData.defaultShift) {
+        const tm = new TimeManager();
+        createSpecialistForm.setValue("shift", {
+          ...rowData.defaultShift,
+          workingScheduleWithFromTo: tm.getWorkingScheduleWithFromAndToPropertys(
+            rowData.defaultShift.working_schedule
+          ),
+        });
+      } else {
+        createSpecialistForm.resetField("shift");
+      }
+
+      setIsOpenUpdateModal(true);
+    },
+    [createSpecialistForm]
+  );
+
   const onSelectRowHandler = useCallback(
     (model: GridRowSelectionModel) => {
       if (model.length) {
@@ -194,55 +209,25 @@ const StaffListTable = () => {
         }
       }
     },
-    [rows]
+    [rows, showUpdateModalHandler]
   );
-
-  const showUpdateModalHandler = (rowData: TRowItem) => {
-    createSpecialistForm.setValue("_specialistId", rowData.id);
-    rowData.name.avatar && createSpecialistForm.setValue("avatar", rowData.name.avatar);
-    createSpecialistForm.setValue("name", rowData.name.name || "");
-    createSpecialistForm.setValue("email", rowData.email || "");
-    createSpecialistForm.setValue("phone", rowData.phone || "");
-
-    const tm = new TimeManager();
-
-    createSpecialistForm.setValue("shift", {
-      ...rowData.defaultShift,
-      workingScheduleWithFromTo: tm.getWorkingScheduleWithFromAndToPropertys(
-        rowData.defaultShift.working_schedule
-      ),
-    });
-
-    setIsOpenUpdateModal(true);
-  };
 
   const createNewSpecialistHandler = async (
     formData: CreateSpecialistForm,
-    customShiftId?: number
+    customShiftId?: TShift["id"]
   ) => {
     try {
       const bodyDefaultData: TCreateCompanySpecialistsArgs["data"] = {
-        user_data: {
-          email: formData.email || undefined,
-          phone: formData.phone || undefined,
-        },
-        full_name: formData.name,
-        default_shift: customShiftId || formData.shift.id,
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        defaultShift: String(customShiftId || formData.shift.id),
         services: [],
       };
 
-      const { data, status } = await createCompanySpecialistsQuery.mutateAsync({
+      const { data } = await createCompanySpecialistsQuery.mutateAsync({
         data: bodyDefaultData,
       });
-
-      if (status === 201 && typeof formData.avatar === "object") {
-        await uploadUserAvatarQuery.mutateAsync({
-          userId: data.profile.specialist_details.id,
-          data: {
-            file: formData.avatar,
-          },
-        });
-      }
 
       if (data) {
         hideCreateModalHandler();
@@ -255,41 +240,23 @@ const StaffListTable = () => {
 
   const updateSpecialistHandler = async (
     formData: CreateSpecialistForm,
-    customShiftId?: number
+    customShiftId?: TShift["id"]
   ) => {
     try {
-      if (formData._specialistUserId && typeof formData.avatar === "object") {
-        const res = await uploadUserAvatarQuery.mutateAsync({
-          userId: formData._specialistUserId,
-          data: {
-            file: formData.avatar,
-          },
-        });
-
-        if (res.status === 200) {
-          toaster.success("Specialist avatar uploaded");
-        }
-      }
-
       const initData = getCompanySpecialistsQuery.data?.results.find(
         (s) => s.id === formData._specialistId
       );
 
-      if (initData && formData._specialistUserId) {
+      if (initData && formData._specialistId) {
         const body = {
-          user_data: {
-            email:
-              initData.specialist_details.email !== formData.email && formData.email?.length
-                ? formData.email
-                : undefined,
-            phone: formData.phone || undefined,
-          },
-          full_name: formData.name,
-          default_shift: customShiftId ? customShiftId : formData.shift.id,
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          defaultShift: String(customShiftId || formData.shift.id),
         };
 
         const { data } = await updateCompanySpecialistsQuery.mutateAsync({
-          specialistId: formData._specialistId!,
+          specialistId: formData._specialistId,
           data: body,
         });
         if (data) {
@@ -304,10 +271,8 @@ const StaffListTable = () => {
 
   const createCustomShift = async ({
     workingScheduleWithFromTo,
-    specialistId,
   }: {
     workingScheduleWithFromTo: WorkingScheduleWithTimeSlots;
-    specialistId?: number;
   }) => {
     try {
       const body = {
@@ -317,7 +282,6 @@ const StaffListTable = () => {
         color: SHIFT_COLORS.at(-1)!,
         working_schedule: {} as WorkingSchedule,
         is_default: false, //Operation Hours if true
-        specialist: specialistId,
       };
 
       const tm = new TimeManager();
@@ -339,13 +303,20 @@ const StaffListTable = () => {
         };
       });
 
-      console.log("CREATE CUSTOM SHIFT", { body });
+      const firstWorkingDay = tm.getWorkingScheduleFirstWeekDaySlots(
+        body.working_schedule
+      );
+
       const res = await createCompanyShiftQuery.mutateAsync({
         companyId,
-        body,
+        body: {
+          name: body.name,
+          description: body.description,
+          color: body.color,
+          workingSlots: firstWorkingDay.workings.map((slot) => slot.slot),
+          breakSlots: firstWorkingDay.breaks.map((slot) => slot.slot),
+        },
       });
-
-      console.log("CREATED CUSTOM SHIFT", { res });
 
       if (res.data) {
         return res.data.shift;
@@ -357,12 +328,10 @@ const StaffListTable = () => {
 
   const updateCustomShift = async ({
     workingScheduleWithFromTo,
-    specialistId,
     shiftId,
   }: {
     workingScheduleWithFromTo: WorkingScheduleWithTimeSlots;
-    shiftId: number;
-    specialistId: number;
+    shiftId: TShift["id"];
   }) => {
     try {
       const body = {
@@ -372,7 +341,6 @@ const StaffListTable = () => {
         color: SHIFT_COLORS.at(-1)!,
         working_schedule: {} as WorkingSchedule,
         is_default: false, //Operation Hours if true
-        specialist: specialistId,
       };
 
       const tm = new TimeManager();
@@ -394,14 +362,21 @@ const StaffListTable = () => {
         };
       });
 
-      console.log("UPDATE CUSTOM SHIFT", { body });
+      const firstWorkingDay = tm.getWorkingScheduleFirstWeekDaySlots(
+        body.working_schedule
+      );
+
       const res = await updateCompanyShiftQuery.mutateAsync({
         companyId,
         shiftId,
-        body,
+        body: {
+          name: body.name,
+          description: body.description,
+          color: body.color,
+          workingSlots: firstWorkingDay.workings.map((slot) => slot.slot),
+          breakSlots: firstWorkingDay.breaks.map((slot) => slot.slot),
+        },
       });
-
-      console.log("UPDATED CUSTOM SHIFT", { res });
 
       if (res.data) {
         return res.data.shift;
@@ -411,16 +386,12 @@ const StaffListTable = () => {
     }
   };
 
-
   const createSpecialistMainHandler = async (formData: CreateSpecialistForm) => {
-    console.log("CREATE NEW STAFF", { formData });
-
     if (formData.shift.id === -1) {
       //Selected custom time
       const newShift = await createCustomShift({
         workingScheduleWithFromTo: formData.shift.workingScheduleWithFromTo,
       });
-      console.log({ newShift });
       if (newShift) {
         await createNewSpecialistHandler(formData, newShift.id);
       }
@@ -430,14 +401,13 @@ const StaffListTable = () => {
   };
 
   const updateSpecialistMainHandler = async (formData: CreateSpecialistForm) => {
-    const rowData = rows.find((i) => i.specialistUserId === formData._specialistUserId);
+    const rowData = rows.find((item) => item.id === formData._specialistId);
 
     if (rowData && formData._specialistId) {
       if (formData.shift.id === -1) {
         //Selected custom time
         const newShift = await createCustomShift({
           workingScheduleWithFromTo: formData.shift.workingScheduleWithFromTo,
-          specialistId: formData._specialistId,
         });
 
         if (newShift) {
@@ -449,7 +419,6 @@ const StaffListTable = () => {
         await updateCustomShift({
           workingScheduleWithFromTo: formData.shift.workingScheduleWithFromTo,
           shiftId: formData.shift.id,
-          specialistId: formData._specialistId,
         });
         await updateSpecialistHandler(formData, formData.shift.id);
       } else {
@@ -500,6 +469,10 @@ const StaffListTable = () => {
         minWidth: 150,
         flex: 0.1,
         renderCell: ({ row }) => {
+          if (!row.defaultShift) {
+            return <div className="h-full flex items-center text-greyPrimary">—</div>;
+          }
+
           return (
             <TableDefaultShift
               currentShift={row.defaultShift}
@@ -576,38 +549,16 @@ const StaffListTable = () => {
         },
       },
     ],
-    [getCompanyShiftsQuery.data]
+    [getCompanyShiftsQuery.data, showUpdateModalHandler, t]
   );
 
-  const createNewStaffBtnIsActive = useMemo(() => {
-    const formData = createSpecialistForm.getValues();
-
-    return Boolean(
-      !createCompanySpecialistsQuery.isPending && formData.name && formData.shift
-    );
-  }, [
-    createCompanySpecialistsQuery,
-    createSpecialistForm.watch("name"),
-    createSpecialistForm.watch("email"),
-    createSpecialistForm.watch("shift"),
-  ]);
-
-  const updateStaffBtnIsActive = useMemo(() => {
-    const formData = createSpecialistForm.getValues();
-
-    return Boolean(
-      !updateCompanySpecialistsQuery.isPending &&
-        !updateCompanyShiftForDateQuery.isPending &&
-        formData.name &&
-        formData.shift
-    );
-  }, [
-    updateCompanySpecialistsQuery,
-    updateCompanyShiftForDateQuery,
-    createSpecialistForm.watch("name"),
-    createSpecialistForm.watch("email"),
-    createSpecialistForm.watch("shift"),
-  ]);
+  const formData = createSpecialistForm.watch();
+  const formIsValid = Boolean(
+    formData.firstName && formData.lastName && formData.email && formData.shift
+  );
+  const createNewStaffBtnIsActive =
+    !createCompanySpecialistsQuery.isPending && formIsValid;
+  const updateStaffBtnIsActive = !updateCompanySpecialistsQuery.isPending && formIsValid;
 
   if (firstLoading) {
     return (

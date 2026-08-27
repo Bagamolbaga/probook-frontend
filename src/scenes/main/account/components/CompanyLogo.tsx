@@ -14,10 +14,10 @@ import { toaster } from "@/components/ui/toaster";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
 
 const CompanyLogo = () => {
-  const {companyId} = useGetCompanyId()
+  const { companyId } = useGetCompanyId();
 
   const getCompanyDetailsQuery = useGetCompanyDetailsQuery({
-    companyId
+    companyId,
   });
   const uploadCompanyLogoQuery = useUploadCompanyLogoQuery();
 

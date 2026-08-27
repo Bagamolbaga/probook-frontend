@@ -22,12 +22,12 @@ export const ApiClientProvider = ({ children }: { children: ReactNode }) => {
   const session = useAppSession();
 
   const apiClient = useMemo(() => {
-    if (session.data?.access_token && session.data.user?.id) {
-      return new ApiClient(session.data.access_token, session.data.user.id);
+    if (session.data?.accessToken && session.data.user?.id) {
+      return new ApiClient(session.data.accessToken, Number(session.data.user.id));
     }
 
     return new ApiClient("", -1);
-  }, [session.data?.access_token, session.data?.user?.id]);
+  }, [session.data?.accessToken, session.data?.user?.id]);
 
   return (
     <ApiClientContext.Provider value={apiClient}>{children}</ApiClientContext.Provider>

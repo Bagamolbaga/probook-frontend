@@ -45,6 +45,8 @@ const CompanyAddressStep: FC<Props> = ({ form, handleSignUpStep }) => {
       if (res.results.length) {
         const { lat, lng } = res.results[0].geometry.location;
         setPos({ lat, lng });
+        form.setValue("lat", lat);
+        form.setValue("lng", lng);
         setZoom(8);
       }
     };
@@ -101,7 +103,6 @@ const CompanyAddressStep: FC<Props> = ({ form, handleSignUpStep }) => {
 
   const t = useTranslations();
   const isNextBtnActive =
-    form.watch("country") &&
     form.watch("city") &&
     form.watch("address1") &&
     form.watch("zip_code") &&
@@ -110,22 +111,6 @@ const CompanyAddressStep: FC<Props> = ({ form, handleSignUpStep }) => {
 
   return (
     <div className="w-full mt-16">
-      {/* <div className="">
-        <TextField
-          id="country"
-          label="Country code"
-          placeholder={t("ui.labels.startTyping")}
-          type="text"
-          register={form.register}
-          rules={{
-            required: t("ui.errors.fieldIsRequired"),
-            minLength: 2,
-            maxLength: 2,
-          }}
-          error={form.formState.errors.country}
-          requiredHideSymbol
-        />
-      </div> */}
       <div className="mt-2">
         <TextField
           id="city"
@@ -151,17 +136,6 @@ const CompanyAddressStep: FC<Props> = ({ form, handleSignUpStep }) => {
             required: t("ui.errors.fieldIsRequired"),
           }}
           error={form.formState.errors.address1}
-          requiredHideSymbol
-        />
-      </div>
-      <div className="mt-2">
-        <TextField
-          id="address2"
-          label={t("ui.labels.apartAddress")}
-          placeholder={t("ui.labels.startTyping")}
-          type="text"
-          register={form.register}
-          error={form.formState.errors.address2}
           requiredHideSymbol
         />
       </div>

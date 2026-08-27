@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { Grid } from "@mui/material";
@@ -22,16 +22,15 @@ import { Player } from "@lottiefiles/react-lottie-player";
 import { useLocale, useTranslations } from "next-intl";
 import { DATE_FNS_LOCALES, Link } from "@/i18n";
 
-import { useGetBookingByTokenQuery, useGetBookingsQuery } from "@/api/queries/booking";
+import { useGetBookingsQuery } from "@/api/queries/booking";
 import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
-import { useGetCompanyServicesQuery } from "@/api/queries/company/services";
 import { useGetCompanyShiftsForDateRangeQuery } from "@/api/queries/company/shift";
 import { useGetCompanyDetailsQuery } from "@/api/queries/company";
 import UpdateBookingModal from "./components/UpdateBookingModal";
 import TimeLineBreakItem from "./components/TimeLineBreakItem";
 import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
 import Button from "@/components/ui/button";
-import { TIME_SLOTS, TTimeSlot } from "@/constants/timeSlots";
+import { TIME_SLOTS } from "@/constants/timeSlots";
 import { cn } from "@/utils/cn";
 
 import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
@@ -42,108 +41,16 @@ import DatePicker from "@/components/ui/DatePicker";
 import CalendarIcon from "@/components/ui/icons/Calendar";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import CustomScrollbar from "@/styles/scrollbar.module.sass";
+import type { FormattedDataItem, UpdateBookingForm } from "../components/types";
+export type { FormattedDataItem } from "../components/types";
 
-const workingSchedule2 = {
-  Monday: {
-    times: [
-      36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56,
-      57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71,
-    ],
-    breaks: [48, 49, 50, 51],
-  },
-  Tuesday: {
-    times: [
-      36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56,
-      57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71,
-    ],
-    breaks: [48, 49, 50, 51],
-  },
-  Wednesday: {
-    times: [
-      36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56,
-      57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71,
-    ],
-    breaks: [48, 49, 50, 51],
-  },
-  Thursday: {
-    times: [
-      36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56,
-      57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71,
-    ],
-    breaks: [48, 49, 50, 51],
-  },
-  Friday: {
-    times: [
-      36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56,
-      57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71,
-    ],
-    breaks: [48, 49, 50, 51],
-  },
-  Saturday: {
-    times: [],
-    breaks: [],
-  },
-  Sunday: {
-    times: [],
-    breaks: [],
-  },
-};
-
-export type FormattedDataItem = {
-  _booking?: TBooking;
-  shifts: {
-    id: number;
-    slots: TBooking["slots"];
-    client: TBooking["client"];
-    date: TBooking["date"];
-    status: TBooking["status"];
-    services: TServiceAndSelectedOption[];
-    updatedAt: TBooking["updated_at"];
-  }[];
-  id: TBooking["id"];
-  specialist: TBooking["specialist"];
-  customWorkingShift?: TShift;
-  company: TBooking["company"];
-  revalidateQueries: () => void;
-};
-
-export type UpdateBookingForm = {
-  companyId: number;
-  bookingId: number;
-  status: TBooking["status"];
-  updatedAt: TBooking["updated_at"];
-  assignee?: TBooking["specialist"];
-  customer: TBooking["client"];
-  time: {
-    start: string;
-    end: string;
-    slots: number[];
-  } | null;
-  date: Date;
-  location: string;
-  servicesId: string[];
-  services: {
-    service: TService;
-    option: TService["options"][number];
-  }[];
-};
-
-type Props = {
-  token?: string;
-};
-
-const TimeLineCalendar = ({ token }: Props) => {
+const TimeLineCalendar = () => {
   const t = useTranslations();
   const locale = useLocale() as keyof typeof DATE_FNS_LOCALES;
   const { companyId } = useGetCompanyId();
 
-  const decodedToken = token && decodeURIComponent(token);
-
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedDateIsOffDay, setSelectedDateIsOffDay] = useState(false);
   const [isOpenBookingDetailModal, setIsOpenBookingDetailModal] = useState(false);
-  const [bookingWithTokenAlreadyOpened, setBookingWithTokenAlreadyOpened] =
-    useState(false);
 
   const [isOpenDatePicker, setIsOpenDatePicker] = useState(false);
   const datePickerContainer = useRef<HTMLDivElement>(null);
@@ -161,16 +68,11 @@ const TimeLineCalendar = ({ token }: Props) => {
       end_date: selectedDate,
     },
   });
-  const getCompanyServicesQuery = useGetCompanyServicesQuery({
-    companyId,
-  });
   const getCompanyShiftsForDateRangeQuery = useGetCompanyShiftsForDateRangeQuery({
     companyId,
     start: selectedDate,
     end: selectedDate,
   });
-  const getBookingByTokenQuery = useGetBookingByTokenQuery({ token: decodedToken });
-
   const updateBookingForm = useForm<UpdateBookingForm>({
     mode: "onChange",
     defaultValues: {
@@ -179,91 +81,34 @@ const TimeLineCalendar = ({ token }: Props) => {
     },
   });
 
-  useEffect(() => {
-    if (
-      !bookingWithTokenAlreadyOpened &&
-      token &&
-      getBookingByTokenQuery?.data &&
-      getCompanySpecialistsQuery.data &&
-      getCompanyShiftsForDateRangeQuery.data
-    ) {
-      const booking = getBookingByTokenQuery.data;
-
-      if (booking) {
-        const staff = getCompanySpecialistsQuery.data.results.find(
-          (s) => s.id === booking.specialist.id
-        );
-
-        if (staff) {
-          const data: FormattedDataItem = {
-            id: staff.id,
-            company: booking.company,
-            specialist: staff,
-            shifts: [
-              {
-                id: booking.id,
-                client: booking.client,
-                slots: booking.slots,
-                date: booking.date,
-                status: booking.status,
-                updatedAt: booking.updated_at,
-                services: booking.services.map((s) => ({
-                  ...s.service,
-                  selectedOption: s.service_option,
-                })),
-              },
-            ],
-            revalidateQueries: revalidateQueriesHandler,
-          };
-
-          const findedCustomShift = getCompanyShiftsForDateRangeQuery.data.results.find(
-            (s) => s.id === staff.id
-          );
-
-          if (findedCustomShift?.shifts.length) {
-            const findedNotDefault = findedCustomShift.shifts.find((s) => !s.is_default);
-
-            if (findedNotDefault) {
-              data.customWorkingShift = findedNotDefault;
-            }
-          }
-
-          setSelectedDate(parse(booking.date, "yyyy-MM-dd", new Date()));
-          openBookingDetailModalHandler(data, data.shifts[0]);
-          setBookingWithTokenAlreadyOpened(true);
-        }
-      }
-    }
-  }, [
-    bookingWithTokenAlreadyOpened,
-    token,
-    getBookingByTokenQuery,
-    getCompanySpecialistsQuery,
-    getCompanyShiftsForDateRangeQuery,
-  ]);
-
-  const revalidateQueriesHandler = async () => {
-    void getCompanyDetailsQuery.refetch();
-    void getBookingsQuery.refetch();
-    void getCompanySpecialistsQuery.refetch();
-    void getCompanyShiftsForDateRangeQuery.refetch();
-    void getCompanyServicesQuery.refetch();
-  };
-
-  console.log({ getBookingsQuery });
+  const revalidateQueriesHandler = useCallback(
+    async () =>
+      Promise.all([
+        getCompanyDetailsQuery.refetch(),
+        getBookingsQuery.refetch(),
+        getCompanySpecialistsQuery.refetch(),
+        getCompanyShiftsForDateRangeQuery.refetch(),
+      ]),
+    [
+      getBookingsQuery,
+      getCompanyDetailsQuery,
+      getCompanyShiftsForDateRangeQuery,
+      getCompanySpecialistsQuery,
+    ]
+  );
 
   const mappedData: FormattedDataItem[] = useMemo(() => {
     if (!getCompanySpecialistsQuery.data || !getBookingsQuery.data) {
       return [];
     }
 
-    let data: FormattedDataItem[] = [];
+    const data: FormattedDataItem[] = [];
 
     getCompanySpecialistsQuery.data.results.forEach((s) => {
       data.push({
         id: s.id,
-        company: s.company,
-        specialist: s as any,
+        company: s.company || companyId,
+        specialist: s,
         shifts: [],
         revalidateQueries: revalidateQueriesHandler,
       });
@@ -272,120 +117,87 @@ const TimeLineCalendar = ({ token }: Props) => {
     getBookingsQuery.data.results
       // .filter((b) => b.status !== "OFF" && b.status !== "BLOCKED")
       .forEach((item) => {
-        const findedIdx = data.findIndex((i) => i?.id === item.specialist?._id);
+        const specialistId = item.specialist.id || item.specialist._id;
+        const findedIdx = data.findIndex((entry) => entry.id === specialistId);
 
         if (findedIdx >= 0) {
           data[findedIdx]._booking = item;
           data[findedIdx].shifts.push({
             id: item.id,
-            client: item.customer,
+            customer: item.customer,
             slots: item.slots,
             date: item.date,
             status: item.status,
             updatedAt: item.updatedAt,
-            services: item.services.map((s) => ({
-              ...s.service,
-              selectedOption: s.options[0],
-            })),
+            services: item.services,
           });
         }
       });
 
-    // data = data.map((i) => {
-    //   const findedCustomShift = getCompanyShiftsForDateRangeQuery.data.results.find(
-    //     (s) => s.id === i.specialist.id
-    //   );
+    const selectedDateString = format(selectedDate, "yyyy-MM-dd");
+    const res = data.map((item) => {
+      const specialistShift = getCompanyShiftsForDateRangeQuery.data?.results.find(
+        (entry) => entry.specialist.id === item.specialist.id
+      );
+      const overrideShift = specialistShift?.shifts.find(
+        (shift) => shift.kind === "override" && shift.date === selectedDateString
+      );
+      const defaultShift =
+        specialistShift?.defaultShift?.kind === "default"
+          ? specialistShift.defaultShift
+          : undefined;
+      const customWorkingShift = overrideShift || defaultShift;
 
-    //   if (findedCustomShift?.shifts.length) {
-    //     const findedNotDefault = findedCustomShift.shifts.find((s) => !s.is_default);
-
-    //     if (findedNotDefault) {
-    //       return {
-    //         ...i,
-    //         customWorkingShift: findedNotDefault,
-    //       };
-    //     }
-    //   }
-
-    //   return i;
-    // });
-
-    const res = data.map((i) => ({
-      ...i,
-      shifts: i.shifts.filter((i) => i.date === format(selectedDate, "yyyy-MM-dd")),
-    }));
+      return {
+        ...item,
+        ...(customWorkingShift ? { customWorkingShift } : {}),
+        shifts: item.shifts.filter((booking) => booking.date === selectedDateString),
+      };
+    });
 
     return res;
   }, [
     getCompanySpecialistsQuery.data,
     getCompanyShiftsForDateRangeQuery.data,
     getBookingsQuery.data,
+    companyId,
+    revalidateQueriesHandler,
     selectedDate,
   ]);
 
-  console.log({ mappedData });
-
-  useEffect(() => {
-    getBookingsQuery.refetch();
-  }, [selectedDate]);
-
   const { HEADER_TIMES, COMPANY_SLOTS } = useMemo(() => {
     const slotManager = new TimeManager();
+    const weekDay = format(selectedDate, "EEEE") as WorkingScheduleWeekDays;
+    const daySchedule = getCompanyDetailsQuery.data?.workingSchedule?.[weekDay];
+    const scheduleSlots = daySchedule?.workingSlots || [];
+    const fallbackSlots = slotManager.getFullSlotsInRange(36, 72);
+    const companySlots = scheduleSlots.length
+      ? slotManager.getFullSlots(scheduleSlots)
+      : fallbackSlots;
+    const hourSlots = companySlots.filter((slot) => slot.minute === 0);
 
-    const workingSchedule = workingSchedule2;
+    return {
+      HEADER_TIMES: hourSlots.slice(0, -1),
+      COMPANY_SLOTS: companySlots,
+    };
+  }, [getCompanyDetailsQuery.data, selectedDate]);
 
-    if (workingSchedule) {
-      const currWorkingTime = {
-        slots: slotManager.getFullSlotsInRange(36, 71),
-        breaks: slotManager.getFullSlotsInRange(36, 71),
-      };
-
-      let slots: TTimeSlot[] = [];
-
-      if (currWorkingTime && currWorkingTime.slots.length) {
-        slots = currWorkingTime.slots.filter((s) => s.minute === 0) || [];
-
-        setSelectedDateIsOffDay(false);
-      } else {
-        //if current day is OFF day for company, but specialist could have custom working shift
-        slots = slotManager.getWorkingTimeSlotsCompany(workingSchedule);
-
-        if (slots.length) {
-          slots = slots.filter((s) => s.minute === 0);
-
-          setSelectedDateIsOffDay(true);
-
-          return {
-            HEADER_TIMES: slots.slice(0, -1),
-            COMPANY_SLOTS: slots,
-          };
-        }
-
-        setSelectedDateIsOffDay(true);
-
-        return {
-          HEADER_TIMES: slotManager
-            .getFullSlotsInRange(36, 71)
-            .slice(0, -1)
-            .filter((s) => s.minute === 0),
-          COMPANY_SLOTS: slotManager
-            .getFullSlotsInRange(36, 71)
-            .filter((s) => s.minute === 0),
-        };
-      }
-
+  const getRowSchedule = (rowData: FormattedDataItem) => {
+    if (rowData.customWorkingShift) {
       return {
-        HEADER_TIMES: slots.slice(0, -1),
-        COMPANY_SLOTS: slots,
+        workingSlots: rowData.customWorkingShift.workingSlots,
+        breakSlots: rowData.customWorkingShift.breakSlots,
       };
     }
 
-    return {
-      HEADER_TIMES: slotManager.getFullSlotsInRange(36, 71).slice(0, -1),
-      COMPANY_SLOTS: slotManager.getFullSlotsInRange(36, 71),
-    };
-    // return TIMES_DEFAULT;
-  }, [getCompanyDetailsQuery.data, getCompanyShiftsForDateRangeQuery.data, selectedDate]);
+    const weekDay = format(selectedDate, "EEEE") as WorkingScheduleWeekDays;
+    return (
+      getCompanyDetailsQuery.data?.workingSchedule?.[weekDay] || {
+        workingSlots: [],
+        breakSlots: [],
+      }
+    );
+  };
 
   const renderShift = (row: number, col: number) => {
     const rowData = mappedData[row];
@@ -413,7 +225,7 @@ const TimeLineCalendar = ({ token }: Props) => {
       // const minShiftLength =
       //   (shift.slots.length - 1) * 0.25 >= 0.25 ? (shift.slots.length - 1) * 0.25 : 0.25;
 
-      const minShiftLength = (((shift.slots.length - 1) * 15) / 60) * 100;
+      const minShiftLength = ((shift.slots.length * 15) / 60) * 100;
 
       const firstSlotIsEven = shift.slots[0] % 2 === 0;
       const lastSlotIsEven = shift.slots.at(-1) && shift.slots.at(-1)! % 2 === 0;
@@ -421,7 +233,7 @@ const TimeLineCalendar = ({ token }: Props) => {
       const status = shift.status;
       const content = (
         <div
-          key={shift.client.username}
+          key={shift.id}
           className={cn("absolute z-[5] top-0 left-0 h-full py-[6px]", {
             "pl-[6px] pr-[3px]": shift.slots.length === 1 && firstSlotIsEven,
             "pl-[3px] pr-[6px]": shift.slots.length === 1 && !firstSlotIsEven,
@@ -442,12 +254,10 @@ const TimeLineCalendar = ({ token }: Props) => {
               className={cn(
                 "w-full h-full px-[6px] flex items-center rounded overflow-hidden cursor-pointer ",
                 {
-                  "bg-purplePrimary/10 hover:bg-purplePrimary/20":
-                    (!shift.client.phone && !shift.client.email) || status === "WALK_IN",
-                  "bg-[#40E1FA1A]/10 hover:bg-[#40E1FA1A]": shift.client.phone?.length,
+                  "bg-purplePrimary/10 hover:bg-purplePrimary/20": !shift.customer.email,
                   "bg-yellowPrimary/10 hover:bg-yellowPrimary/20": status === "PENDING",
                   "bg-greenPrimary/10 hover:bg-greenPrimary/20":
-                    shift.client.email && status === "COMPLETED",
+                    status === "COMPLETED" || status === "CONFIRMED",
                   "bg-redExtraLight/10 hover:bg-redExtraLight/20": status === "BLOCKED",
                   // "bg-blueExtraLight/10 hover:bg-blueExtraLight/20": status === "break",
                   "bg-greyPrimary/10 hover:bg-greyPrimary/20": status === "OFF",
@@ -458,18 +268,15 @@ const TimeLineCalendar = ({ token }: Props) => {
                 className={cn(
                   "text-sm font-bold text-nowrap text-ellipsis overflow-hidden",
                   {
-                    "text-purplePrimary":
-                      (!shift.client.phone && !shift.client.email) ||
-                      status === "WALK_IN",
-                    "text-[#2CE5F6]": shift.client.phone?.length,
+                    "text-purplePrimary": !shift.customer.email,
                     "text-yellowPrimary": status === "PENDING",
-                    "text-greenPrimary": shift.client.email && status === "COMPLETED",
+                    "text-greenPrimary": status === "COMPLETED" || status === "CONFIRMED",
                     "text-redPrimary": status === "BLOCKED",
                     "text-greyPrimary": status === "OFF",
                   }
                 )}
               >
-                {shift.client.firstName} {shift.client.lastName}
+                {shift.customer.first_name} {shift.customer.last_name}
               </p>
             </div>
           </div>
@@ -481,46 +288,14 @@ const TimeLineCalendar = ({ token }: Props) => {
   };
 
   const renderFullDayOff = (row: number) => {
-    if (!workingSchedule2) return;
-
     const rowData = mappedData[row];
-
-    const timeSlots = {
-      slots: new TimeManager().getFullSlotsInRange(36, 71),
-      breaks: new TimeManager().getFullSlotsInRange(36, 71),
-    };
-
-    let workingSlots = timeSlots?.slots;
-
-    // if (rowData.customWorkingShift) {
-    //   const timeSlotsCustom = new TimeManager().getWorkingScheduleSlotsByWeekDay({
-    //     workingSchedule: rowData.customWorkingShift.working_schedule,
-    //     date: selectedDate,
-    //   });
-
-    //   workingSlots = timeSlotsCustom?.slots;
-    // }
+    const { workingSlots } = getRowSchedule(rowData);
 
     const width = 100;
     const paddingRight = 6;
     const paddingLeft = 0;
 
-    if (!workingSlots?.length) {
-      return (
-        <TimeLineBreakItem
-          key={`${rowData.id}-fullDayOff`}
-          type="fullDayOff"
-          row={rowData}
-          currentDate={selectedDate}
-          width={width}
-          paddingLeft={paddingLeft}
-          paddingRight={paddingRight}
-        />
-      );
-    }
-
-    //if selected day is OFF day, but staff could have custom shift
-    if (selectedDateIsOffDay && !rowData.customWorkingShift) {
+    if (!workingSlots.length) {
       return (
         <TimeLineBreakItem
           key={`${rowData.id}-fullDayOff`}
@@ -540,28 +315,23 @@ const TimeLineCalendar = ({ token }: Props) => {
   const renderNotWorkingTime = (row: number) => {
     const rowData = mappedData[row];
 
-    let defaultSlots = {
-      slots: new TimeManager().getFullSlotsInRange(36, 71),
-      breaks: new TimeManager().getFullSlotsInRange(36, 71),
+    const schedule = getRowSchedule(rowData);
+    const defaultSlots = {
+      slots: new TimeManager().getFullSlots(schedule.workingSlots),
+      breaks: new TimeManager().getFullSlots(schedule.breakSlots),
     };
 
-    if (!defaultSlots) return null;
-
-    // rowData.customWorkingShift &&
-    //   (defaultSlots = new TimeManager().getWorkingScheduleSlotsByWeekDay({
-    //     workingSchedule: rowData.customWorkingShift!.working_schedule,
-    //     date: selectedDate,
-    //   }));
+    if (!defaultSlots.slots.length) return null;
 
     const beforeWorkingTimeBreakSlots = HEADER_TIMES.filter(
-      (s) => s.slot < defaultSlots!.slots[0]?.slot
+      (s) => s.slot < defaultSlots.slots[0]?.slot
     ).map((s) => s.slot);
     const afterWorkingTimeBreakSlots = HEADER_TIMES.filter(
-      (s) => s.slot >= defaultSlots!.slots[defaultSlots!.slots.length - 1]?.slot
+      (s) => s.slot >= defaultSlots.slots[defaultSlots.slots.length - 1]?.slot
     ).map((s) => s.slot);
 
     const allAfterWorkingTimeBreakSlots = COMPANY_SLOTS.filter(
-      (s) => s.slot >= defaultSlots!.slots[defaultSlots!.slots.length - 1]?.slot
+      (s) => s.slot >= defaultSlots.slots[defaultSlots.slots.length - 1]?.slot
     ).map((s) => s.slot);
 
     const getContent = ({
@@ -573,7 +343,7 @@ const TimeLineCalendar = ({ token }: Props) => {
     }) => {
       const fullSlots = HEADER_TIMES.filter((s) => slots.includes(s.slot));
       const fullWorkingSlots = TIME_SLOTS.filter((s) =>
-        defaultSlots!.slots.find((i) => i.slot === s.slot)
+        defaultSlots.slots.find((i) => i.slot === s.slot)
       );
 
       const lastWorkingSlotIsNotFullHour =
@@ -636,13 +406,7 @@ const TimeLineCalendar = ({ token }: Props) => {
       !afterWorkingTimeBreakSlots.length &&
       allAfterWorkingTimeBreakSlots.length
     ) {
-      //if last slot equal some hours and 30 min and it slot not in 'beforeWorkingTimeBreakSlot'`
-      // contents.push(
-      //   getContent({
-      //     slots: [],
-      //     type: "afterWorkingTime",
-      //   })
-      // );
+      // The final boundary may fall outside the rendered hour headers.
     }
 
     if (contents.length) {
@@ -655,17 +419,13 @@ const TimeLineCalendar = ({ token }: Props) => {
   const renderBreakTime = (row: number) => {
     const rowData = mappedData[row];
 
-    let workingSlots = {
-      slots: new TimeManager().getFullSlotsInRange(36, 71),
-      breaks: new TimeManager().getFullSlotsInRange(48, 51),
+    const schedule = getRowSchedule(rowData);
+    const workingSlots = {
+      slots: new TimeManager().getFullSlots(schedule.workingSlots),
+      breaks: new TimeManager().getFullSlots(schedule.breakSlots),
     };
-    // rowData.customWorkingShift &&
-    //   (workingSlots = new TimeManager().getWorkingScheduleSlotsByWeekDay({
-    //     workingSchedule: rowData.customWorkingShift!.working_schedule,
-    //     date: selectedDate,
-    //   }));
 
-    if (!workingSlots) return null;
+    if (!workingSlots.slots.length) return null;
 
     const defaultBreakSlot = workingSlots.breaks.map((s) => s.slot);
 
@@ -691,23 +451,7 @@ const TimeLineCalendar = ({ token }: Props) => {
 
     const paddingRight = 6;
 
-    if (!selectedDateIsOffDay && defaultBreakSlot.length) {
-      return (
-        <TimeLineBreakItem
-          key={`${rowData.id}-dailyBreak`}
-          type="dailyBreak"
-          label="Break"
-          row={rowData}
-          currentDate={selectedDate}
-          width={width}
-          paddingLeft={paddingLeft}
-          paddingRight={paddingRight}
-        />
-      );
-    }
-
-    //if selected day is OFF day, but staff could have custom shift
-    if (selectedDateIsOffDay && rowData.customWorkingShift) {
+    if (defaultBreakSlot.length) {
       return (
         <TimeLineBreakItem
           key={`${rowData.id}-dailyBreak`}
@@ -800,31 +544,19 @@ const TimeLineCalendar = ({ token }: Props) => {
     updateBookingForm.setValue("bookingId", shift.id);
     updateBookingForm.setValue("status", shift.status);
     updateBookingForm.setValue("assignee", booking.specialist);
-    updateBookingForm.setValue("customer", shift.client);
+    updateBookingForm.setValue("customer", shift.customer);
     updateBookingForm.setValue("time", {
       start: TIME_SLOTS.find((s) => s.slot === shift.slots[0])?.label || "",
-      end: TIME_SLOTS.find((s) => s.slot === shift.slots.at(-1))?.label || "",
+      end: TIME_SLOTS.find((s) => s.slot === (shift.slots.at(-1) ?? -1) + 1)?.label || "",
       slots: shift.slots,
     });
     updateBookingForm.setValue("date", parse(shift.date, "yyyy-MM-dd", new Date()));
     updateBookingForm.setValue("updatedAt", shift.updatedAt);
 
-    const arr: {
-      service: TService;
-      option: TService["options"][number];
-    }[] = [];
-
-    shift.services
-      .filter((s) => s.selectedOption)
-      .forEach((s) => {
-        arr.push({ service: s, option: s.selectedOption });
-      });
-    updateBookingForm.setValue("services", arr);
+    updateBookingForm.setValue("services", shift.services);
     updateBookingForm.setValue(
       "servicesId",
-      shift.services
-        .filter((s) => s.selectedOption)
-        .map((i) => `${i.id}-${i.selectedOption.id}`)
+      shift.services.map((service) => service.id)
     );
 
     setIsOpenBookingDetailModal(true);
@@ -893,11 +625,7 @@ const TimeLineCalendar = ({ token }: Props) => {
         <UpdateBookingModal
           isOpen={isOpenBookingDetailModal}
           updateBookingForm={updateBookingForm}
-          getBookingsQuery={getBookingsQuery}
-          getCompanySpecialistsQuery={getCompanySpecialistsQuery}
-          servicesQuery={getCompanyServicesQuery}
           handleClose={closeBookingDetailModalHandler}
-          revalidateQueries={revalidateQueriesHandler}
         />
       )}
       <div className="w-full h-full px-7 py-10 rounded-xl bg-white sm:px-5 sm:py-6">

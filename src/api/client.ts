@@ -29,13 +29,13 @@ export class ApiClient {
   companySubscription: ApiClientCompanySubscription;
   admin: {
     company: ApiClientAdminCompany;
-    booking: ApiClientAdminBookings
+    booking: ApiClientAdminBookings;
     customers: ApiClientAdminCustomer;
     business: ApiClientAdminBusinessUser;
     services: ApiClientAdminServices;
     specialists: ApiClientAdminSpecialists;
     shifts: ApiClientAdminCompanyShifts;
-    companySubscription: ApiClientCompanySubscription;
+    companySubscription: ApiClientAdminCompanySubscription;
   };
 
   constructor(token: string, currentUserId: number) {

@@ -13,7 +13,6 @@ import {
 import { toaster } from "@/components/ui/toaster";
 import CloseIcon from "@/components/ui/icons/Close";
 import { useTranslations } from "next-intl";
-import { TimeSlotsManager } from "@/utils/timeSlotManager";
 import { FormControl } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import AppSelect from "@/components/ui/inputs/AppSelect";
@@ -105,7 +104,7 @@ const ShiftItem = memo(
       if (getCompanyShiftsQuery.data) {
         const presets = getCompanyShiftsQuery.data.results
           .filter((s) => s.is_default && !s.specialist)
-          .sort((a, b) => a.id - b.id);
+          .sort((a, b) => String(a.id).localeCompare(String(b.id)));
 
         // const arr = presets.map((s) => {
         //   const slots = s.slots;
@@ -247,12 +246,11 @@ const ShiftItem = memo(
         const body = {
           name: "CUSTOM",
           description: "custom",
-          description_thai: "custom",
           color: SHIFT_COLORS.at(-1)!,
-          working_schedule: {} as WorkingSchedule,
+          workingSlots: [] as number[],
+          breakSlots: [] as number[],
           date: date,
-          is_default: false,
-          specialist: specialistId,
+          specialistId,
         };
 
         const tm = new TimeManager();
@@ -268,11 +266,8 @@ const ShiftItem = memo(
               )
             : [];
 
-        body.working_schedule = tm.createWorkingScheduleFromSlots({
-          workingDays: [format(date, "EEEE") as keyof WorkingSchedule],
-          slots,
-          breaks: breaks,
-        });
+        body.workingSlots = slots;
+        body.breakSlots = breaks;
 
         const res = await createCompanyShiftQuery.mutateAsync({
           companyId,
@@ -294,12 +289,9 @@ const ShiftItem = memo(
           const body = {
             name: "CUSTOM",
             description: "custom",
-            description_thai: "custom",
             color: SHIFT_COLORS.at(-1)!,
-            working_schedule: {} as WorkingSchedule,
-            date: date,
-            is_default: false,
-            specialist: specialistId,
+            workingSlots: [] as number[],
+            breakSlots: [] as number[],
           };
 
           const tm = new TimeManager();
@@ -318,11 +310,8 @@ const ShiftItem = memo(
                 )
               : [];
 
-          body.working_schedule = tm.createWorkingScheduleFromSlots({
-            workingDays: [format(date, "EEEE") as keyof WorkingSchedule],
-            slots,
-            breaks: breaks,
-          });
+          body.workingSlots = slots;
+          body.breakSlots = breaks;
 
           const res = await updateCompanyShiftQuery.mutateAsync({
             companyId,
@@ -459,17 +448,13 @@ const ShiftItem = memo(
       customShift?: TShift;
     }) => {
       const tm = new TimeManager();
-      const timeSlots = tm.getWorkingScheduleSlotsByWeekDay({
-        workingSchedule: defaultShift.working_schedule,
-        date,
-      });
+      const workingSlots = tm.getFullSlotsFromArr(defaultShift.workingSlots);
+      const breakSlots = tm.getFullSlotsFromArr(defaultShift.breakSlots);
 
-      if (!timeSlots) return null;
-
-      const from = timeSlots.slots[0];
-      const to = timeSlots.slots.at(-1)!;
-      const breakFrom = timeSlots.breaks[0];
-      const breakTo = timeSlots.breaks.at(-1)!;
+      const from = workingSlots[0];
+      const to = workingSlots.at(-1)!;
+      const breakFrom = breakSlots[0];
+      const breakTo = breakSlots.at(-1)!;
 
       // if (customShift) {
       //   from = customShift.slots[0];
@@ -493,10 +478,10 @@ const ShiftItem = memo(
     }, [currentShift]);
 
     const companyWorkingTimeSlots = useMemo(() => {
-      const workingSchedule = getCompanyDetailsQuery?.data?.working_schedule;
+      const workingSchedule = getCompanyDetailsQuery?.data?.workingSchedule;
 
       if (workingSchedule) {
-        const slotManager = new TimeSlotsManager();
+        const slotManager = new TimeManager();
         const slots = slotManager
           .getWorkingTimeSlotsCompany(workingSchedule)
           .filter((s) => s.minute === 0 || s.minute === 30);
@@ -505,7 +490,7 @@ const ShiftItem = memo(
       }
 
       return [];
-    }, [getCompanyDetailsQuery?.data?.working_schedule]);
+    }, [getCompanyDetailsQuery?.data?.workingSchedule]);
 
     const fromTimeOptions = useMemo(() => {
       const mostEarlyBookSlot = allBookings
@@ -659,7 +644,7 @@ const ShiftItem = memo(
       }
 
       if (
-        (currentShift.date && currentShift.specialist) ||
+        (currentShift.date && currentShift.specialistId) ||
         currentShift.name === "CUSTOM"
       ) {
         return `${customShiftFromToTime?.from?.label} - ${customShiftFromToTime?.to?.label}`;
@@ -674,7 +659,7 @@ const ShiftItem = memo(
       }
 
       if (
-        (currentShift.date && currentShift.specialist) ||
+        (currentShift.date && currentShift.specialistId) ||
         currentShift.name === "CUSTOM"
       ) {
         return SHIFT_COLORS.at(-1)!;

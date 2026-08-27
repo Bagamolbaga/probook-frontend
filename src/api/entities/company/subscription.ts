@@ -1,11 +1,11 @@
 import { ApiClientCore } from "@/api/core";
 
 export type TGetCompanySubscriptionArgs = {
-  companyId: number;
+  companyId: string;
 };
 
 export type TUpdateCompanySubscriptionArgs = {
-  companyId: number;
+  companyId: string;
   body: {
     num_employees: number;
   };
@@ -30,8 +30,6 @@ export class ApiClientCompanySubscription extends ApiClientCore {
   }
 
   async cancelSubscription({ companyId }: TGetCompanySubscriptionArgs) {
-    return this.instance.delete<unknown>(
-      `/companies/${companyId}/subscription/`
-    );
+    return this.instance.delete<unknown>(`/companies/${companyId}/subscription/`);
   }
 }

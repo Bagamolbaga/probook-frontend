@@ -59,7 +59,7 @@ const AvatarImage = () => {
                   height={108}
                   className="w-full h-full object-cover"
                   src={fileBase64}
-                  alt={session?.user?.first_name || ""}
+                  alt={session?.user?.firstName || ""}
                 />
               ) : prevAvatar ? (
                 <Image
@@ -67,7 +67,7 @@ const AvatarImage = () => {
                   height={108}
                   className="w-full h-full object-cover"
                   src={prevAvatar}
-                  alt={session?.user?.first_name || ""}
+                  alt={session?.user?.firstName || ""}
                 />
               ) : (
                 <PersonIcon className="w-10 h-10 stroke-blueDark" />

@@ -8,13 +8,14 @@ import HorizontalList from "@/components/ui/horizontalList";
 import CustomScrollbar from "@/styles/scrollbar.module.sass";
 import { cn } from "@/utils/cn";
 
-export const FEATURED = {
-  id: -1,
-  name: "Featured",
+export type ServiceCategoryTab = {
+  id: string | number;
+  name: string;
+  text?: string;
 };
 
 type TServiceData = {
-  type: TServiceType_new;
+  type: ServiceCategoryTab;
   services: TService[];
 };
 
@@ -22,7 +23,7 @@ type Props = {
   className?: string;
   rightPanelHeight?: number;
   hideTitle?: boolean;
-  serviceTypes: TServiceType_new[];
+  serviceTypes: ServiceCategoryTab[];
   services: TService[];
   selectedServices: TServiceAndSelectedOption[];
   selectServiceHandler: (services: TServiceAndSelectedOption[]) => void;
@@ -36,8 +37,8 @@ const TypeRow = ({
 }: {
   rootElement: Element | null;
   disableChangeType?: boolean;
-  type: TServiceType_new;
-  setServiceType: (type: TServiceType_new) => void;
+  type: ServiceCategoryTab;
+  setServiceType: (type: ServiceCategoryTab) => void;
 }) => {
   const { ref, inView } = useInView({
     // delay: 200,
@@ -50,7 +51,7 @@ const TypeRow = ({
     if (inView && !disableChangeType) {
       setServiceType(type);
     }
-  }, [inView, disableChangeType]);
+  }, [inView, disableChangeType, setServiceType, type]);
 
   return (
     <div ref={ref} id={`type-${type.id}`} className="text-lg font-bold py-2">
@@ -73,7 +74,7 @@ const ServiceSelection: FC<Props> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollableListRef = useRef<HTMLDivElement>(null);
 
-  const [serviceType, setServiceType] = useState<TServiceType_new>();
+  const [serviceType, setServiceType] = useState<ServiceCategoryTab>();
   const [isSmoothScrolling, setIsSmoothScrolling] = useState(false);
 
   const selectServiceTypeLocalHandler = (tab: { id: string | number; text: string }) => {
@@ -98,10 +99,7 @@ const ServiceSelection: FC<Props> = ({
     }
   };
 
-  const selectServiceHandlerLocal = (
-    service: TServiceAndSelectedOption,
-    isSelectedFromFeature?: boolean
-  ) => {
+  const selectServiceHandlerLocal = (service: TServiceAndSelectedOption) => {
     const alreadySelectedServices = selectedServices;
 
     const currentServiceAlreadySelected = alreadySelectedServices.find(
@@ -116,51 +114,38 @@ const ServiceSelection: FC<Props> = ({
   };
 
   const servicesTabs = useMemo(() => {
-    let serviceTypesThatHaveServices = serviceTypes.filter((st) =>
-      services.some((s) => s.service_type === st.name)
+    const serviceTypesThatHaveServices = serviceTypes.filter((serviceType) =>
+      services.some((service) => {
+        const categoryId =
+          typeof service.category === "string" ? service.category : service.category.id;
+
+        return categoryId === String(serviceType.id);
+      })
     );
-
-    if (services.some((s) => s.featured)) {
-      serviceTypesThatHaveServices = [
-        { ...FEATURED, company: serviceTypes[0]?.company },
-        ...serviceTypesThatHaveServices,
-      ];
-    }
-
-    if (serviceTypesThatHaveServices.length) {
-      const st = serviceTypesThatHaveServices[0];
-      setServiceType(st);
-    }
 
     return serviceTypesThatHaveServices.map((st) => ({ ...st, text: st.name }));
   }, [serviceTypes, services]);
 
+  useEffect(() => {
+    setServiceType(
+      (current) => servicesTabs.find((tab) => tab.id === current?.id) || servicesTabs[0]
+    );
+  }, [servicesTabs]);
+
   const serviceData: TServiceData[] = useMemo(() => {
-    return [
-      {
-        type: {
-          text: "All",
-          id: "all",
-          name: "All",
-          company: "",
-        },
-        services: services,
-      },
-    ];
+    if (!servicesTabs.length) {
+      return [{ type: { id: "all", name: "All", text: "All" }, services }];
+    }
 
-    return servicesTabs.map((st) => {
-      if (st.id === FEATURED.id) {
-        return {
-          type: st,
-          services: services.filter((s) => s.featured),
-        };
-      }
+    return servicesTabs.map((serviceType) => ({
+      type: serviceType,
+      services: services.filter((service) => {
+        const categoryId =
+          typeof service.category === "string" ? service.category : service.category.id;
 
-      return {
-        type: st,
-        services: services.filter((s) => s.service_type === st.name),
-      };
-    });
+        return categoryId === String(serviceType.id);
+      }),
+    }));
   }, [servicesTabs, services]);
 
   return (
@@ -201,12 +186,12 @@ const ServiceSelection: FC<Props> = ({
               rootElement={scrollableListRef.current}
               disableChangeType={Boolean(
                 isSmoothScrolling ||
-                  (scrollableListRef.current &&
-                    scrollableListRef.current.scrollHeight <=
-                      scrollableListRef.current.clientHeight) //disable change type when dont have scroll
+                (scrollableListRef.current &&
+                  scrollableListRef.current.scrollHeight <=
+                    scrollableListRef.current.clientHeight) //disable change type when dont have scroll
               )}
               type={type}
-              setServiceType={(type) => setServiceType(type)}
+              setServiceType={setServiceType}
             />
           )}
         />

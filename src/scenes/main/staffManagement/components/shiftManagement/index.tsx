@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
-import { useSession } from "next-auth/react";
 import { Grid } from "@mui/material";
 import { Player } from "@lottiefiles/react-lottie-player";
 import {
@@ -31,6 +30,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { DATE_FNS_LOCALES } from "@/i18n";
 import { TimeManager } from "@/utils/timeManager";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { useGetCompanyDetailsQuery } from "@/api/queries/company";
 
 const WEEK_STARTS_ON = 1;
 
@@ -43,10 +43,11 @@ const ShiftManagement = () => {
     startOfWeek(new Date(), { weekStartsOn: WEEK_STARTS_ON })
   );
   const getCompanySpecialistsQuery = useGetCompanySpecialistsQuery({ companyId });
+  const getCompanyDetailsQuery = useGetCompanyDetailsQuery({ companyId });
   const getCompanyShiftsForDateRangeQuery = useGetCompanyShiftsForDateRangeQuery({
     companyId,
     start: firstDayOnWeek,
-    end: addWeeks(firstDayOnWeek, 1),
+    end: endOfWeek(firstDayOnWeek, { weekStartsOn: WEEK_STARTS_ON }),
   });
   const getCompanyShiftsQuery = useGetCompanyShiftsQuery({ companyId });
 
@@ -66,14 +67,16 @@ const ShiftManagement = () => {
   const data = useMemo(() => {
     return (
       getCompanySpecialistsQuery.data?.results.map((s) => {
-        const shifts =
-          getCompanyShiftsForDateRangeQuery.data?.results.find((sf) => sf.id === s.id)
-            ?.shifts || [];
+        const shiftAssignment = getCompanyShiftsForDateRangeQuery.data?.results.find(
+          (item) => item.id === s.id
+        );
+        const shifts = shiftAssignment?.shifts || [];
 
         return {
           id: s.id,
           specialist: s,
           shifts,
+          defaultShift: shiftAssignment?.defaultShift || null,
         };
       }) || []
     );
@@ -112,25 +115,55 @@ const ShiftManagement = () => {
 
     const currData = data[row];
 
-    const defaultShift =
+    const assignedDefaultShift =
       getCompanyShiftsForDateRangeQuery.data?.results.find(
         (sf) => sf.id === currData.specialist.id
-      )?.default_shift || currData.specialist.default_shift;
+      )?.defaultShift ||
+      (typeof currData.specialist.defaultShift === "object"
+        ? currData.specialist.defaultShift
+        : getCompanyShiftsQuery.data?.results.find(
+            (shift) => shift.id === currData.specialist.defaultShift
+          ));
 
-    const findedCustomShift = currData.shifts.find(
-      (s) =>
-        s.date ===
-        format(day, "yyyy-MM-dd", {
-          locale: DATE_FNS_LOCALES[locale],
-        })
+    const dateString = format(day, "yyyy-MM-dd");
+    const overrideShift = currData.shifts.find(
+      (shift) => shift.kind === "override" && shift.date === dateString
     );
+    const weekDay = format(day, "EEEE") as WorkingScheduleWeekDays;
+    const companyDay = getCompanyDetailsQuery.data?.workingSchedule?.[weekDay];
+    const companyScheduleShift: TShift | undefined = companyDay
+      ? {
+          id: `company-${dateString}`,
+          companyId,
+          specialistId: null,
+          kind: "default",
+          name: "CUSTOM",
+          color: "#7c7c7c",
+          date: null,
+          workingSlots: companyDay.workingSlots,
+          breakSlots: companyDay.breakSlots,
+          specialist: null,
+          is_default: true,
+          working_schedule: new TimeManager().createWorkingScheduleFromSlots({
+            workingDays: [weekDay],
+            slots: companyDay.workingSlots,
+            breaks: companyDay.breakSlots,
+          }),
+          daily_break: companyDay.breakSlots,
+        }
+      : undefined;
+    const fallbackShift = assignedDefaultShift || companyScheduleShift || overrideShift;
 
-    if (findedCustomShift) {
+    if (!fallbackShift) {
+      return null;
+    }
+
+    if (overrideShift) {
       return (
         <ShiftItem
           specialistId={currData.specialist.id}
-          customShift={findedCustomShift}
-          defaultShift={defaultShift}
+          customShift={overrideShift}
+          defaultShift={fallbackShift}
           date={day}
           col={dayCol}
           revalidateQueries={revalidateQueries}
@@ -140,7 +173,7 @@ const ShiftManagement = () => {
 
     return (
       <ShiftItem
-        defaultShift={defaultShift}
+        defaultShift={fallbackShift}
         specialistId={currData.specialist.id}
         date={day}
         col={dayCol}
@@ -221,27 +254,26 @@ const ShiftManagement = () => {
               className="w-full h-[48.8px] py-[6px] px-[6px] flex items-center gap-2 border-b last:border-b-0 border-greyOutlineSecondary"
             >
               <div className="min-w-8 min-h-8 w-8 h-8 rounded-full overflow-hidden bg-greyPrimary/40">
-                {item.specialist.specialist_details.avatar && (
+                {item.specialist.avatar && (
                   <Image
-                    key={item.specialist.specialist_details.avatar}
+                    key={item.specialist.avatar}
                     width={32}
                     height={32}
                     className="w-full h-full object-cover"
-                    src={item.specialist.specialist_details.avatar}
-                    alt={item.specialist.full_name}
+                    src={item.specialist.avatar}
+                    alt={item.specialist.fullName}
                   />
                 )}
               </div>
               <div className="flex flex-col justify-center">
                 <span className="text-sm font-bold">
-                  {item.specialist.full_name ? item.specialist.full_name : `${item.specialist.specialist_details.first_name} ${item.specialist.specialist_details.last_name}`}
+                  {item.specialist.fullName ||
+                    `${item.specialist.firstName} ${item.specialist.lastName}`}
                 </span>
                 <span className="text-sm text-greyPrimary">
-                  {item.specialist.default_shift.name === "CUSTOM"
+                  {item.defaultShift?.name === "CUSTOM"
                     ? DEFAULT_SHIFTS.find((s) => s.nameId === "CUSTOM")?.name
-                    : DEFAULT_SHIFTS.find(
-                        (s) => s.id === item.specialist.default_shift.id
-                      )?.name}
+                    : DEFAULT_SHIFTS.find((s) => s.id === item.defaultShift?.id)?.name}
                 </span>
               </div>
             </div>
@@ -322,7 +354,7 @@ const ShiftManagement = () => {
       <div className="w-full mt-auto flex justify-center items-center gap-4">
         {getCompanyShiftsQuery.data?.results
           .filter((s) => s.is_default && !s.specialist)
-          .sort((a, b) => a.id - b.id)
+          .sort((a, b) => String(a.id).localeCompare(String(b.id)))
           .map((s) => {
             const fullSlots = new TimeManager().getWorkingScheduleFirstWeekDaySlots(
               s.working_schedule

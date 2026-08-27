@@ -1,6 +1,6 @@
 import { SHIFT_COLORS } from "@/constants/shiftColors";
 import { cn } from "@/utils/cn";
-import { TimeManager } from "@/utils/timeManager";
+import { TIME_SLOTS } from "@/constants/timeSlots";
 
 type Props = {
   shiftPresets: TShift[];
@@ -9,25 +9,26 @@ type Props = {
 
 const TableDefaultShift = ({ currentShift, shiftPresets }: Props) => {
   const isPreset = shiftPresets
-    .filter((s) => s.is_default && !s.specialist && s.name !== "CUSTOM")
-    .find((s) => s.id === currentShift.id);
+    .filter((shift) => shift.kind === "default" && shift.name !== "CUSTOM")
+    .find((shift) => String(shift.id) === String(currentShift.id));
 
   const getName = () => {
-    return "Custom"
     if (currentShift.name === "CUSTOM") {
-      const tm = new TimeManager();
-      const from = tm.getWorkingScheduleFirstWeekDaySlots(currentShift.working_schedule)
+      const firstSlot = TIME_SLOTS.find(
+        (slot) => slot.slot === currentShift.workingSlots[0]
+      );
+      const lastSlot = TIME_SLOTS.find(
+        (slot) => slot.slot === currentShift.workingSlots.at(-1)
+      );
 
-      return `${from.workings[0].label} - ${from.workings.at(-1)?.label}`;
+      return firstSlot && lastSlot ? `${firstSlot.label} - ${lastSlot.label}` : "Custom";
     }
 
     return currentShift.name;
   };
-  
+
   const getColor = () => {
-    return SHIFT_COLORS[0];
     if (currentShift.name === "CUSTOM") {
-      
       return SHIFT_COLORS.at(-1)!;
     }
 
@@ -47,10 +48,7 @@ const TableDefaultShift = ({ currentShift, shiftPresets }: Props) => {
           backgroundColor: `${getColor()}20`,
         }}
       >
-        <p
-          className={cn("text-sm font-bold")}
-          style={{ color: getColor() }}
-        >
+        <p className={cn("text-sm font-bold")} style={{ color: getColor() }}>
           {getName()}
         </p>
       </div>

@@ -1,6 +1,7 @@
+import { format, isSameDay, parse } from "date-fns";
+
 import { WEEK_DAYS } from "@/constants/other";
 import { TIME_SLOTS, TTimeSlot } from "@/constants/timeSlots";
-import { format, isSameDay, parse } from "date-fns";
 
 type ConstructorArgs = {
   slots?: TTimeSlot[];
@@ -9,85 +10,110 @@ type ConstructorArgs = {
 };
 
 export class TimeManager {
-  SLOTS: TTimeSlot[];
-  SLOTS_ALREADY_USED: TTimeSlot[];
-  SERVICES: TService[] = [];
-  SLOT_DURATION_IN_MINUTS = 15;
+  readonly SLOTS: TTimeSlot[];
+  readonly SLOTS_ALREADY_USED: TTimeSlot[];
+  readonly SERVICES: TService[];
+  readonly SLOT_DURATION_IN_MINUTES = 15;
 
-  constructor(
-    args: ConstructorArgs = {
-      slots: TIME_SLOTS,
-      slotsAlreadyUsed: [],
-      services: [],
-    }
-  ) {
-    this.SLOTS = args.slots || TIME_SLOTS;
-    this.SERVICES = args.services || [];
-    this.SLOTS_ALREADY_USED = args.slotsAlreadyUsed || [];
+  constructor({
+    slots = TIME_SLOTS,
+    slotsAlreadyUsed = [],
+    services = [],
+  }: ConstructorArgs = {}) {
+    this.SLOTS = slots;
+    this.SLOTS_ALREADY_USED = slotsAlreadyUsed;
+    this.SERVICES = services;
   }
 
-  getSlotsInRange = (a: number, b: number) => {
-    const arr: number[] = [];
-    for (let i = a; i <= b; i++) {
-      arr.push(i);
-    }
-    return arr;
+  getDefaultSlots = () => this.SLOTS;
+
+  getSlotsInRange = (from: number, to: number) => {
+    if (from > to) return [];
+
+    return Array.from({ length: to - from + 1 }, (_, index) => from + index);
   };
 
-  getFullSlotsInRange = (a: number, b: number) => {
-    return this.SLOTS.filter((s) => s.slot >= a && s.slot <= b);
-  };
+  getFullSlotsInRange = (from: number, to: number) =>
+    this.SLOTS.filter((slot) => slot.slot >= from && slot.slot <= to);
 
-  getFullSlotsFromArr = (slots: number[]): TTimeSlot[] => {
-    return this.SLOTS.filter((s) => slots.includes(s.slot));
-  };
+  getFullSlots = (slots: number[]): TTimeSlot[] => {
+    const slotIds = new Set(slots);
 
-  getSlotsCountForServices(services: TServiceAndSelectedOption[]) {
-    return services.reduce<number>(
-      (acc, service) =>
-        (acc += service.selectedOption.duration / this.SLOT_DURATION_IN_MINUTS),
-      0
+    return this.SLOTS.filter((slot) => slotIds.has(slot.slot)).sort(
+      (left, right) => left.slot - right.slot
     );
-  }
+  };
+
+  getFullSlotsFromArr = (slots: number[]) => this.getFullSlots(slots);
 
   /**
-   * Возвращает список временных слотов, которые уже заняты в указанный день для конкретного сотрудника.
-   *
-   * @param {Object} params - Параметры функции.
-   * @param {TBooking[]} params.bookings - Массив бронирований, в которых нужно искать занятые слоты.
-   * @param {Date} params.date - Дата, для которой проверяются занятые слоты.
-   * @param {TSpecialist["id"]} params.staffId - Идентификатор сотрудника. Если не указан, возвращаются слоты для всех сотрудников.
-   *
-   * @returns {Array} Массив временных слотов, которые уже заняты в указанный день.
+   * Shift workingSlots/breakSlots contain the end boundary as their last item.
+   * Booking.slots do not: every booking slot is an occupied 15-minute interval.
    */
+  getIntervalSlots = (rangeSlots: number[]) => {
+    const sortedSlots = Array.from(new Set(rangeSlots)).sort(
+      (left, right) => left - right
+    );
+
+    return sortedSlots.length > 1 ? sortedSlots.slice(0, -1) : [];
+  };
+
+  getBreakIntervalSlots = (breakSlots: number[]) => this.getIntervalSlots(breakSlots);
+
+  getServicesDuration = (options: TServiceOption[]) =>
+    options.reduce((duration, option) => duration + option.duration, 0);
+
+  getSlotsCountForServices = (services: TServiceAndSelectedOption[]) =>
+    Math.ceil(
+      services.reduce(
+        (duration, service) => duration + service.selectedOption.duration,
+        0
+      ) / this.SLOT_DURATION_IN_MINUTES
+    );
+
+  getFreeSlots = (slots: number[]) => {
+    const numberSlots = slots.filter((slot) => !this.isAlreadyUsed(slot));
+
+    return {
+      fullSlots: this.getFullSlots(numberSlots),
+      numberSlots,
+    };
+  };
+
+  isAlreadyUsed = (slot: number) =>
+    this.SLOTS_ALREADY_USED.some((usedSlot) => usedSlot.slot === slot);
+
   getAlreadyUsedSlotsInBookings<ReturnFullSlots extends boolean = false>({
     bookings,
     date,
     staffId,
     returnFullSlots,
   }: {
-    bookings: TBooking[] | TBookingMin[];
+    bookings: TBooking[] | TBookingMin[] | TApiBooking[] | TApiBookingMin[];
     date: Date;
     staffId?: TSpecialist["id"];
     returnFullSlots?: ReturnFullSlots;
   }): ReturnFullSlots extends true ? TTimeSlot[] : number[] {
-    let filteredBookings = bookings.filter((b) =>
-      isSameDay(parse(b.date, "yyyy-MM-dd", new Date()), date)
-    );
+    const filteredBookings = bookings.filter((booking) => {
+      if (!isSameDay(parse(booking.date, "yyyy-MM-dd", new Date()), date)) {
+        return false;
+      }
 
-    if (staffId) {
-      filteredBookings = filteredBookings.filter((b) => b.specialist._id === staffId);
-    }
+      if (!staffId) return true;
 
-    const slots = filteredBookings
-      .reduce<number[]>((acc, b) => {
-        const arr = [...b.slots.slice(0, -1)];
-        return [...acc, ...arr];
-      }, [])
-      .sort((a, b) => a - b);
+      const specialist = booking.specialist as unknown as {
+        id?: string | number;
+        _id?: string | number;
+      };
+      return String(specialist.id ?? specialist._id) === String(staffId);
+    });
+
+    const slots = Array.from(
+      new Set(filteredBookings.flatMap((booking) => booking.slots))
+    ).sort((left, right) => left - right);
 
     if (returnFullSlots) {
-      return this.getFullSlotsFromArr(slots) as ReturnFullSlots extends true
+      return this.getFullSlots(slots) as ReturnFullSlots extends true
         ? TTimeSlot[]
         : number[];
     }
@@ -95,141 +121,98 @@ export class TimeManager {
     return slots as ReturnFullSlots extends true ? TTimeSlot[] : number[];
   }
 
-  /**
-   * Get free slots for srvice
-   * @param allSlots - Staff free slots
-   * @param usedSlots - Already used slots
-   * @param needSlotsCount - Slots count for service
-   * @return Slots can select for service
-   */
+  getAvailableStartSlots({
+    workingSlots,
+    breakSlots = [],
+    busySlots = [],
+    slotsNeeded,
+  }: {
+    workingSlots: number[];
+    breakSlots?: number[];
+    busySlots?: number[];
+    slotsNeeded: number;
+  }) {
+    const workingIntervals = this.getIntervalSlots(workingSlots);
+    const unavailableSlots = new Set([
+      ...this.getBreakIntervalSlots(breakSlots),
+      ...busySlots,
+    ]);
+    const availableSlots = new Set(
+      workingIntervals.filter((slot) => !unavailableSlots.has(slot))
+    );
+    const normalizedSlotsNeeded = Math.max(1, Math.ceil(slotsNeeded));
+
+    return workingIntervals.filter((startSlot) =>
+      Array.from(
+        { length: normalizedSlotsNeeded },
+        (_, offset) => startSlot + offset
+      ).every((slot) => availableSlots.has(slot))
+    );
+  }
+
   getAvailableSlotsForService(
     allSlots: number[],
     usedSlots: number[],
-    needSlotsCount: number
-  ): number[] {
-    // const dailyBreaksWithoutLastSlot = usedSlots.slice(0, -1)
-    // Фильтруем свободные слоты, исключая перерывы
-    const availableSlots = allSlots.filter((slot) => !usedSlots.includes(slot));
+    slotsNeeded: number
+  ) {
+    const unavailableSlots = new Set(usedSlots);
+    const availableSlots = new Set(
+      allSlots.filter((slot) => !unavailableSlots.has(slot))
+    );
+    const normalizedSlotsNeeded = Math.max(1, Math.ceil(slotsNeeded));
 
-    // Массив для хранения подходящих слотов
-    const suitableSlots: number[] = [];
-
-    // Проверяем каждый слот на возможность начала услуги
-    for (let i = 0; i <= availableSlots.length - needSlotsCount; i++) {
-      const startSlot = availableSlots[i];
-      let isSuitable = true;
-
-      // Проверяем, есть ли достаточно последовательных слотов
-      for (let j = 1; j < needSlotsCount; j++) {
-        if (availableSlots[i + j] !== startSlot + j) {
-          isSuitable = false;
-          break;
-        }
-      }
-
-      // Если слоты подходят, добавляем начальный слот в результат
-      if (isSuitable) {
-        suitableSlots.push(startSlot);
-      }
-    }
-
-    return suitableSlots;
+    return allSlots.filter((startSlot) =>
+      Array.from(
+        { length: normalizedSlotsNeeded },
+        (_, offset) => startSlot + offset
+      ).every((slot) => availableSlots.has(slot))
+    );
   }
 
-  getWorkingTimeSlotsCompany = (
-    workingSchedule: TCompany["working_schedule"]
-  ): TTimeSlot[] => {
-    const weekDayS = Object.keys(workingSchedule);
+  getSlotsFromCompanyWorkRange = (
+    date: Date,
+    workingSchedule: TCompany["workingSchedule"]
+  ) => {
+    const weekDay = format(date, "EEEE") as WorkingScheduleWeekDays;
+    return this.getFullSlots(workingSchedule[weekDay]?.workingSlots ?? []);
+  };
 
-    let slots: TTimeSlot[] = [];
+  getWorkingTimeSlotsCompany = (workingSchedule: TCompany["workingSchedule"]) => {
+    const daySchedule = Object.values(workingSchedule).find(
+      ({ workingSlots }) => workingSlots.length > 0
+    );
 
-    for (let i = 0; i < weekDayS.length; i++) {
-      const weekDay = weekDayS[i] as keyof TCompany["working_schedule"];
+    return this.getFullSlots(daySchedule?.workingSlots ?? []);
+  };
 
-      if (workingSchedule[weekDay].times) {
-        workingSchedule[weekDay].times.forEach((time) => {
-          const [start, end] = time.split("-");
-          const startSlot = TIME_SLOTS.find((s) => s.label === start);
-          const endSlot = TIME_SLOTS.find((s) => s.label === end);
+  getTimeBreakSlotCompany = (workingSchedule: TCompany["workingSchedule"]) => {
+    const daySchedule = Object.values(workingSchedule).find(
+      ({ breakSlots }) => breakSlots.length > 0
+    );
 
-          if (startSlot && endSlot) {
-            const rangeSlots = TIME_SLOTS.filter(
-              (s) => s.slot >= startSlot.slot && s.slot <= endSlot.slot
-            );
-            slots = [...slots, ...rangeSlots];
-          }
-        });
+    return this.SLOTS.find((slot) => slot.slot === daySchedule?.breakSlots[0]);
+  };
 
-        if (slots.length) {
-          break;
-        }
-      }
-    }
+  getTimeBreakSlotCompanyV2 = (workingSchedule: TCompany["workingSchedule"]) => {
+    const daySchedule = Object.values(workingSchedule).find(
+      ({ breakSlots }) => breakSlots.length > 0
+    );
 
-    return slots.sort((a, b) => a.slot - b.slot);
+    return this.getFullSlots(daySchedule?.breakSlots ?? []);
   };
 
   getWorkingTimeSlotsForAllWeekDaysCompany = (
-    workingSchedule: TCompany["working_schedule"]
-  ) => {
-    const weekDayS = Object.keys(workingSchedule) as WorkingScheduleWeekDaysArr;
-
-    const obj: Record<
-      string,
-      {
-        slots: TTimeSlot[];
-        break: TTimeSlot[];
-      }
-    > = Object.fromEntries(
-      weekDayS.map((d) => [
-        d,
+    workingSchedule: TCompany["workingSchedule"]
+  ) =>
+    Object.fromEntries(
+      Object.entries(workingSchedule).map(([day, schedule]) => [
+        day,
         {
-          slots: [],
-          break: [],
+          slots: this.getFullSlots(schedule.workingSlots),
+          break: this.getFullSlots(schedule.breakSlots),
         },
       ])
-    );
-
-    for (let i = 0; i < weekDayS.length; i++) {
-      const weekDay = weekDayS[i];
-
-      if (workingSchedule[weekDay].times) {
-        workingSchedule[weekDay].times.forEach((time) => {
-          const [start, end] = time.split("-");
-          const startSlot = TIME_SLOTS.find((s) => s.label === start);
-          const endSlot = TIME_SLOTS.find((s) => s.label === end);
-
-          if (startSlot && endSlot) {
-            const rangeSlots = this.getFullSlotsInRange(startSlot.slot, endSlot.slot);
-
-            obj[weekDay] = {
-              ...obj[weekDay],
-              slots: [...obj[weekDay].slots, ...rangeSlots].sort((a, b) => a.slot - b.slot),
-            };
-          }
-        });
-      }
-
-      if (workingSchedule[weekDay].breaks) {
-        workingSchedule[weekDay].breaks.forEach((time) => {
-          const [start, end] = time.split("-");
-          const startSlot = TIME_SLOTS.find((s) => s.label === start);
-          const endSlot = TIME_SLOTS.find((s) => s.label === end);
-
-          if (startSlot && endSlot) {
-            const rangeSlots = this.getFullSlotsInRange(startSlot.slot, endSlot.slot);
-
-            obj[weekDay] = {
-              ...obj[weekDay],
-              break: [...obj[weekDay].break, ...rangeSlots].sort((a, b) => a.slot - b.slot),
-            };
-          }
-        });
-      }
-    }
-
-    return obj;
-  };
+    ) as Record<WorkingScheduleWeekDays, { slots: TTimeSlot[]; break: TTimeSlot[] }>;
 
   getCompanyWorkingScheduleSlotsByWeekDay = ({
     workingSchedule,
@@ -238,16 +221,15 @@ export class TimeManager {
     workingSchedule: TCompany["workingSchedule"];
     date: Date;
   }) => {
-    const workingSlotsForWeek =
-      this.getWorkingTimeSlotsForAllWeekDaysCompany(workingSchedule);
+    const weekDay = format(date, "EEEE") as WorkingScheduleWeekDays;
+    const schedule = workingSchedule[weekDay];
 
-    const currentWeekDay = format(date, "EEEE") as keyof WorkingSchedule;
+    if (!schedule) return null;
 
-    if (workingSlotsForWeek[currentWeekDay]) {
-      return workingSlotsForWeek[currentWeekDay];
-    }
-
-    return null;
+    return {
+      slots: this.getFullSlots(schedule.workingSlots),
+      breaks: this.getFullSlots(schedule.breakSlots),
+    };
   };
 
   getWorkingScheduleSlotsByWeekDay = ({
@@ -257,71 +239,33 @@ export class TimeManager {
     workingSchedule: WorkingSchedule;
     date: Date;
   }) => {
-    const workingSlotsForWeek = workingSchedule;
+    const weekDay = format(date, "EEEE") as keyof WorkingSchedule;
+    const schedule = workingSchedule[weekDay];
 
-    const currentWeekDay = format(date, "EEEE") as keyof WorkingSchedule;
+    if (!schedule) return null;
 
-    if (workingSlotsForWeek[currentWeekDay]) {
-      const slots = this.getFullSlotsFromArr(workingSlotsForWeek[currentWeekDay].slots);
-      const breaks = this.getFullSlotsFromArr(workingSlotsForWeek[currentWeekDay].breaks);
-      return {
-        slots,
-        breaks,
-      };
-    }
-
-    return null;
+    return {
+      slots: this.getFullSlots(schedule.slots),
+      breaks: this.getFullSlots(schedule.breaks),
+    };
   };
 
-  getWorkingScheduleTimeBreakSlots = (
-    workingSchedule: TCompany["working_schedule"]
-  ): TTimeSlot[] => {
-    const weekDayS = Object.keys(workingSchedule);
+  getWorkingScheduleTimeBreakSlots = (workingSchedule: TCompany["workingSchedule"]) => {
+    const daySchedule = Object.values(workingSchedule).find(
+      ({ breakSlots }) => breakSlots.length > 0
+    );
 
-    let slots: TTimeSlot[] = [];
-
-    for (let i = 0; i < weekDayS.length; i++) {
-      const weekDay = weekDayS[i] as keyof TCompany["working_schedule"];
-
-      if (workingSchedule[weekDay].breaks.length) {
-        const breakStr = workingSchedule[weekDay].breaks[0];
-
-        const [start, end] = breakStr.split("-");
-        const startSlot = TIME_SLOTS.find((s) => s.label === start);
-        const endSlot = TIME_SLOTS.find((s) => s.label === end);
-
-        if (startSlot && endSlot) {
-          const rangeSlots = TIME_SLOTS.filter(
-            (s) => s.slot >= startSlot.slot && s.slot <= endSlot.slot
-          );
-          slots = [...slots, ...rangeSlots];
-        }
-      }
-    }
-
-    return slots.sort((a, b) => a.slot - b.slot);
+    return this.getFullSlots(daySchedule?.breakSlots ?? []);
   };
 
   getWorkingScheduleFirstWeekDaySlots = (workingSchedule: WorkingSchedule) => {
-    const workingSlotsForWeek = workingSchedule;
-
-    const firstWeekDayWithSlots = Object.entries(workingSlotsForWeek).find(
-      ([key, value]) => value.slots.length
+    const firstWorkingDay = Object.values(workingSchedule).find(
+      ({ slots }) => slots.length > 0
     );
 
-    if (firstWeekDayWithSlots) {
-      const fullWorkings = this.getFullSlotsFromArr(firstWeekDayWithSlots[1].slots);
-      const fullBreaks = this.getFullSlotsFromArr(firstWeekDayWithSlots[1].breaks);
-
-      return {
-        workings: fullWorkings,
-        breaks: fullBreaks,
-      };
-    }
-
     return {
-      workings: [],
-      breaks: [],
+      workings: this.getFullSlots(firstWorkingDay?.slots ?? []),
+      breaks: this.getFullSlots(firstWorkingDay?.breaks ?? []),
     };
   };
 
@@ -333,8 +277,8 @@ export class TimeManager {
     workingDays: (typeof WEEK_DAYS)[number]["id"][];
     slots: number[];
     breaks: number[];
-  }): WorkingSchedule => {
-    const obj = Object.fromEntries(
+  }): WorkingSchedule =>
+    Object.fromEntries(
       WEEK_DAYS.map((day) => [
         day.id,
         {
@@ -342,34 +286,97 @@ export class TimeManager {
           breaks: workingDays.includes(day.id) ? breaks : [],
         },
       ])
+    ) as WorkingSchedule;
+
+  getWorkingScheduleWithFromAndToPropertys = (workingSchedule: WorkingSchedule) =>
+    Object.fromEntries(
+      Object.entries(workingSchedule).map(([day, schedule]) => [
+        day,
+        {
+          slots: {
+            from: this.SLOTS.find((slot) => slot.slot === schedule.slots[0]),
+            to: this.SLOTS.find(
+              (slot) => slot.slot === schedule.slots[schedule.slots.length - 1]
+            ),
+          },
+          breaks: {
+            from: this.SLOTS.find((slot) => slot.slot === schedule.breaks[0]),
+            to: this.SLOTS.find(
+              (slot) => slot.slot === schedule.breaks[schedule.breaks.length - 1]
+            ),
+          },
+        },
+      ])
+    ) as WorkingScheduleWithTimeSlots;
+
+  isNotEnoughTimeForNextSlot = ({
+    options,
+    slot,
+  }: {
+    options: TServiceOption[];
+    slot: number;
+  }) => {
+    const slotsNeeded = Math.ceil(
+      this.getServicesDuration(options) / this.SLOT_DURATION_IN_MINUTES
+    );
+    const firstNextUsedSlot = this.SLOTS_ALREADY_USED.find(
+      (usedSlot) => usedSlot.slot > slot
     );
 
-    return obj as WorkingSchedule;
+    return firstNextUsedSlot ? firstNextUsedSlot.slot - slot < slotsNeeded : false;
   };
 
-  getWorkingScheduleWithFromAndToPropertys = (
-    workingSchedule: WorkingSchedule
-  ) => {
-    return Object.fromEntries(
-      Object.entries(workingSchedule).map(([day, value]) => {
-        const slots = {
-          from: this.SLOTS.find((s) => s.slot === value.slots[0]),
-          to: this.SLOTS.find((s) => s.slot === value.slots[value.slots.length - 1]),
-        };
+  isNotEnoughTime = ({
+    options,
+    slot,
+    staffShift,
+  }: {
+    options: TServiceOption[];
+    slot: number;
+    staffShift: { name: string; slots: number[] };
+    slotsInWorkRange: TTimeSlot[];
+  }) => {
+    const slotsNeeded = Math.ceil(
+      this.getServicesDuration(options) / this.SLOT_DURATION_IN_MINUTES
+    );
+    const availableWorkingSlots = new Set(this.getIntervalSlots(staffShift.slots));
 
-        const breaks = {
-          from: this.SLOTS.find((s) => s.slot === value.breaks[0]),
-          to: this.SLOTS.find((s) => s.slot === value.breaks[value.breaks.length - 1]),
-        };
+    return !Array.from({ length: slotsNeeded }, (_, offset) => slot + offset).every(
+      (requiredSlot) => availableWorkingSlots.has(requiredSlot)
+    );
+  };
 
-        return [
-          day as WorkingScheduleWeekDays,
-          {
-            slots,
-            breaks,
-          },
-        ];
+  isNotInShiftRange = (slot: number, staffShift: { name: string; slots: number[] }) =>
+    !this.getIntervalSlots(staffShift.slots).includes(slot);
+
+  getDoubledSlotsV2 = ({
+    options,
+    shift,
+    staffBookingsUsedSlots,
+    duration,
+  }: {
+    options: TServiceOption[];
+    shift: { name: string; slots: number[]; breaks: number[] };
+    staffBookingsUsedSlots: number[];
+    duration: number;
+  }) => {
+    const durationMinutes = duration || this.getServicesDuration(options);
+    const slotsNeeded = Math.ceil(durationMinutes / this.SLOT_DURATION_IN_MINUTES);
+    const constructorBusySlots = this.SLOTS_ALREADY_USED.map((slot) => slot.slot);
+    const startSlots = this.getAvailableStartSlots({
+      workingSlots: shift.slots,
+      breakSlots: shift.breaks,
+      busySlots: [...constructorBusySlots, ...staffBookingsUsedSlots],
+      slotsNeeded,
+    });
+
+    return startSlots
+      .map((startSlot) => {
+        const start = this.SLOTS.find((slot) => slot.slot === startSlot);
+        const end = this.SLOTS.find((slot) => slot.slot === startSlot + slotsNeeded);
+
+        return start && end ? [start, end] : null;
       })
-    ) as WorkingScheduleWithTimeSlots;
+      .filter((range): range is [TTimeSlot, TTimeSlot] => Boolean(range));
   };
 }

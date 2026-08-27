@@ -1,12 +1,4 @@
-import {
-  eachDayOfInterval,
-  endOfMonth,
-  endOfWeek,
-  format,
-  isSameMonth,
-  startOfMonth,
-  startOfWeek,
-} from "date-fns";
+import { eachDayOfInterval, endOfWeek, format, startOfWeek } from "date-fns";
 import { cn } from "@/utils/cn";
 import { DATE_FORMAT } from "@/constants/other";
 
@@ -38,7 +30,7 @@ const getSlotsFromMinAndMax = (
 ) => {
   let allSlots: number[] = [];
 
-  Object.entries(value).forEach(([week, slots]) => {
+  Object.values(value).forEach((slots) => {
     allSlots = [...allSlots, ...slots.slots.map((s) => s.slot)];
   });
 
@@ -50,13 +42,13 @@ const getSlotsFromMinAndMax = (
 };
 
 type Props = {
-  bookings: TBooking[];
+  bookings: TApiBooking[];
   staffs: TSpecialist[];
   dateRange: {
     from: Date;
     to: Date;
   };
-  handleBookingClick: (b: TBooking) => void;
+  handleBookingClick: (b: TApiBooking) => void;
 };
 
 const ByWeek = ({ bookings, staffs, dateRange, handleBookingClick }: Props) => {
@@ -84,10 +76,12 @@ const ByWeek = ({ bookings, staffs, dateRange, handleBookingClick }: Props) => {
     }
   };
 
-  const storeSlots = useMemo(() => {
-    if (getCompanyDetailsQuery.data?.working_schedule) {
+  const storeSlots = useMemo<
+    Partial<Record<WorkingScheduleWeekDays, { slots: TTimeSlot[]; break: TTimeSlot[] }>>
+  >(() => {
+    if (getCompanyDetailsQuery.data?.workingSchedule) {
       const d = new TimeManager().getWorkingTimeSlotsForAllWeekDaysCompany(
-        getCompanyDetailsQuery.data.working_schedule
+        getCompanyDetailsQuery.data.workingSchedule
       );
 
       return d;
@@ -110,8 +104,8 @@ const ByWeek = ({ bookings, staffs, dateRange, handleBookingClick }: Props) => {
     type Item = {
       slot: TTimeSlot;
       date?: Date;
-      bookings: TBooking[];
-      bookingsInThisDay: TBooking[];
+      bookings: TApiBooking[];
+      bookingsInThisDay: TApiBooking[];
       isNotWorking?: boolean;
     };
 
@@ -127,7 +121,7 @@ const ByWeek = ({ bookings, staffs, dateRange, handleBookingClick }: Props) => {
 
       for (let i = 0; i < weekDays.length; i++) {
         const day = weekDays[i];
-        const daySlots = storeSlots[format(day, "EEEE")];
+        const daySlots = storeSlots[format(day, "EEEE") as WorkingScheduleWeekDays];
 
         const bookingsWithCurrentDayAndStartWithCurrentSlot = bookings.filter(
           (b) => b.date === format(day, DATE_FORMAT) && b.slots[0] === slot.slot
@@ -136,11 +130,7 @@ const ByWeek = ({ bookings, staffs, dateRange, handleBookingClick }: Props) => {
           (b) => b.date === format(day, DATE_FORMAT)
         );
 
-        const booksWithIntersection: TBooking[] = bookingsWithCurrentDay.filter((b) =>
-          b.slots.slice(1, -1).includes(slot.slot)
-        );
-
-        let books: TBooking[] = [];
+        let books: TApiBooking[] = [];
 
         if (!showMoreDayIds.includes(i)) {
           //if day column is NOT `show more`
@@ -159,7 +149,7 @@ const ByWeek = ({ bookings, staffs, dateRange, handleBookingClick }: Props) => {
         } else {
           books = bookingsWithCurrentDayAndStartWithCurrentSlot;
         }
-        
+
         week.push({
           slot,
           date: day,
@@ -179,44 +169,21 @@ const ByWeek = ({ bookings, staffs, dateRange, handleBookingClick }: Props) => {
   }, [weekDays, storeSlots, bookings, showMoreDayIds]);
 
   const renderItem = ({
-    bookingsInThisDay,
     booking,
-    bookingIdx,
-    date,
     showMore,
   }: {
-    bookingsInThisDay: TBooking[];
-    booking: TBooking;
-    bookingIdx: number; // idx in type Item.bookings
-    date?: Date;
+    booking: TApiBooking;
     showMore?: boolean;
   }) => {
     const fullSlots = new TimeManager().getFullSlotsFromArr(booking.slots);
-    const slotsCount = fullSlots.slice(0, -1).length;
+    const slotsCount = fullSlots.length;
     // const slotsCount = fullSlots
     //   .filter((s) => s.minute === 0 || s.minute === 30)
     //   .slice(0, -1).length;
 
-    const bookingsInThisDayWithoutCurrentBooking = date
-      ? bookingsInThisDay.filter(
-          (b) => b.id !== booking.id && b.date === format(date, DATE_FORMAT)
-        )
-      : [];
-
-    const intersections = bookingsInThisDayWithoutCurrentBooking.filter((b) =>
-      b.slots.some((s) => booking.slots.slice(1, -1).includes(s))
-    );
-
-    const intersectionCount = showMore
-      ? intersections.length
-      : Math.min(intersections.length, 2);
     const staffIdx = sortedStaff.findIndex(
-      (staffId) => Number(staffId) === booking.specialist.id
+      (staffId) => staffId === booking.specialist.id
     );
-    
-    if (booking.id === 495) {
-      console.log({booking, sortedStaff, staffIdx});
-    }
 
     if (staffIdx < 0) {
       return null;
@@ -224,11 +191,8 @@ const ByWeek = ({ bookings, staffs, dateRange, handleBookingClick }: Props) => {
 
     const height = (36 / 2) * slotsCount - BOOKING_ITEM_FIX_MARGIN * 2; //rowHeight * slotsCount - paddingY * 2
     // let width = intersectionCount > 0 ? 100 / (intersectionCount + 1) : 100;
-    
+
     let width = 100 / staffs.length;
-    let leftPosition = width * (intersectionCount ? staffIdx : 0);
-
-
 
     if (showMore) {
       return (
@@ -257,10 +221,7 @@ const ByWeek = ({ bookings, staffs, dateRange, handleBookingClick }: Props) => {
     const itemCount = sortedStaff.length;
     const totalGaps = (itemCount + 1) * BOOKING_ITEM_FIX_MARGIN;
 
-
     width = 100 / staffs.length;
-    leftPosition = BOOKING_ITEM_FIX_MARGIN + staffIdx
-
     return (
       <BookingItem
         style={{
@@ -294,18 +255,6 @@ const ByWeek = ({ bookings, staffs, dateRange, handleBookingClick }: Props) => {
     //     handleClick={() => handleBookingClick(booking)}
     //   />
     // );
-  };
-
-  const getColumnWidth = (colIdx: number) => {
-    if (staffs.length === 1) {
-      return `calc(100% / 7)`;
-    }
-
-    if (showMoreDayIds.includes(colIdx)) {
-      `calc(${BOOKING_ITEM_FIX_WIDTH * sortedStaff.length + sortedStaff.length * (BOOKING_ITEM_FIX_MARGIN + 1)}px)`;
-    }
-
-    return `calc(100% / 7)`;
   };
 
   return (
@@ -374,12 +323,9 @@ const ByWeek = ({ bookings, staffs, dateRange, handleBookingClick }: Props) => {
                 >
                   {/* {d.date && console.log(d)} */}
                   {d.bookings.length > 0
-                    ? d.bookings.map((booking, idx) =>
+                    ? d.bookings.map((booking) =>
                         renderItem({
-                          bookingsInThisDay: d.bookingsInThisDay,
                           booking,
-                          bookingIdx: idx,
-                          date: d.date,
                           showMore: showMoreDayIds.includes(colIdx),
                         })
                       )

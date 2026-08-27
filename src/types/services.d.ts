@@ -1,13 +1,30 @@
 type TService = {
-  id: string
+  id: string;
+  _id?: string;
   name: string;
   description?: string;
   image?: string;
-  company: Company;
-  options: ServiceOption[];
-  specialists: Specialist[];
-  createdAt: Date;
-  updatedAt: Date;
+  company: string | TCompany;
+  category: string | TServiceCategory;
+  options: TServiceOption[];
+  specialists: (string | TServiceSpecialist)[];
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+type TServiceSpecialist = Pick<
+  TSpecialist,
+  "id" | "firstName" | "lastName" | "fullName" | "avatar"
+>;
+
+type TServiceCategory = {
+  id: string;
+  _id?: string;
+  name: string;
+  company: string | null;
+  isGlobal: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 type TServiceOption = {

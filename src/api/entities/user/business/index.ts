@@ -2,11 +2,11 @@ import { User } from "@/types/user";
 import { ApiClientCore } from "../../../core";
 
 type LoginRes = {
-  access_token: string;
-  expires_in: number;
-  token_type: string;
-  scope: string;
-  refresh_token: string;
+  accessToken: string;
+  expiresIn: number;
+  tokenType: "Bearer";
+  refreshToken: string;
+  user: User;
 };
 
 export type RegisterRes = {
@@ -70,18 +70,9 @@ export class ApiClientBusinessUser extends ApiClientCore {
   }
 
   async login({ email, password }: { email: string; password: string }) {
-    const data = {
-      grant_type: "password",
-      username: email,
-      password: password,
-      client_id: process.env.CLIENT_ID_BUSINESS,
-      client_secret: process.env.CLIENT_SECRET_BUSINESS,
-    };
-
-    const res = await this.instanceWithoutAuth.post<LoginRes>("/o/token/", data, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
+    const res = await this.instanceWithoutAuth.post<LoginRes>("/auth/login", {
+      email,
+      password,
     });
 
     return res;
@@ -148,7 +139,7 @@ export class ApiClientBusinessUser extends ApiClientCore {
   }
 
   async getCurrentUserSession() {
-    const res = await this.instance.get<GetCurrentUserSessionRes>(`/users/session`);
+    const res = await this.instance.get<GetCurrentUserSessionRes>(`/auth/me`);
 
     return res;
   }

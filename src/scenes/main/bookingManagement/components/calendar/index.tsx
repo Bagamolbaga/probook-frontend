@@ -12,7 +12,6 @@ import {
 } from "date-fns";
 
 import { useGetBookingsQuery } from "@/api/queries/booking";
-import { useGetCompanyServicesQuery } from "@/api/queries/company/services";
 import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
 import Button from "@/components/ui/button";
 import DatePicker from "@/components/ui/DatePicker";
@@ -27,7 +26,6 @@ import UpdateBookingModal from "../components/UpdateBookingModal";
 import ByMonth from "./ByMonth";
 import ByWeek from "./ByWeek";
 import { cn } from "@/utils/cn";
-import { MOCK } from "./mock";
 
 type TDateRangeType = "month" | "week" | "day";
 
@@ -83,14 +81,9 @@ const Calendar = () => {
     companyId,
   });
 
-  const getCompanyServicesQuery = useGetCompanyServicesQuery({
-    companyId,
-  });
-
   const revalidateQueriesHandler = async () => {
     void getBookingsQuery.refetch();
     void getCompanySpecialistsQuery.refetch();
-    void getCompanyServicesQuery.refetch();
   };
 
   const closeBookingDetailModalHandler = () => {
@@ -99,35 +92,24 @@ const Calendar = () => {
     void revalidateQueriesHandler();
   };
 
-  const openBookingDetailModalHandler = (booking: TBooking) => {
+  const openBookingDetailModalHandler = (booking: TApiBooking) => {
     updateBookingForm.setValue("bookingId", booking.id);
     updateBookingForm.setValue("status", booking.status);
     updateBookingForm.setValue("assignee", booking.specialist);
-    updateBookingForm.setValue("customer", booking.client);
+    updateBookingForm.setValue("customer", booking.customer);
     updateBookingForm.setValue("time", {
       start: TIME_SLOTS.find((s) => s.slot === booking.slots[0])?.label || "",
-      end: TIME_SLOTS.find((s) => s.slot === booking.slots.at(-1))?.label || "",
+      end:
+        TIME_SLOTS.find((s) => s.slot === (booking.slots.at(-1) ?? -1) + 1)?.label || "",
       slots: booking.slots,
     });
     updateBookingForm.setValue("date", parse(booking.date, "yyyy-MM-dd", new Date()));
-    updateBookingForm.setValue("updatedAt", booking.updated_at);
+    updateBookingForm.setValue("updatedAt", booking.updatedAt);
 
-    const arr: {
-      service: TService;
-      option: TService["options"][number];
-    }[] = [];
-
-    booking.services
-      .filter((s) => s.service_option)
-      .forEach((s) => {
-        arr.push({ service: s.service, option: s.service_option });
-      });
-    updateBookingForm.setValue("services", arr);
+    updateBookingForm.setValue("services", booking.services);
     updateBookingForm.setValue(
       "servicesId",
-      booking.services
-        .filter((s) => s.service_option)
-        .map((i) => `${i.service.id}-${i.service_option.id}`)
+      booking.services.map((service) => service.id)
     );
 
     setIsOpenBookingDetailModal(true);
@@ -174,7 +156,7 @@ const Calendar = () => {
   const bookings = useMemo(() => {
     let arr = getBookingsQuery.data?.results || [];
 
-    arr = arr.filter(b => b.specialist && b.slots.length)
+    arr = arr.filter((b) => b.specialist && b.slots.length);
 
     if (selectedStaffIds.length) {
       arr = arr.filter((b) => selectedStaffIds.includes(b.specialist.id));
@@ -234,11 +216,7 @@ const Calendar = () => {
         <UpdateBookingModal
           isOpen={isOpenBookingDetailModal}
           updateBookingForm={updateBookingForm}
-          getBookingsQuery={getBookingsQuery}
-          getCompanySpecialistsQuery={getCompanySpecialistsQuery}
-          servicesQuery={getCompanyServicesQuery}
           handleClose={closeBookingDetailModalHandler}
-          revalidateQueries={revalidateQueriesHandler}
         />
       )}
       <div className="w-full h-full px-7 py-7 rounded-xl bg-white sm:px-5 sm:py-6">

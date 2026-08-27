@@ -25,6 +25,7 @@ type TSpecialist = {
   // company: number;
 
   id: string;
+  _id?: string;
   company?: string | null;
   email: string;
   firstName: string;
@@ -38,9 +39,8 @@ type TSpecialist = {
   specialties: string[];
   bio?: string;
   rating?: number;
-  defaultShift?: string;
-  services: Service[];
-  servicesPopulated?: Service[];
+  defaultShift?: string | TShift | null;
+  services: (string | Pick<TService, "id" | "name">)[];
   role: "specialist";
 };
 

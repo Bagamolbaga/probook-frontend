@@ -13,7 +13,7 @@ import Image from "next/image";
 import Badge from "./components/TimeBadge";
 import { TimeManager } from "@/utils/timeManager";
 import { TTimeSlot } from "@/constants/timeSlots";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import CreateUpdateModal from "./components/CreateUpdateModal";
 import { toaster } from "@/components/ui/toaster";
 import {
@@ -24,19 +24,15 @@ import {
 } from "@/api/queries/company/shift";
 import { useTranslations } from "next-intl";
 import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
-import { SHIFT_COLORS } from "@/constants/shiftColors";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
 import Table from "@/components/ui/table";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGetCompanyDetailsQuery } from "@/api/queries/company";
-import { WEEK_DAYS } from "@/constants/other";
-import { cn } from "@/utils/cn";
 
 export type CreateUpdateOpeationHour = {
-  id: number;
+  id: TShift["id"];
   name: string;
   color: string;
-  weekDays: (typeof WEEK_DAYS)[number][];
   time: {
     from?: TTimeSlot;
     to?: TTimeSlot;
@@ -46,11 +42,11 @@ export type CreateUpdateOpeationHour = {
 };
 
 type TRowItem = {
-  id: number;
+  id: TShift["id"];
   name: string;
   color: string;
-  slots: number[];
-  daily_break: number[];
+  workingSlots: number[];
+  breakSlots: number[];
   _initial: TShift;
 };
 
@@ -60,12 +56,8 @@ const OperationHours = () => {
 
   const form = useForm<CreateUpdateOpeationHour>({
     mode: "onChange",
-    defaultValues: {
-      weekDays: [],
-    },
   });
 
-  const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>([]);
   const [paginationModel, setPaginationModel] = useState({
     pageSize: 50,
     page: 0,
@@ -76,7 +68,7 @@ const OperationHours = () => {
   const [isOpenCreateModal, setIsOpenCreateModal] = useState(false);
   const [isOpenUpdateModal, setIsOpenUpdateModal] = useState(false);
   const [shiftIdDeleteConfirmModal, setShiftIdDeleteConfirmModal] = useState<
-    number | null
+    TShift["id"] | null
   >(null);
 
   const queryClient = useQueryClient();
@@ -95,13 +87,6 @@ const OperationHours = () => {
   const deleteCompanyShiftQuery = useDeleteCompanyShiftQuery();
 
   useEffect(() => {
-    if (rowSelectionModel.length) {
-      const row = rows.find((r) => r.id === rowSelectionModel[0]);
-      row && showUpdateModalHandler(row);
-    }
-  }, [rowSelectionModel]);
-
-  useEffect(() => {
     if (getCompanyShiftsQuery.data) {
       setFirstLoading(false);
     }
@@ -109,20 +94,15 @@ const OperationHours = () => {
 
   const rows: TRowItem[] = useMemo(() => {
     if (getCompanyShiftsQuery.data) {
-      const tm = new TimeManager();
       return getCompanyShiftsQuery.data.results
-        .filter((s) => s.is_default && !s.specialist)
+        .filter((shift) => shift.kind === "default" && !shift.specialistId)
         .map<TRowItem>((s) => ({
           _initial: s,
           id: s.id,
           name: s.name,
           color: s.color,
-          slots: tm
-            .getWorkingScheduleFirstWeekDaySlots(s.working_schedule)
-            .workings.map((s) => s.slot),
-          daily_break: tm
-            .getWorkingScheduleFirstWeekDaySlots(s.working_schedule)
-            .breaks.map((s) => s.slot),
+          workingSlots: s.workingSlots,
+          breakSlots: s.breakSlots,
         }));
     }
 
@@ -145,6 +125,32 @@ const OperationHours = () => {
     setIsOpenUpdateModal(false);
   };
 
+  const showUpdateModalHandler = useCallback(
+    (rowData: TRowItem) => {
+      form.setValue("id", rowData.id);
+      form.setValue("name", rowData.name);
+      form.setValue("color", rowData.color);
+
+      const slotManager = new TimeManager();
+      const from = slotManager.SLOTS.find((s) => s.slot === rowData.workingSlots[0]);
+      const to = slotManager.SLOTS.find(
+        (s) => s.slot === rowData.workingSlots[rowData.workingSlots.length - 1]
+      );
+      const breakFrom = slotManager.SLOTS.find((s) => s.slot === rowData.breakSlots[0]);
+      const breakTo = slotManager.SLOTS.find(
+        (s) => s.slot === rowData.breakSlots[rowData.breakSlots.length - 1]
+      );
+
+      form.setValue("time.from", from);
+      form.setValue("time.to", to);
+      form.setValue("time.breakFrom", breakFrom);
+      form.setValue("time.breakTo", breakTo);
+
+      setIsOpenUpdateModal(true);
+    },
+    [form]
+  );
+
   const onSelectRowHandler = useCallback(
     (model: GridRowSelectionModel) => {
       if (model.length) {
@@ -155,64 +161,28 @@ const OperationHours = () => {
         }
       }
     },
-    [rows]
+    [rows, showUpdateModalHandler]
   );
-
-  const showUpdateModalHandler = (rowData: TRowItem) => {
-    form.setValue("id", rowData.id);
-    form.setValue("name", rowData.name);
-    form.setValue("color", rowData.color);
-
-    const tm = new TimeManager();
-    const weeksDays = rowData._initial.working_schedule;
-    const weeksDaysWithSlots = Object.entries(weeksDays)
-      .filter(([_, value]) => value.slots.length)
-      .map(([key]) => key);
-    const weeksDaysForDisplay = WEEK_DAYS.filter((wd) =>
-      weeksDaysWithSlots.includes(wd.id)
-    );
-
-    const from = tm.SLOTS.find((s) => s.slot === rowData.slots[0]);
-    const to = tm.SLOTS.find((s) => s.slot === rowData.slots[rowData.slots.length - 1]);
-    const breakFrom = tm.SLOTS.find((s) => s.slot === rowData.daily_break[0]);
-    const breakTo = tm.SLOTS.find(
-      (s) => s.slot === rowData.daily_break[rowData.daily_break.length - 1]
-    );
-
-    form.setValue("weekDays", weeksDaysForDisplay);
-    form.setValue("time.from", from);
-    form.setValue("time.to", to);
-    form.setValue("time.breakFrom", breakFrom);
-    form.setValue("time.breakTo", breakTo);
-
-    setIsOpenUpdateModal(true);
-  };
 
   const createNewOperationHourHandler = async (formData: CreateUpdateOpeationHour) => {
     try {
+      const slotManager = new TimeManager();
       const body = {
         name: formData.name,
         description: `${formData.name} shift`,
-        description_thai: `${formData.name} shift in thai`,
-        is_default: true,
         color: formData.color,
-        working_schedule: {} as WorkingSchedule,
-      };
-
-      if (formData.time.from && formData.time.to) {
-        const tm = new TimeManager();
-        const slots = tm.getSlotsInRange(formData.time.from.slot, formData.time.to.slot);
-        const breakSlots =
+        workingSlots:
+          formData.time.from && formData.time.to
+            ? slotManager.getSlotsInRange(formData.time.from.slot, formData.time.to.slot)
+            : [],
+        breakSlots:
           formData.time.breakFrom && formData.time.breakTo
-            ? tm.getSlotsInRange(formData.time.breakFrom.slot, formData.time.breakTo.slot)
-            : [];
-
-        body.working_schedule = tm.createWorkingScheduleFromSlots({
-          workingDays: formData.weekDays.map((wd) => wd.id),
-          slots,
-          breaks: breakSlots,
-        });
-      }
+            ? slotManager.getSlotsInRange(
+                formData.time.breakFrom.slot,
+                formData.time.breakTo.slot
+              )
+            : [],
+      };
 
       const { data } = await createCompanyShiftQuery.mutateAsync({
         companyId,
@@ -230,30 +200,23 @@ const OperationHours = () => {
 
   const updateOpearationHourHandler = async (formData: CreateUpdateOpeationHour) => {
     try {
+      const slotManager = new TimeManager();
       const body = {
         name: formData.name,
         description: `${formData.name} shift`,
-        description_thai: `${formData.name} shift in thai`,
-        is_default: true,
         color: formData.color,
-        working_schedule: {} as WorkingSchedule,
+        workingSlots:
+          formData.time.from && formData.time.to
+            ? slotManager.getSlotsInRange(formData.time.from.slot, formData.time.to.slot)
+            : [],
+        breakSlots:
+          formData.time.breakFrom && formData.time.breakTo
+            ? slotManager.getSlotsInRange(
+                formData.time.breakFrom.slot,
+                formData.time.breakTo.slot
+              )
+            : [],
       };
-
-      const tm = new TimeManager();
-      const slots =
-        formData.time.from && formData.time.to
-          ? tm.getSlotsInRange(formData.time.from.slot, formData.time.to.slot)
-          : [];
-      const breakSlots =
-        formData.time.breakFrom && formData.time.breakTo
-          ? tm.getSlotsInRange(formData.time.breakFrom.slot, formData.time.breakTo.slot)
-          : [];
-
-      body.working_schedule = tm.createWorkingScheduleFromSlots({
-        workingDays: formData.weekDays.map((wd) => wd.id),
-        slots,
-        breaks: breakSlots,
-      });
 
       const { data } = await updateCompanyShiftQuery.mutateAsync({
         companyId,
@@ -262,7 +225,7 @@ const OperationHours = () => {
       });
 
       if (data) {
-        void queryClient.refetchQueries({ queryKey: ["shifts"] });
+        void queryClient.refetchQueries({ queryKey: ["shifts", companyId] });
         hideUpdateModalHandler();
         toaster.success("Operation hour updated successfully");
       }
@@ -300,13 +263,13 @@ const OperationHours = () => {
         },
       },
       {
-        field: "slots",
+        field: "workingSlots",
         headerName: t("staffManagement.operationHours.table.headerLabels.time"),
         type: "string",
         minWidth: 150,
         flex: 0.2,
         renderCell: (params) => {
-          const value = params.value as TRowItem["slots"];
+          const value = params.value as TRowItem["workingSlots"];
           const from = value[0];
           const to = value[value.length - 1];
 
@@ -317,21 +280,21 @@ const OperationHours = () => {
 
           if (fullFrom && fullTo) {
             return (
-              <Badge text={`${fullFrom.label} - ${fullTo.label}`} colorPreset="grey" />
+              <Badge text={`${fullFrom.label} - ${fullTo.label}`} variant="working" />
             );
           }
 
-          return <Badge text={"Off"} colorPreset="grey" />;
+          return <Badge text="Off" variant="neutral" />;
         },
       },
       {
-        field: "daily_break",
+        field: "breakSlots",
         headerName: t("staffManagement.operationHours.table.headerLabels.breakTime"),
         type: "string",
         minWidth: 150,
         flex: 0.2,
         renderCell: (params) => {
-          const value = params.value as TRowItem["slots"];
+          const value = params.value as TRowItem["breakSlots"];
           const from = value[0];
           const to = value[value.length - 1];
 
@@ -341,46 +304,10 @@ const OperationHours = () => {
           const fullTo = fullSlots[fullSlots.length - 1];
 
           if (fullFrom && fullTo) {
-            return (
-              <Badge text={`${fullFrom.label} - ${fullTo.label}`} colorPreset="grey" />
-            );
+            return <Badge text={`${fullFrom.label} - ${fullTo.label}`} variant="break" />;
           }
 
-          return <Badge text={"Off"} colorPreset="grey" />;
-        },
-      },
-      {
-        field: "working_schedule",
-        headerName: "Working schedule",
-        type: "string",
-        minWidth: 250,
-        flex: 0.2,
-        renderCell: (params) => {
-          const row = params.row as TRowItem;
-
-          return (
-            <div className="w-full h-full flex items-center justify-center gap-1">
-              {Object.entries(row._initial.working_schedule)
-                .sort(
-                  (a, b) =>
-                    (WEEK_DAYS.find((wd) => wd.id === a[0])?.order || 0) -
-                    (WEEK_DAYS.find((wd) => wd.id === b[0])?.order || 0)
-                )
-                .map(([day, value]) => (
-                  <div
-                    key={day}
-                    className={cn(
-                      "min-w-7 min-h-7 flex items-center justify-center rounded-sm border border-greyOutlineSecondary",
-                      {
-                        "border-purplePrimary": value.slots.length,
-                      }
-                    )}
-                  >
-                    <p>{day[0]}</p>
-                  </div>
-                ))}
-            </div>
-          );
+          return <Badge text="Off" variant="neutral" />;
         },
       },
       {
@@ -393,10 +320,7 @@ const OperationHours = () => {
           const color = params.value as TRowItem["color"];
           const row = params.row as TRowItem;
 
-          const findedColor =
-            SHIFT_COLORS.find((c) => c === color) || SHIFT_COLORS.at(-1)!;
-
-          return <Badge text={row.name} color={color} />;
+          return <Badge text={row.name} variant="shift" color={color} />;
         },
       },
       {
@@ -427,7 +351,7 @@ const OperationHours = () => {
         },
       },
     ],
-    []
+    [showUpdateModalHandler, t]
   );
 
   const rowsCount = useMemo(() => {
@@ -438,26 +362,12 @@ const OperationHours = () => {
     return 0;
   }, [getCompanyShiftsQuery.data?.count]);
 
-  const actionBtnIsDisabled = useMemo(() => {
-    const formData = form.getValues();
-
-    if (!formData.name || !formData.color) {
-      return true;
-    }
-
-    // if (
-    //   Object.values(formData.time).length === 4 ||
-    //   Object.values(formData.time).length === 0
-    // ) {
-    //   return false;
-    // }
-
-    // if (Object.values(formData.time).length >= 1) {
-    //   return true;
-    // }
-
-    return false;
-  }, [form.watch()]);
+  const formValues = useWatch({ control: form.control });
+  const actionBtnIsDisabled =
+    !formValues.name ||
+    !formValues.color ||
+    !formValues.time?.from ||
+    !formValues.time?.to;
 
   if (firstLoading) {
     return (
@@ -471,7 +381,7 @@ const OperationHours = () => {
     return (
       <>
         <CreateUpdateModal
-          companyWorkingSchedule={getCompanyDetailsQuery.data?.working_schedule}
+          companyWorkingSchedule={getCompanyDetailsQuery.data?.workingSchedule}
           headerTitle={t("staffManagement.operationHours.updateModal.createTitle")}
           isOpen={isOpenCreateModal}
           form={form}
@@ -524,7 +434,7 @@ const OperationHours = () => {
   return (
     <>
       <CreateUpdateModal
-        companyWorkingSchedule={getCompanyDetailsQuery.data?.working_schedule}
+        companyWorkingSchedule={getCompanyDetailsQuery.data?.workingSchedule}
         headerTitle={t("staffManagement.operationHours.updateModal.createTitle")}
         isOpen={isOpenCreateModal}
         form={form}
@@ -544,7 +454,7 @@ const OperationHours = () => {
         }
       />
       <CreateUpdateModal
-        companyWorkingSchedule={getCompanyDetailsQuery.data?.working_schedule}
+        companyWorkingSchedule={getCompanyDetailsQuery.data?.workingSchedule}
         headerTitle={t("staffManagement.operationHours.updateModal.updateTitle")}
         isOpen={isOpenUpdateModal}
         form={form}

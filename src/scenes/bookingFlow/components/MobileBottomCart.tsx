@@ -13,7 +13,7 @@ import { useTranslations } from "next-intl";
 import { TIME_SLOTS } from "@/constants/timeSlots";
 
 type Props = {
-  isDashboard?: boolean
+  isDashboard?: boolean;
   _stepId: string;
   company?: TCompany;
   selectedServices: TServiceAndSelectedOption[];
@@ -33,7 +33,7 @@ const MobileBottomCart: FC<Props> = ({
   renderContinueButton,
 }) => {
   const t = useTranslations();
-  const contentContainer = useRef<HTMLDivElement>(null)
+  const contentContainer = useRef<HTMLDivElement>(null);
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -108,9 +108,12 @@ const MobileBottomCart: FC<Props> = ({
     <>
       {createPortal(
         <motion.div
-          className={cn("fixed bottom-0 left-0 right-0 z-50 w-full flex-col justify-end bg-darkPrimary/35 hidden sm:flex", {
-            "bottom-[64px]": isDashboard
-          })}
+          className={cn(
+            "fixed bottom-0 left-0 right-0 z-50 w-full flex-col justify-end bg-darkPrimary/35 hidden sm:flex",
+            {
+              "bottom-[64px]": isDashboard,
+            }
+          )}
           variants={variantsBg}
           animate={variantsBgAnimate}
           onClick={closeHandler}
@@ -249,7 +252,7 @@ const MobileBottomCart: FC<Props> = ({
                           <div className="size-5 rounded-full border-2 border-greyLight"></div>
 
                           <div className="flex-1 flex flex-col gap-1">
-                            <p className="text-sm font-bold">{selectedStaff.full_name}</p>
+                            <p className="text-sm font-bold">{selectedStaff.fullName}</p>
                             <p className="text-sm text-greyPrimary">
                               {/* {selectedStaff.bio} */}
                             </p>
