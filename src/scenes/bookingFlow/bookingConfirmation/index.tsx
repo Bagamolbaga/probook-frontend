@@ -43,7 +43,7 @@ const BookingConfirmationScene: FC<Props> = ({ token: tokenFromUrl }) => {
 
   const getBookingByTokenQuery = useGetBookingByTokenQuery({ token });
 
-  const companyId = getBookingByTokenQuery.data?.company || "";
+  const companyId = String(getBookingByTokenQuery.data?.company || "");
   const getCompanyDetailsQuery = useGetCompanyDetailsQuery({ companyId });
 
   const [bookingIsConfirmed, setBookingIsConfirmed] = useState(false);

@@ -9,7 +9,7 @@ import TimeLineCalendar from "@/components/timeLineCalendar";
 import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
 
 type Props = {
-  companyId: TCompany["id"];
+  companyId: string;
   specialistId: TSpecialist["id"];
 };
 

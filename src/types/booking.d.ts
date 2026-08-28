@@ -70,6 +70,7 @@ type TApiBooking = {
   status: Exclude<BookingStatus, "WALK_IN">;
   createdAt?: string;
   updatedAt?: string;
+  otp_sent?: boolean;
 };
 
 type TApiBookingMin = Pick<
@@ -122,7 +123,11 @@ type TComment = {
   id: number;
   company: number;
   booking: number;
-  author: TBooking["specialist"]["specialist_details"];
+  author: {
+    avatar: string | null;
+    first_name: string;
+    last_name: string;
+  };
   body: string;
   body_thai: string;
   created_at: string;

@@ -25,7 +25,8 @@ export type TRange = "day" | "week" | "month";
 
 export const useGetDashboardStatistic = (companyId?: number) => {
   const { data: session } = useAppSession();
-  const {companyId: companyIdLocal} = useGetCompanyId()
+  const { companyId: companyIdLocal } = useGetCompanyId();
+  const companyIdNumber = Number(companyIdLocal);
 
   const [selectedRange, setSelectedRange] = useState<TRange>("day");
   const [selectedDates, setSelectedDates] = useState(() => {
@@ -58,13 +59,13 @@ export const useGetDashboardStatistic = (companyId?: number) => {
   });
 
   const getCompanySalesAndCustomerStatQuery = useGetCompanySalesAndCustomerStatQuery({
-    companyId: companyIdLocal,
+    companyId: companyIdNumber,
     startDate: selectedDates.start,
     endDate: selectedDates.end,
   });
 
   const getCompanySalesAndCustomerStatPrevQuery = useGetCompanySalesAndCustomerStatQuery({
-    companyId: companyIdLocal,
+    companyId: companyIdNumber,
     startDate: selectedDatesPrev.start,
     endDate: selectedDatesPrev.end,
   });
@@ -80,7 +81,7 @@ export const useGetDashboardStatistic = (companyId?: number) => {
   });
 
   const allBookings = useMemo(() => {
-    let arr: TBooking[] = [];
+    let arr: TApiBooking[] = [];
 
     getAllBookingsQuery.forEach((q) => {
       if (q.data?.results) {

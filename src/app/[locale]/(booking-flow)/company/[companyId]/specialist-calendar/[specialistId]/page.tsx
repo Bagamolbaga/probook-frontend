@@ -47,7 +47,7 @@ const SpecialistCalendarPage = async ({
 
   return (
     <SpecialistCalendarScene
-      companyId={storeId}
+      companyId={String(storeId)}
       specialistId={specialistId}
     />
   );

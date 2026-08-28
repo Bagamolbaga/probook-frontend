@@ -6,7 +6,7 @@ import { cn } from "@/utils/cn";
 import { toSlug } from "@/utils/toSlug";
 
 type Props = {
-  company: TCompany<{ priceFrom: string }>;
+  company: TCompany<{ price_from: string }>;
   isDark?: boolean;
 };
 
@@ -35,7 +35,7 @@ const StoreCart: FC<Props> = ({ company, isDark }) => {
             <div className="w-full h-full bg-greyPrimary/50"></div>
           )}
           <div className="absolute top-4 right-4 py-3 px-4 rounded-full bg-white border-[#CFDBD5]/60">
-            <p className="text-sm font-bold text-grey-800">{company.businessType}</p>
+            <p className="text-sm font-bold text-grey-800">{company.business_type}</p>
           </div>
         </div>
         <div className="p-4 flex-1 flex flex-col items-start justify-between">
@@ -64,7 +64,7 @@ const StoreCart: FC<Props> = ({ company, isDark }) => {
                   "text-greyPrimary": isDark,
                 })}
               >
-                From {company.priceFrom ? `฿${company.priceFrom}` : <span className="text-greyPrimary">No info</span>}
+                From {company.price_from ? `฿${company.price_from}` : <span className="text-greyPrimary">No info</span>}
               </p>
             </div>
             <div className="py-3 flex items-center justify-between border-t border-greyOutlineSecondary">

@@ -98,7 +98,7 @@ const DashboardScene = () => {
             </div>
             <div className="w-full mt-7">
               <LineChartApacheEcharts
-                allBookings={allBookings}
+                allBookings={allBookings as unknown as TBooking[]}
                 selectedDates={selectedDates}
                 selectedRange={selectedRange}
                 setSelectedRange={setSelectedRange}

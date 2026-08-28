@@ -154,7 +154,7 @@ const ShiftItem = memo(
 
       getAllBookingsQuery.forEach((q) => {
         if (q.data?.results) {
-          arr = [...arr, ...q.data.results];
+          arr = [...arr, ...(q.data.results as unknown as TBooking[])];
         }
       });
 

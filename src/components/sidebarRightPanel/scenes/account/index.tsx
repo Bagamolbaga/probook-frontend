@@ -65,14 +65,14 @@ export const AccountScene = () => {
         <div className="w-full flex gap-1">
           {getCompanySpecialistsQuery.data?.results.map((s) => (
             <div key={s.id} className="w-9 h-9 rounded-md overflow-hidden">
-              {!s.specialist_details.avatar ? (
+              {!s.avatar ? (
                 <div className="w-full h-full bg-greyBackgroundLight"></div>
               ) : (
                 <Image
                   width={36}
                   height={36}
-                  src={s.specialist_details.avatar ? MockAvatar : MockAvatar}
-                  alt={s.full_name}
+                  src={s.avatar || MockAvatar}
+                  alt={s.fullName}
                 />
               )}
             </div>

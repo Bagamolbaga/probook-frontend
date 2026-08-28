@@ -153,7 +153,7 @@ const CompanyDetailsScene: FC<Props> = ({ companyId }) => {
                     <LocationIcon className="w-4 h-4" />
                     {location}
                   </p>
-                  <p className="pl-4 text-sm">{store?.businessType?.split(",")[0]}</p>
+                   <p className="pl-4 text-sm">{store?.business_type?.split(",")[0]}</p>
                 </div>
               </div>
             </div>
@@ -178,7 +178,7 @@ const CompanyDetailsScene: FC<Props> = ({ companyId }) => {
       <div className="w-full h-[calc(100vh-78px-80px)] -mt-[35px] flex gap-10 sm:flex-col sm:h-auto sm:mt-10 bg-[#FDFDFD]">
         <div className="relative w-3/5 sm:w-full sm:h-[300px]">
           <div className="absolute z-10 top-4 right-4 flex items-center gap-3">
-            {store?.businessType?.split(",").map((type) => (
+            {store?.business_type?.split(",").map((type: string) => (
               <span
                 key={type}
                 className="px-4 py-3 rounded-full text-sm font-bold bg-white"
@@ -196,7 +196,7 @@ const CompanyDetailsScene: FC<Props> = ({ companyId }) => {
             </Button>
           </div>
 
-          <ImagesSwiper images={store?.images || []} />
+          <ImagesSwiper images={(store?.images || []).map((image) => image.image)} />
         </div>
         <div className="w-2/5 flex flex-col gap-6 sm:w-full">
           <div className="flex items-center gap-3">
@@ -263,7 +263,7 @@ const CompanyDetailsScene: FC<Props> = ({ companyId }) => {
                 <Map centerOfMap={store?.pos} />
               </div>
               <div className="w-full mt-2 flex flex-col gap-2 justify-between md:w-1/2 sm:w-full">
-                {Object.entries(getCompanyDetailsQuery.data?.working_schedule || {}).map(
+                {Object.entries(getCompanyDetailsQuery.data?.workingSchedule || {}).map(
                   ([weekDay, value]) => (
                     <div
                       key={weekDay}
@@ -272,12 +272,12 @@ const CompanyDetailsScene: FC<Props> = ({ companyId }) => {
                       <div className="flex items-center gap-2">
                         <div
                           className={cn("w-2 h-2 rounded-full bg-greyLight", {
-                            "bg-greenPrimary": value.times.length,
+                             "bg-greenPrimary": value.workingSlots.length,
                           })}
                         ></div>
                         <p
                           className={cn("text-sm", {
-                            "text-greyPrimary": !value.times.length,
+                             "text-greyPrimary": !value.workingSlots.length,
                           })}
                         >
                           {weekDay}
@@ -286,10 +286,10 @@ const CompanyDetailsScene: FC<Props> = ({ companyId }) => {
                       <div className="flex items-center">
                         <p
                           className={cn("text-sm", {
-                            "text-greyPrimary": !value.times.length,
+                             "text-greyPrimary": !value.workingSlots.length,
                           })}
                         >
-                          {getOpeningTime(value.times)}
+                           {getOpeningTime(value.workingSlots.map(String))}
                         </p>
                       </div>
                     </div>
@@ -309,7 +309,7 @@ const CompanyDetailsScene: FC<Props> = ({ companyId }) => {
               {selectedServices.length} service selected
             </p>
             <Link
-              href={`/company/${toSlug(getCompanyDetailsQuery.data?.name)}/booking-creation?storeId=${store?._id}${selectedServices.length ? `&services=${selectedServices.map((s) => s.id).join(",")}&options=${selectedServices.map((s) => s.selectedOption.id).join(",")}` : ""}`}
+              href={`/company/${toSlug(getCompanyDetailsQuery.data?.name)}/booking-creation?storeId=${store?.id}${selectedServices.length ? `&services=${selectedServices.map((s) => s.id).join(",")}&options=${selectedServices.map((s) => s.selectedOption.id).join(",")}` : ""}`}
             >
               <Button variant="primary" className={cn("px-8 !rounded-full")}>
                 Book Now

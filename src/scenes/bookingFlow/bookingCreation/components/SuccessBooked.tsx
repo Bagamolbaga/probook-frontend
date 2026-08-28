@@ -24,7 +24,7 @@ type TPos = {
 };
 
 type Props = {
-  booking: TBooking;
+  booking: TApiBooking;
   company: TCompany;
 };
 
@@ -95,7 +95,7 @@ const SuccessBooked = ({ company, booking }: Props) => {
 
   const duration = useMemo(() => {
     const allMins = booking.services.reduce(
-      (acc, s) => acc + s.options[0]?.duration,
+      (acc, s) => acc + s.selectedOption.duration,
       0
     );
 
@@ -200,8 +200,8 @@ const SuccessBooked = ({ company, booking }: Props) => {
               </div>
               <div className="w-1/2 flex flex-col gap-2">
                 {booking.services.map((s) => (
-                  <p key={s.options[0]?.id} className="text-sm">
-                    {s.options[0]?.name ? s.options[0]?.name : s.service.name}
+                  <p key={s.selectedOption.id} className="text-sm">
+                    {s.selectedOption.name ? s.selectedOption.name : s.name}
                   </p>
                 ))}
               </div>

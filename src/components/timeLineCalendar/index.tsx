@@ -122,6 +122,7 @@ const TimeLineCalendar = ({ companyId, specialistIds, onStopLoading }: Props) =>
           slots: item.slots,
           date: item.date,
           status: item.status,
+          totalPrice: item.totalPrice,
           updatedAt: item.updatedAt,
           services: item.services,
         });

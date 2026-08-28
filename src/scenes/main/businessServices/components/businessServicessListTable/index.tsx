@@ -120,13 +120,15 @@ const BusinessServicesListTable = () => {
       ...(getCompanyServicesQuery.data?.results.map((s) => ({
         ...s,
         id: s.id || s._id || "",
-        options: (s.options as TServiceOption[]).map((so) => ({
+        options: s.options.map((so) => ({
           ...so,
           price: Number(so.price),
         })),
         specialists: s.specialists as TSpecialist[],
       })) || []),
-    ].sort((a, b) => differenceInSeconds(a.createdAt, b.createdAt));
+    ].sort((a, b) =>
+      differenceInSeconds(a.createdAt || new Date(0), b.createdAt || new Date(0))
+    );
   }, [getCompanyServicesQuery.data]);
 
   const showCreateModalHandler = () => {

@@ -85,8 +85,8 @@ type Props = {
 
 type DraftBookingDataInLocalStorage = {
   _createdAt: Date;
-  services: { id: number; optionId: number }[];
-  staffId: number;
+  services: { id: string; optionId: number }[];
+  staffId: string;
   date: Date;
   time: TTimeSlot;
 };
@@ -114,7 +114,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
   const createBookingQuery = useCreateBookingQuery();
 
   const [createdBooking, setCreatedBooking] = useState<
-    TBooking & {
+    TApiBooking & {
       otp_sent?: boolean;
     }
   >();
@@ -160,7 +160,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
         .map((id) => getCompanyServicesQuery.data.results.find((s) => s.id === id))
         .filter((s) => !!s)
         .map((s, idx) => {
-          const selectedOption = s.options.find((so) => so.id === options[idx]);
+          const selectedOption = s.options.find((so) => so.id === Number(options[idx]));
 
           return {
             ...s,
@@ -203,16 +203,16 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
         setIsGlobalLoading(true);
 
         const staffFromDraft = getCompanySpecialistsQuery.data.results.find(
-          (st) => st.id === draftBookingInLS.staffId
+          (st) => st.id === String(draftBookingInLS.staffId)
         );
 
         const servicesFromDraft = getCompanyServicesQuery.data?.results.filter((s) =>
-          draftBookingInLS.services.find((ds) => ds.id === s.id)
+          draftBookingInLS.services.find((ds) => String(ds.id) === s.id)
         );
         const selectedServicesWithSelectedOption = servicesFromDraft
           .map((s) => {
             const draftOptionId = draftBookingInLS.services.find(
-              (ds) => ds.id === s.id
+              (ds) => String(ds.id) === s.id
             )?.optionId;
             const option = s.options.find((so) => so.id === draftOptionId);
 
@@ -259,15 +259,15 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
       getCompanySpecialistsQuery.data?.results.length
     ) {
       const staffFromDraft = getCompanySpecialistsQuery.data?.results.find(
-        (s) => s.id === draftBookingInLS.staffId
+        (s) => s.id === String(draftBookingInLS.staffId)
       );
       const servicesFromDraft = getCompanyServicesQuery.data?.results.filter((s) =>
-        draftBookingInLS.services.find((ds) => ds.id === s.id)
+          draftBookingInLS.services.find((ds) => String(ds.id) === s.id)
       );
       const selectedServicesWithSelectedOption = servicesFromDraft
         .map((s) => {
           const draftOptionId = draftBookingInLS.services.find(
-            (ds) => ds.id === s.id
+            (ds) => String(ds.id) === s.id
           )?.optionId;
           const option = s.options.find((so) => so.id === draftOptionId);
 
@@ -396,7 +396,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
 
           setDraftBookingInLS(null);
 
-          if (res.data.client.phone_verified) {
+          if (res.data.customer.avatar) {
             form.setValue("isPhoneVerified", true);
           }
 
@@ -441,7 +441,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
     const formData = form.getValues();
 
     const everySelectedServicesHaveDontShowStaff = formData.selectedServices.every(
-      (s) => !s.show_specialist
+      (s) => !s.specialists.length
     );
     const selectedStaff = formData.selectedStaff;
 
@@ -555,7 +555,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
     if (createdBooking) {
       await apiClient.customerUser.sendCreateBookingOTPCode({
         otp: Number(code),
-        bookingId: createdBooking.id,
+        bookingId: Number(createdBooking.id),
       });
 
       form.setValue("isPhoneVerified", true);
@@ -569,7 +569,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
   const resendVerifyCodeHandler = async () => {
     if (createdBooking) {
       const res = await apiClient.customerUser.resendBookingOTPCode({
-        bookingId: createdBooking.id,
+        bookingId: Number(createdBooking.id),
       });
 
       if (res.status === 204) {
@@ -639,19 +639,17 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
   }, [getCompanyServicesQuery.data]);
 
   const specialistForOnlySelectedServices = useMemo(() => {
-    return getCompanySpecialistsQuery.data?.results || [];
-
     const services = form.watch("selectedServices");
 
-    if (services.length && !services[0].show_specialist) {
+    if (services.length && !services[0].specialists.length) {
       return [];
     }
 
     if (getCompanySpecialistsQuery.data?.results) {
-      const services = form.watch("selectedServices");
-      const servicesStaffIds = services.reduce<number[]>(
-        (acc, s) => (acc = [...acc, ...s.specialists]),
-        []
+      const servicesStaffIds = services.flatMap((service) =>
+        service.specialists.map((specialist) =>
+          typeof specialist === "string" ? specialist : specialist.id
+        )
       );
 
       return getCompanySpecialistsQuery.data.results.filter((st) =>

@@ -75,7 +75,7 @@ const BookingManageScene = ({ token: tokenFromUrl }: Props) => {
 
   const token = new URLSearchParams(`t=${tokenFromUrl}`).get("t") || "";
   const getBookingByTokenQuery = useGetBookingByTokenQuery({ token });
-  const companyId = getBookingByTokenQuery.data?.company || "";
+  const companyId = String(getBookingByTokenQuery.data?.company || "");
 
   const getCompanyDetailsQuery = useGetCompanyDetailsQuery({ companyId });
   const getCompanyServicesTypesQuery = useGetCompanyServicesTypesQuery({ companyId });
@@ -173,8 +173,8 @@ const BookingManageScene = ({ token: tokenFromUrl }: Props) => {
         } = {
           services: form
             .getValues("selectedServices")
-            .map((s) => ({ id: s.id, option_id: s.selectedOption.id })),
-          specialist: selectedStaff.id,
+            .map((s) => ({ id: Number(s.id), option_id: s.selectedOption.id })),
+          specialist: Number(selectedStaff.id),
           date: selectedNewDate,
           slots: [],
         };
@@ -402,7 +402,7 @@ const BookingManageScene = ({ token: tokenFromUrl }: Props) => {
           )}
           {form.watch("_stepId") === "time" && (
             <TimeSelection
-              companyId={companyId}
+              companyId={String(companyId)}
               selectedServices={form.watch("selectedServices")}
               selectedSpecialist={form.watch("selectedStaff")}
               selectedDate={form.watch("selectedDate")}

@@ -44,8 +44,8 @@ const Slider: FC<Props> = ({ isDark, companies }) => {
             key={c.id}
             company={
               c as TCompany<{
-                priceFrom: string;
-                priceTo: string;
+                price_from: string;
+                price_to: string;
               }>
             }
             isDark={isDark}

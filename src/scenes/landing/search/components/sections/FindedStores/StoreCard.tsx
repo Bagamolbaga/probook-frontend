@@ -16,7 +16,7 @@ const StoreCard: FC<Props> = ({ company, isDark, setHover }) => {
   return (
     <Link
       id={`store_cart_id-${company.id}`}
-      href={`/company/${toSlug(company.name)}?storeId=${company._id}`}
+      href={`/company/${toSlug(company.name)}?storeId=${company.id}`}
       className={cn(
         "flex flex-col rounded-[14px] transition-all border border-[#ECECF2] hover:border-purplePrimary bg-white",
         {
@@ -39,7 +39,7 @@ const StoreCard: FC<Props> = ({ company, isDark, setHover }) => {
             <div className="w-full h-full bg-greyPrimary/50"></div>
           )}
           <div className="absolute top-4 right-4 py-1 px-4 rounded-full border bg-white border-purplePrimary">
-            <p className="text-sm font-bold text-grey-800">{company.businessType}</p>
+            <p className="text-sm font-bold text-grey-800">{company.business_type}</p>
           </div>
         </div>
         <div className="p-4 flex-1 flex flex-col items-start justify-between">
@@ -56,7 +56,7 @@ const StoreCard: FC<Props> = ({ company, isDark, setHover }) => {
             <div className="py-3 flex items-center justify-between">
               <p className={cn("text-sm text-greyPrimary", {})}>Price</p>
               <p className={cn("text-sm font-semibold text-darkPrimary", {})}>
-                {company.priceFrom && company.priceTo ? `From ฿${Number(company.priceFrom)} - To ฿${Number(company.priceTo)}` : "No info"}
+                {company.price_from && company.price_to ? `From ฿${Number(company.price_from)} - To ฿${Number(company.price_to)}` : "No info"}
               </p>
             </div>
             <div className="py-3 flex items-center justify-between border-t border-greyOutlineSecondary">
@@ -68,7 +68,7 @@ const StoreCard: FC<Props> = ({ company, isDark, setHover }) => {
           </div>
           <div className="w-full flex mt-1">
             <Link
-              href={`/company/${toSlug(company.name)}/booking-creation?storeId=${company._id}`}
+              href={`/company/${toSlug(company.name)}/booking-creation?storeId=${company.id}`}
               className="w-full"
             >
               <Button
