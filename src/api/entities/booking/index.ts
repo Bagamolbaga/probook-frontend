@@ -19,7 +19,10 @@ export type TGetBookingByTokenArgs = {
 export type TCreateBookingArgs = {
   companyId: string;
   data: {
-    services: string[];
+    services: Array<{
+      serviceId: string;
+      optionId: string;
+    }>;
     specialist: string;
     customer: {
       email: string;

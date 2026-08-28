@@ -34,7 +34,7 @@ const BookingDetailsModal: FC<Props> = ({ isOpen, company, booking, handleClose 
         <dl className="mt-6 grid grid-cols-[130px_1fr] gap-x-4 gap-y-3 text-sm">
           <dt className="text-greyPrimary">Customer</dt>
           <dd>
-            {booking.customer.first_name} {booking.customer.last_name}
+            {booking.customer.firstName} {booking.customer.lastName}
           </dd>
           <dt className="text-greyPrimary">Email</dt>
           <dd>{booking.customer.email}</dd>

@@ -29,6 +29,7 @@ type TServiceCategory = {
 
 type TServiceOption = {
   id: number;
+  _id?: string;
   name?: string;
   price: number;
   duration: number;

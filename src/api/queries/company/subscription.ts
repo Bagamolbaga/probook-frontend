@@ -28,7 +28,7 @@ export const useGetCompanySubscriptionQuery = (
     queryKey: ["company_subscription", companyId],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: companyId > 0
+    enabled: Boolean(companyId)
   });
 };
 
@@ -67,6 +67,6 @@ export const useCancelCompanySubscriptionQuery = (
     queryKey: ["company_subscription", companyId],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: companyId > 0
+    enabled: Boolean(companyId)
   });
 };

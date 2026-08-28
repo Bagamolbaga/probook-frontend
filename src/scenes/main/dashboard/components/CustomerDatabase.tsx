@@ -10,7 +10,7 @@ import { formatCurrency } from "@/utils/formatCurrency";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
 
 type TRowItem = {
-  id: string | number;
+  id: string;
   name: string;
   email: string | null;
   phone: string | null;
@@ -27,7 +27,7 @@ const CustomerDatabase = () => {
     },
   });
 
-  const columns: GridColDef[] = useMemo(
+  const columns: GridColDef<TRowItem>[] = useMemo(
     () => [
       {
         field: "name",
@@ -44,8 +44,8 @@ const CustomerDatabase = () => {
         type: "string",
         minWidth: 200,
         flex: 0.1,
-        renderCell: ({ value }) => {
-          return <div className="h-full flex items-center text-base">{value}</div>;
+        renderCell: ({ row }) => {
+          return <div className="h-full flex items-center text-base">{row.email}</div>;
         },
       },
       {
@@ -54,8 +54,8 @@ const CustomerDatabase = () => {
         type: "string",
         minWidth: 200,
         flex: 0.1,
-        renderCell: ({ value }) => {
-          return <div className="h-full flex items-center text-base">{value}</div>;
+        renderCell: ({ row }) => {
+          return <div className="h-full flex items-center text-base">{row.phone}</div>;
         },
       },
       {
@@ -64,8 +64,10 @@ const CustomerDatabase = () => {
         type: "string",
         minWidth: 150,
         flex: 0.1,
-        renderCell: (params) => {
-          return <div className="h-full flex items-center text-base">{params.value}</div>;
+        renderCell: ({ row }) => {
+          return (
+            <div className="h-full flex items-center text-base">{row.booking_id}</div>
+          );
         },
       },
       {
@@ -74,10 +76,10 @@ const CustomerDatabase = () => {
         type: "string",
         minWidth: 150,
         flex: 0.1,
-        renderCell: (params) => {
+        renderCell: ({ row }) => {
           return (
             <div className="h-full flex items-center text-base">
-              {formatCurrency(params.value as string)}
+              {formatCurrency(row.moneySpent)}
             </div>
           );
         },
@@ -118,11 +120,11 @@ const CustomerDatabase = () => {
       getCustomersQuery.data?.results.map((c) => {
         return {
           id: c.id,
-          name: c.name,
+          name: `${c.firstName} ${c.lastName}`.trim(),
           email: c.email,
-          phone: c.phone,
-          booking_id: c.bookings_count,
-          moneySpent: Number(c.money_spent),
+          phone: c.phone ?? null,
+          booking_id: c.bookingsCount,
+          moneySpent: c.moneySpent,
         };
       }) || []
     );

@@ -103,7 +103,7 @@ const BookingItem = (props: Props) => {
           onClick={handleClick}
         >
           <p className={cn("text-sm font-bold", textClasses)}>
-            {booking.customer.first_name} {booking.customer.last_name}
+            {booking.customer.firstName} {booking.customer.lastName}
           </p>
           <p className={cn("mt-[2px] text-xs", textClasses)}>{renderTime(true)}</p>
         </div>
@@ -121,7 +121,7 @@ const BookingItem = (props: Props) => {
         onMouseLeave={() => setIsHover(false)}
       >
         <p className={cn("text-sm font-bold", textClasses)}>
-          {booking.customer.first_name} {booking.customer.last_name}
+          {booking.customer.firstName} {booking.customer.lastName}
         </p>
         <p className={cn("mt-[2px] text-xs", textClasses)}>{renderTime(withTime)}</p>
       </div>

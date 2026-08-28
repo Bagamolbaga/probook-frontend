@@ -128,6 +128,8 @@ const TimeLineCalendar = () => {
             slots: item.slots,
             date: item.date,
             status: item.status,
+            totalPrice: item.totalPrice,
+            createdAt: item.createdAt,
             updatedAt: item.updatedAt,
             services: item.services,
           });
@@ -276,7 +278,7 @@ const TimeLineCalendar = () => {
                   }
                 )}
               >
-                {shift.customer.first_name} {shift.customer.last_name}
+                {shift.customer.firstName} {shift.customer.lastName}
               </p>
             </div>
           </div>
@@ -543,6 +545,8 @@ const TimeLineCalendar = () => {
   ) => {
     updateBookingForm.setValue("bookingId", shift.id);
     updateBookingForm.setValue("status", shift.status);
+    updateBookingForm.setValue("totalPrice", shift.totalPrice);
+    updateBookingForm.setValue("createdAt", shift.createdAt);
     updateBookingForm.setValue("assignee", booking.specialist);
     updateBookingForm.setValue("customer", shift.customer);
     updateBookingForm.setValue("time", {

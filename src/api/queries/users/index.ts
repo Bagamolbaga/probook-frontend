@@ -1,11 +1,26 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  UseQueryOptions,
+} from "@tanstack/react-query";
 import { useApiClient } from "@/api/context";
-import { TUpdateBusinessUserLineId, TUploadUserAvatarArgs } from "@/api/entities/user/business";
-import { TCreateCustomerArgs, TGetCustomerBookingHistoryArgs, TGetCustomerDetailsArgs, TGetCustomersArgs } from "@/api/entities/user/customer";
-import { useAppSession } from '@/hooks/useAppSession';
-import { useStore } from 'zustand';
-import { useSuperAdminStore } from '@/stores/superAdmin';
+import {
+  TUpdateBusinessUserLineId,
+  TUploadUserAvatarArgs,
+} from "@/api/entities/user/business";
+import {
+  TBookingCustomerDetails,
+  TBookingCustomerListItem,
+  TCreateCustomerArgs,
+  TGetCustomerBookingHistoryArgs,
+  TGetCustomerDetailsArgs,
+  TGetCustomersArgs,
+} from "@/api/entities/user/customer";
+import { useAppSession } from "@/hooks/useAppSession";
+import { useStore } from "zustand";
+import { useSuperAdminStore } from "@/stores/superAdmin";
 
 type CustomUseQueryOptions<TRes> = Omit<UseQueryOptions<TRes, Error>, "queryKey">;
 
@@ -41,7 +56,7 @@ export const useGetCustomersQuery = (options: TGetCustomersArgs) => {
     queryKey: ["customers", companyId, ...Object.values(queryParams)],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: !!companyId
+    enabled: !!companyId,
   });
 };
 
@@ -61,35 +76,46 @@ export const useCreateCustomerQuery = () => {
   });
 };
 
-export const useGetCustomerDetailsQuery = (options: Options<TGetCustomerDetailsArgs, TCustomer>) => {
+export const useGetCustomerDetailsQuery = (
+  options: Options<TGetCustomerDetailsArgs, TBookingCustomerDetails>
+) => {
   const apiClient = useApiClient();
   const { companyId, customerId } = options;
 
   const fetcherFn = async () => {
-    return (await apiClient.customerUser.getCustomerDetails({ companyId, customerId })).data;
+    return (await apiClient.customerUser.getCustomerDetails({ companyId, customerId }))
+      .data;
   };
 
   return useQuery({
     queryKey: ["customer_details", companyId, customerId],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: companyId > 0
+    enabled: Boolean(companyId),
   });
 };
 
-export const useGetCustomerBookingsHistoryQuery = (options: Options<TGetCustomerBookingHistoryArgs, unknown>) => {
+export const useGetCustomerBookingsHistoryQuery = (
+  options: Options<TGetCustomerBookingHistoryArgs, unknown>
+) => {
   const apiClient = useApiClient();
-  const { customerId } = options;
+  const { companyId, customerId, queryParams = {} } = options;
 
   const fetcherFn = async () => {
-    return (await apiClient.customerUser.getCustomerBookingsHistory({ customerId })).data;
+    return (
+      await apiClient.customerUser.getCustomerBookingsHistory({
+        companyId,
+        customerId,
+        queryParams,
+      })
+    ).data;
   };
 
   return useQuery({
-    queryKey: ["customer_details", customerId],
+    queryKey: ["customer_bookings", companyId, customerId, ...Object.values(queryParams)],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: customerId > 0
+    enabled: Boolean(companyId && customerId),
   });
 };
 

@@ -25,8 +25,8 @@ export async function generateMetadata({
   const specialist: TSpecialist = (await companyDetailsRes.json()) as TSpecialist;
 
   return {
-    title: `${specialist?.full_name} | Bowers`,
-    description: `${specialist?.full_name} | Bowers`,
+    title: `${specialist?.fullName} | Bowers`,
+    description: `${specialist?.fullName} | Bowers`,
   };
 }
 
@@ -43,10 +43,12 @@ const SpecialistCalendarPage = async ({
     redirect("/search");
   }
 
+  const storeId = Number(params.storeId);
+
   return (
     <SpecialistCalendarScene
-      companyId={Number(params.storeId)}
-      specialistId={Number(specialistId)}
+      companyId={storeId}
+      specialistId={specialistId}
     />
   );
 };

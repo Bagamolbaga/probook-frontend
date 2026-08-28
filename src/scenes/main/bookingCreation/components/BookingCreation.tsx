@@ -123,7 +123,10 @@ const BookingCreation = () => {
         }
 
         const data: TCreateBookingArgs["data"] = {
-          services: formData.selectedServices.map((service) => service.id),
+          services: formData.selectedServices.map((service) => ({
+            serviceId: service.id,
+            optionId: String(service.selectedOption._id || service.selectedOption.id),
+          })),
           specialist: specialist.id,
           customer: {
             email: formData.client.email,

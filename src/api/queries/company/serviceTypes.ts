@@ -33,7 +33,7 @@ export const useGetCompanyServicesTypesQuery = (
     queryKey: ["services_types", companyId],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: companyId > 0,
+    enabled: !!companyId,
     // ...queryOptions,
   });
 };

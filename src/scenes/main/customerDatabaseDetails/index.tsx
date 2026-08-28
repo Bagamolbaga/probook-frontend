@@ -3,7 +3,7 @@
 import UserNameWithAvatar from "@/components/ui/table/customCells/UserNameWithAvatar";
 import { Player } from "@lottiefiles/react-lottie-player";
 import { GridColDef, GridSortModel } from "@mui/x-data-grid";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
 import Button from "@/components/ui/button";
 import ArrowRight from "@/components/ui/icons/ArrowRight";
@@ -27,6 +27,8 @@ import BookingStatusCell from "@/components/ui/table/customCells/BookingStatus";
 import MoneyIcon from "@/components/ui/icons/Money";
 import CalendarIcon from "@/components/ui/icons/Calendar";
 import { cn } from "@/utils/cn";
+import type { TCustomerBookingOrdering } from "@/api/entities/user/customer";
+import { useGetCompanyDetailsQuery } from "@/api/queries/company";
 
 type TCustomerVisitHistoryTableRowItem = {
   id: string | number;
@@ -35,11 +37,12 @@ type TCustomerVisitHistoryTableRowItem = {
   specialist: string;
   services: string;
   date: string;
+  amount: number;
   status: BookingStatus;
 };
 
 type Props = {
-  customerId: number;
+  customerId: string;
 };
 
 const CustomerDatabaseDetailsScene = ({ customerId }: Props) => {
@@ -54,24 +57,21 @@ const CustomerDatabaseDetailsScene = ({ customerId }: Props) => {
     { field: "id", sort: "asc" },
   ]);
 
-  const [createdFirstBookingTime, setCreatedFirstBookingTime] = useState<Date>();
-
   const getCustomerDetailsQuery = useGetCustomerDetailsQuery({ companyId, customerId });
+  const getCompanyDetailsQuery = useGetCompanyDetailsQuery({ companyId });
+  const activeSort = sortModel[0];
+  const ordering = activeSort
+    ? (`${activeSort.sort === "desc" ? "-" : ""}${activeSort.field}` as TCustomerBookingOrdering)
+    : "-createdAt";
   const getCustomerBookingHistoryQuery = useGetCustomerBookingsHistoryQuery({
+    companyId,
     customerId,
     queryParams: {
       limit: paginationModel.pageSize.toString(),
       offset: (paginationModel.pageSize * paginationModel.page).toString(),
-      ordering: "id",
+      ordering,
     },
   });
-
-  useEffect(() => {
-    if (!createdFirstBookingTime && getCustomerBookingHistoryQuery.data?.count) {
-      const date = getCustomerBookingHistoryQuery.data.results[0]?.created_at;
-      date && setCreatedFirstBookingTime(new Date(date));
-    }
-  }, [getCustomerBookingHistoryQuery.data]);
 
   const goBackHandler = () => router.back();
 
@@ -79,20 +79,20 @@ const CustomerDatabaseDetailsScene = ({ customerId }: Props) => {
     if (getCustomerBookingHistoryQuery.data?.results) {
       return getCustomerBookingHistoryQuery.data.results.map((b) => ({
         id: b.id,
-        name: b.company.name,
-        companyLogo: b.company.logo,
-        specialist: `${b.specialist.specialist_details.first_name} ${b.specialist.specialist_details.last_name}`,
-        services: b.services.map((s) => s.service.name).join(", "),
-        date: format(b.date, "dd MMM yyyy"),
-        amount: Number(b.price) || 0,
+        name: b.company.name || getCompanyDetailsQuery.data?.name || "",
+        companyLogo: b.company.logo || getCompanyDetailsQuery.data?.logo || null,
+        specialist: `${b.specialist.firstName} ${b.specialist.lastName}`,
+        services: b.services.map((service) => service.name).join(", "),
+        date: format(new Date(`${b.date}T00:00:00`), "dd MMM yyyy"),
+        amount: b.totalPrice ?? 0,
         status: b.status,
       }));
     }
 
     return [];
-  }, [getCustomerBookingHistoryQuery.data]);
+  }, [getCompanyDetailsQuery.data, getCustomerBookingHistoryQuery.data]);
 
-  const rowCountRef = useRef(false || 5);
+  const rowCountRef = useRef(0);
 
   const rowCount = useMemo(() => {
     if (getCustomerBookingHistoryQuery.data?.count !== undefined) {
@@ -101,25 +101,16 @@ const CustomerDatabaseDetailsScene = ({ customerId }: Props) => {
     return rowCountRef.current;
   }, [getCustomerBookingHistoryQuery.data?.count]);
 
-  const columns: GridColDef[] = useMemo(
+  const columns: GridColDef<TCustomerVisitHistoryTableRowItem>[] = useMemo(
     () => [
       {
         field: "name",
         headerName: "Name",
         minWidth: 200,
         flex: 0.1,
-        renderCell: ({
-          value,
-          row,
-        }: {
-          value?: string;
-          row: TCustomerVisitHistoryTableRowItem;
-        }) => {
+        renderCell: ({ row }) => {
           return (
-            <UserNameWithAvatar
-              name={value || ""}
-              avatar={row.companyLogo || undefined}
-            />
+            <UserNameWithAvatar name={row.name} avatar={row.companyLogo || undefined} />
           );
         },
       },
@@ -129,10 +120,10 @@ const CustomerDatabaseDetailsScene = ({ customerId }: Props) => {
         type: "string",
         minWidth: 200,
         flex: 0.1,
-        renderCell: ({ value }) => {
+        renderCell: ({ row }) => {
           return (
             <ScrollableCell>
-              <div className="h-full flex items-center text-base">{value}</div>
+              <div className="h-full flex items-center text-base">{row.specialist}</div>
             </ScrollableCell>
           );
         },
@@ -143,18 +134,18 @@ const CustomerDatabaseDetailsScene = ({ customerId }: Props) => {
         type: "string",
         minWidth: 150,
         flex: 0.1,
-        renderCell: (params) => {
-          return <div className="h-full flex items-center text-base">{params.value}</div>;
+        renderCell: ({ row }) => {
+          return <div className="h-full flex items-center text-base">{row.date}</div>;
         },
       },
       {
         field: "amount",
         headerName: "Amounts",
-        type: "string",
+        type: "number",
         minWidth: 100,
         flex: 0.1,
-        renderCell: (params) => {
-          return <PriceCell value={params.value as number} />;
+        renderCell: ({ row }) => {
+          return <PriceCell value={row.amount} />;
         },
       },
       {
@@ -163,8 +154,8 @@ const CustomerDatabaseDetailsScene = ({ customerId }: Props) => {
         type: "string",
         minWidth: 150,
         flex: 0.1,
-        renderCell: (params) => {
-          return <BookingStatusCell value={params.value as BookingStatus} />;
+        renderCell: ({ row }) => {
+          return <BookingStatusCell value={row.status} />;
         },
       },
       // {
@@ -192,7 +183,7 @@ const CustomerDatabaseDetailsScene = ({ customerId }: Props) => {
     );
   }
 
-  if ((getCustomerDetailsQuery?.error as AxiosError)?.status === 404) {
+  if ((getCustomerDetailsQuery.error as AxiosError | null)?.response?.status === 404) {
     return (
       <div className="w-full min-h-[100vh] px-7 py-6 bg-greyOutline">
         <div className="pb-6 flex justify-between items-center">
@@ -260,15 +251,12 @@ const CustomerDatabaseDetailsScene = ({ customerId }: Props) => {
           )}
         >
           <CustomerDetailsWidget
-            customer={
-              getCustomerDetailsQuery.data as
-                | (TCustomer & {
-                    first_name: string | null;
-                    last_name: string | null;
-                  })
-                | undefined
+            customer={getCustomerDetailsQuery.data}
+            bowersUsage={
+              getCustomerDetailsQuery.data?.firstBooking
+                ? new Date(getCustomerDetailsQuery.data.firstBooking)
+                : undefined
             }
-            bowersUsage={createdFirstBookingTime}
           />
         </div>
 
@@ -278,7 +266,7 @@ const CustomerDatabaseDetailsScene = ({ customerId }: Props) => {
               <div>
                 <p className="text-sm text-greyPrimary">Revenue tracking</p>
                 <h4 className="text-xl">
-                  {formatCurrency(getCustomerDetailsQuery.data?.money_spent || 0)}
+                  {formatCurrency(getCustomerDetailsQuery.data?.moneySpent || 0)}
                 </h4>
               </div>
               <div className="size-[52px] flex items-center justify-center rounded-xl bg-greenExtraLight">
@@ -288,9 +276,7 @@ const CustomerDatabaseDetailsScene = ({ customerId }: Props) => {
             <div className="w-1/2 px-6 py-5 flex items-center justify-between rounded-xl bg-greyBackgroundLight md:w-full sm:w-full">
               <div>
                 <p className="text-sm text-greyPrimary">No. of booking</p>
-                <h4 className="text-xl">
-                  {getCustomerDetailsQuery.data?.bookings_count}
-                </h4>
+                <h4 className="text-xl">{getCustomerDetailsQuery.data?.bookingsCount}</h4>
               </div>
               <div className="size-[52px] flex items-center justify-center rounded-xl bg-redExtraLight">
                 <CalendarIcon className="stroke-redPrimary" />
@@ -314,7 +300,6 @@ const CustomerDatabaseDetailsScene = ({ customerId }: Props) => {
               onPaginationModelChange={setPaginationModel}
               sortModel={sortModel}
               onSortModelChange={(newModel) => setSortModel(newModel)}
-              
             />
           </div>
         </div>

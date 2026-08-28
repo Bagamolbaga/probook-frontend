@@ -77,8 +77,8 @@ const TopServiceProviders = () => {
         )}
         {getTopCompaniesQuery.data?.results.map((c, idx) => (
           <Link
-            href={`/company/${toSlug(c.name)}?storeId=${c._id}`}
-            key={c._id}
+            href={`/company/${toSlug(c.name)}?storeId=${c.id}`}
+            key={c.id}
             className="max-w-[320px] py-2 px-3 flex items-center gap-[14px] rounded-lg transition-all border border-transparent hover:border-purplePrimary sm:max-w-full"
           >
             <p className="font-medium">{idx + 1}</p>

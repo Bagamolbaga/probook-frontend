@@ -3,17 +3,67 @@ type BookingStatus =
   "BLOCKED" | "PENDING" | "COMPLETED" | "OFF" | "CONFIRMED" | "WALK_IN";
 
 type TApiBookingCustomer = {
+  id: string;
+  _id?: string;
   email: string;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
+  avatar?: string | null;
+};
+
+type TApiBookingCompany = {
+  id: string;
+  _id?: string;
+  name: string;
+  logo?: string | null;
+};
+
+type TApiBookingSpecialist = {
+  id: string;
+  _id?: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  avatar?: string | null;
+  specialties: string[];
+  bio?: string;
+  rating?: number;
+};
+
+type TApiBookingService = {
+  id: string;
+  _id?: string;
+  name: string;
+  description?: string;
+  image?: string;
+  category?: {
+    id: string;
+    _id?: string;
+    name: string;
+  };
+  options: ({
+    id: string;
+    _id?: string;
+    description?: string;
+  } & Pick<TServiceOption, "name" | "price" | "duration">)[];
+  selectedOption: {
+    id: string;
+    _id?: string;
+    name?: string;
+    description?: string;
+    price: number;
+    duration: number;
+  };
 };
 
 type TApiBooking = {
   id: string;
   _id?: string;
-  company: string;
-  specialist: TSpecialist;
-  services: TService[];
+  company: TApiBookingCompany;
+  specialist: TApiBookingSpecialist;
+  services: TApiBookingService[];
+  totalPrice: number;
   customer: TApiBookingCustomer;
   date: string;
   slots: number[];

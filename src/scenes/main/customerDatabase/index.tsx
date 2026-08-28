@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { GridColDef, GridRowSelectionModel, GridSortModel } from "@mui/x-data-grid";
 import { Player } from "@lottiefiles/react-lottie-player";
 
@@ -18,7 +17,6 @@ import { useGetCustomersQuery } from "@/api/queries/users";
 import CreateCustomerModal from "./components/CreateCustomerModal";
 import { useTranslations } from "next-intl";
 import { formatCurrency } from "@/utils/formatCurrency";
-import SubscriptionChecker from "@/components/subscriptionChecker";
 import MainPagesTitle from "@/components/mainPagesTitle";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
 import { useRouter } from "@/i18n";
@@ -28,12 +26,15 @@ import TextField from "@/components/ui/inputs/TextField";
 import SearchIcon from "@/components/ui/icons/Search";
 import { useForm } from "react-hook-form";
 import Spinner from "@/components/ui/loaders/Spinner";
+import type { TBookingCustomerListItem } from "@/api/entities/user/customer";
 
-type TRowItem = TCustomer;
+type TRowItem = TBookingCustomerListItem;
 
-type SerachForm = {
+type SearchForm = {
   searchByName: string;
 };
+
+const EMPTY_CUSTOMER_ROWS: TRowItem[] = [];
 
 const CustomerDatabaseScene = () => {
   const t = useTranslations();
@@ -41,7 +42,7 @@ const CustomerDatabaseScene = () => {
   const router = useRouter();
   const toggleOpenSidebar = useStore(useThemeStore, (st) => st.toggleOpenSidebar);
 
-  const form = useForm<SerachForm>({
+  const form = useForm<SearchForm>({
     defaultValues: {
       searchByName: "",
     },
@@ -56,23 +57,21 @@ const CustomerDatabaseScene = () => {
   ]);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [firstLoading, setFirstLoading] = useState(true);
+  const searchByName = form.watch("searchByName");
+  const activeSort = sortModel[0];
+  const ordering = activeSort
+    ? (`${activeSort.sort === "desc" ? "-" : ""}${activeSort.field}` as OrderingFields<TRowItem>)
+    : undefined;
 
   const getCustomersQuery = useGetCustomersQuery({
     companyId,
     queryParams: {
       limit: paginationModel.pageSize.toString(),
       offset: (paginationModel.pageSize * paginationModel.page).toString(),
-      ordering: `${sortModel[0]?.sort === "asc" ? "" : "-"}${sortModel[0]?.field}` as any,
-      search: form.watch("searchByName"),
+      ordering,
+      search: searchByName,
     },
   });
-
-  useEffect(() => {
-    if (getCustomersQuery.data) {
-      setFirstLoading(false);
-    }
-  }, [getCustomersQuery.data]);
 
   const openCreateModalHandler = () => {
     setShowCreateModal(true);
@@ -82,7 +81,7 @@ const CustomerDatabaseScene = () => {
     setShowCreateModal(false);
   };
 
-  const columns: GridColDef[] = useMemo(
+  const columns: GridColDef<TRowItem>[] = useMemo(
     () => [
       {
         field: "name",
@@ -91,7 +90,13 @@ const CustomerDatabaseScene = () => {
         minWidth: 200,
         flex: 0.2,
         renderCell: ({ row }) => {
-          return <UserNameWithAvatar name={`${row.firstName} ${row.lastName}` || ""} />;
+          const name = `${row.firstName} ${row.lastName}`.trim();
+          return (
+            <UserNameWithAvatar
+              name={name || row.email}
+              avatar={row.avatar ?? undefined}
+            />
+          );
         },
       },
       {
@@ -100,8 +105,8 @@ const CustomerDatabaseScene = () => {
         type: "string",
         minWidth: 200,
         flex: 0.1,
-        renderCell: ({ value }) => {
-          return <div className="h-full flex items-center text-base">{value}</div>;
+        renderCell: ({ row }) => {
+          return <div className="h-full flex items-center text-base">{row.email}</div>;
         },
       },
       {
@@ -110,8 +115,10 @@ const CustomerDatabaseScene = () => {
         type: "string",
         minWidth: 200,
         flex: 0.1,
-        renderCell: ({ value }) => {
-          return <div className="h-full flex items-center text-base">{value || "-"}</div>;
+        renderCell: ({ row }) => {
+          return (
+            <div className="h-full flex items-center text-base">{row.phone || "-"}</div>
+          );
         },
       },
       {
@@ -120,8 +127,10 @@ const CustomerDatabaseScene = () => {
         type: "number",
         minWidth: 150,
         flex: 0.1,
-        renderCell: (params) => {
-          return <div className="h-full flex items-center text-base">{params.value}</div>;
+        renderCell: ({ row }) => {
+          return (
+            <div className="h-full flex items-center text-base">{row.bookingsCount}</div>
+          );
         },
       },
       {
@@ -131,10 +140,10 @@ const CustomerDatabaseScene = () => {
         minWidth: 150,
         flex: 0.1,
         valueFormatter: (value) => Number(value),
-        renderCell: (params) => {
+        renderCell: ({ row }) => {
           return (
             <div className="h-full flex items-center text-base">
-              {formatCurrency(params.value as string)}
+              {formatCurrency(row.moneySpent)}
             </div>
           );
         },
@@ -167,12 +176,10 @@ const CustomerDatabaseScene = () => {
       //   },
       // },
     ],
-    []
+    [t]
   );
 
-  const rows: TRowItem[] = useMemo(() => {
-    return getCustomersQuery.data?.results || [];
-  }, [getCustomersQuery.data]);
+  const rows = getCustomersQuery.data?.results ?? EMPTY_CUSTOMER_ROWS;
 
   const rowCountRef = useRef(getCustomersQuery.data?.count || 0);
 
@@ -183,22 +190,18 @@ const CustomerDatabaseScene = () => {
     return rowCountRef.current;
   }, [getCustomersQuery.data?.count]);
 
-  const openCustomerDetailsPage = (row: TRowItem) => {
-    router.push(`${MAIN_NAVIGATION_ENUM["/customer-database"]["path"]}/${row.id}`);
-  };
-
   const onSelectRowHandler = useCallback(
     (selectionModel: GridRowSelectionModel) => {
       const row = rows.find((r) => r.id === selectionModel[0]);
 
       if (row) {
-        openCustomerDetailsPage(row);
+        router.push(`${MAIN_NAVIGATION_ENUM["/customer-database"]["path"]}/${row.id}`);
       }
     },
-    [rows]
+    [router, rows]
   );
 
-  if (firstLoading) {
+  if (!getCustomersQuery.data && getCustomersQuery.isPending) {
     return (
       <div className="w-full h-screen flex flex-col items-center justify-center">
         <Player src={BlackLogoAnimation} autoplay loop className="w-[200px] h-[200px]" />
@@ -206,11 +209,7 @@ const CustomerDatabaseScene = () => {
     );
   }
 
-  if (
-    !getCustomersQuery.isPending &&
-    !getCustomersQuery.data?.count &&
-    !form.watch("searchByName")
-  ) {
+  if (!getCustomersQuery.isPending && !getCustomersQuery.data?.count && !searchByName) {
     return (
       <div className="w-full min-h-[100vh] px-7 py-6 bg-greyOutline">
         <div className="pb-6 flex justify-between items-center">
@@ -222,7 +221,7 @@ const CustomerDatabaseScene = () => {
         <div className="w-full min-h-[calc(100vh-62px-52px)] flex flex-col items-center justify-center rounded-xl bg-white">
           <div>
             <Image
-              src={ListItemEmptyPlaceholder}
+              src={ListItemEmptyPlaceholder as string}
               alt={t("customerDatabase.empty.title")}
             />
           </div>

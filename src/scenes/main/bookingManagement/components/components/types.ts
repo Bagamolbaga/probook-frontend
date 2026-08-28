@@ -6,13 +6,15 @@ export type FormattedDataItem = {
     customer: TApiBooking["customer"];
     date: TApiBooking["date"];
     status: TApiBooking["status"];
-    services: TService[];
+    services: TApiBooking["services"];
+    totalPrice: TApiBooking["totalPrice"];
+    createdAt?: TApiBooking["createdAt"];
     updatedAt?: TApiBooking["updatedAt"];
   }[];
   id: TApiBooking["id"];
   specialist: TApiBooking["specialist"];
   customWorkingShift?: TShift;
-  company: TApiBooking["company"];
+  company: string;
   revalidateQueries: () => void;
 };
 
@@ -20,6 +22,8 @@ export type UpdateBookingForm = {
   companyId: string;
   bookingId: string;
   status: TApiBooking["status"];
+  totalPrice: TApiBooking["totalPrice"];
+  createdAt?: TApiBooking["createdAt"];
   updatedAt?: TApiBooking["updatedAt"];
   assignee?: TApiBooking["specialist"];
   customer: TApiBooking["customer"];
@@ -31,5 +35,5 @@ export type UpdateBookingForm = {
   date: Date;
   location: string;
   servicesId: string[];
-  services: TService[];
+  services: TApiBooking["services"];
 };

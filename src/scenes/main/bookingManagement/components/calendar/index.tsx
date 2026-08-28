@@ -95,6 +95,8 @@ const Calendar = () => {
   const openBookingDetailModalHandler = (booking: TApiBooking) => {
     updateBookingForm.setValue("bookingId", booking.id);
     updateBookingForm.setValue("status", booking.status);
+    updateBookingForm.setValue("totalPrice", booking.totalPrice);
+    updateBookingForm.setValue("createdAt", booking.createdAt);
     updateBookingForm.setValue("assignee", booking.specialist);
     updateBookingForm.setValue("customer", booking.customer);
     updateBookingForm.setValue("time", {

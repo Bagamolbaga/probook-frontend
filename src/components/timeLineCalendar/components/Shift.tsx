@@ -86,7 +86,7 @@ const Shift = ({ data, row, col, headerTimes, handleOpenBookingDetails }: Props)
                 }
               )}
             >
-              {shift.customer.first_name} {shift.customer.last_name}
+              {shift.customer.firstName} {shift.customer.lastName}
             </p>
           </div>
         </div>

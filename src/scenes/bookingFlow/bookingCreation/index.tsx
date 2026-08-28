@@ -17,6 +17,7 @@ import { useGetCompanyServicesQuery } from "@/api/queries/company/services";
 import { useGetCompanyServicesTypesQuery } from "@/api/queries/company/serviceTypes";
 import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
 import { useApiClient } from "@/api/context";
+import type { TCreateBookingArgs } from "@/api/entities/booking";
 
 import SuccessBooked from "./components/SuccessBooked";
 import ServiceSelection from "../components/ServiceSelection";
@@ -156,9 +157,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
       const options = optionsStr.split(",");
       const services: TServiceAndSelectedOption[] = servicesStr
         .split(",")
-        .map((id) =>
-          getCompanyServicesQuery.data.results.find((s) => s.id === id)
-        )
+        .map((id) => getCompanyServicesQuery.data.results.find((s) => s.id === id))
         .filter((s) => !!s)
         .map((s, idx) => {
           const selectedOption = s.options.find((so) => so.id === options[idx]);
@@ -344,19 +343,11 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
         toaster("Booking creating please wait");
         setIsCreateBookingLoading(true);
 
-        const data: {
-          services: string[];
-          specialist: string;
-          date: Date;
-          slots: number[];
-          customer: {
-            email?: string;
-            firstName: string;
-            lastName: string;
-          };
-          auth?: string; //TODO Add this parametr for dont send OTP code when user auth with social
-        } = {
-          services: formData.selectedServices.map((s) => s.id),
+        const data: TCreateBookingArgs["data"] = {
+          services: formData.selectedServices.map((service) => ({
+            serviceId: service.id,
+            optionId: String(service.selectedOption._id || service.selectedOption.id),
+          })),
           specialist:
             formData.selectedStaff === "ANY"
               ? formData.selectedAnyStaff!.id
@@ -364,9 +355,9 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
           date: formData.selectedDate,
           slots: [],
           customer: {
-            firstName: formData.client.first_name,
-            lastName: formData.client.last_name,
-            email: formData.client.email,
+            first_name: formData.client.first_name,
+            last_name: formData.client.last_name,
+            email: formData.client.email || "",
           },
         };
 

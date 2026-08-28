@@ -1,5 +1,4 @@
 import { ApiClientCore } from "@/api/core";
-import { format } from "date-fns";
 
 type SendOTPCodeArgs = {
   bookingId: number;
@@ -8,20 +7,36 @@ type SendOTPCodeArgs = {
 
 type ResendOTPCode = {
   bookingId: number;
-}
+};
 
 export type TGetCustomersArgs = {
-  companyId: number;
+  companyId: string;
   queryParams?: {
     offset?: string;
     limit?: string;
-    ordering?: OrderingFields<TCustomer>;
-    search?: string
+    ordering?: OrderingFields<TBookingCustomerListItem>;
+    search?: string;
   };
 };
 
+export type TBookingCustomerListItem = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string | null;
+  avatar?: string | null;
+  bookingsCount: number;
+  lastBooking: string;
+  moneySpent: number;
+};
+
+export type TBookingCustomerDetails = TBookingCustomerListItem & {
+  firstBooking: string;
+};
+
 export type TCreateCustomerArgs = {
-  companyId: number;
+  companyId: string;
   data:
     | {
         first_name: string;
@@ -36,22 +51,47 @@ export type TCreateCustomerArgs = {
 };
 
 export type TGetCustomerDetailsArgs = {
-  companyId: number;
-  customerId: number;
+  companyId: string;
+  customerId: string;
 };
 
 export type TGetCustomerBookingHistoryArgs = {
-  customerId: number;
+  companyId: string;
+  customerId: string;
   queryParams?: {
     offset?: string;
     limit?: string;
-    ordering?: OrderingFields<TGetCustomerBookingHistoryRes[number]>;
+    ordering?: TCustomerBookingOrdering;
   };
 };
 
-export type TGetCustomerBookingHistoryRes = (Omit<TBooking, "company"> & {
-  company: TCompany;
-})[];
+export type TCustomerBookingOrdering =
+  "id" | "-id" | "date" | "-date" | "createdAt" | "-createdAt";
+
+export type TCustomerBookingHistoryItem = {
+  id: string;
+  company: {
+    id: string;
+    name: string;
+    logo?: string | null;
+  };
+  specialist: TApiBookingSpecialist;
+  services: TApiBookingService[];
+  totalPrice: number;
+  customer: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+  date: string;
+  slots: number[];
+  status: Exclude<BookingStatus, "WALK_IN">;
+  createdAt: string;
+  updatedAt?: string;
+};
+
+export type TGetCustomerBookingHistoryRes = TCustomerBookingHistoryItem[];
 
 export class ApiClientCustomerUser extends ApiClientCore {
   constructor(token: string, currentUserId: number) {
@@ -68,8 +108,8 @@ export class ApiClientCustomerUser extends ApiClientCore {
 
     return res;
   }
-  
-  async resendBookingOTPCode({ bookingId}: ResendOTPCode) {
+
+  async resendBookingOTPCode({ bookingId }: ResendOTPCode) {
     const res = await this.instanceWithoutAuth.post(`/bookings/resend-otp/${bookingId}/`);
 
     return res;
@@ -82,7 +122,7 @@ export class ApiClientCustomerUser extends ApiClientCore {
 
     const params = new URLSearchParams(formattedQueryParams);
 
-    return this.instanceWithoutAuth.get<TGetResponse<TCustomer[]>>(
+    return this.instanceWithoutAuth.get<TGetResponse<TBookingCustomerListItem[]>>(
       `/companies/${companyId}/customers?${params.toString()}`
     );
   }
@@ -92,12 +132,20 @@ export class ApiClientCustomerUser extends ApiClientCore {
   }
 
   async getCustomerDetails({ companyId, customerId }: TGetCustomerDetailsArgs) {
-    return this.instance.get<TCustomer>(`/users/${companyId}/customers/${customerId}/`);
+    return this.instanceWithoutAuth.get<TBookingCustomerDetails>(
+      `/companies/${companyId}/customers/${customerId}`
+    );
   }
-  
-  async getCustomerBookingsHistory({ customerId }: TGetCustomerBookingHistoryArgs) {
-    return this.instance.get<TGetResponse<TGetCustomerBookingHistoryRes>>(
-      `/companies/customers/${customerId}/bookings/`
+
+  async getCustomerBookingsHistory({
+    companyId,
+    customerId,
+    queryParams,
+  }: TGetCustomerBookingHistoryArgs) {
+    const params = new URLSearchParams(queryParams);
+
+    return this.instanceWithoutAuth.get<TGetResponse<TGetCustomerBookingHistoryRes>>(
+      `/companies/${companyId}/customers/${customerId}/bookings?${params.toString()}`
     );
   }
 }
