@@ -161,7 +161,7 @@ const BookingCreation = () => {
             ...prevBookedServiceToLocalStorage,
           ]);
 
-          toaster.success("Booking created successfully");
+          // toaster.success("Booking created successfully");
           // router.push(
           //   `/company/${companyId}/booking-cancelation/${res.data.results.id}/`
           // );
