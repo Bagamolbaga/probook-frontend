@@ -1,15 +1,17 @@
-export default {
+const config = {
   defaultLocale: "en",
   locales: [
     {
       id: "en",
       name: "EN",
-      iconFlagId: "gb"
+      iconFlagId: "gb",
     },
     {
-      id: "th",
-      name: "TH",
-      iconFlagId: "th"
+      id: "ru",
+      name: "RU",
+      iconFlagId: "ru",
     },
   ],
 };
+
+export default config;

@@ -7,23 +7,22 @@ import { useMemo, useState } from "react";
 import Tabs from "@/components/ui/tab";
 import Calendar from "./components/calendar";
 
-const TABS = [
-  {
-    id: "availability",
-    text: "Availability",
-  },
-  {
-    id: "calendar",
-    text: "Calendar",
-  },
-] as const;
-
-type Tab = (typeof TABS)[number];
+type Tab = { id: "availability" | "calendar"; text: string };
 
 const BookingManagementScene = () => {
   const t = useTranslations();
+  const tabs = useMemo<Tab[]>(
+    () => [
+      { id: "availability", text: t("bookingManagement.tabs.availability") },
+      { id: "calendar", text: t("bookingManagement.tabs.calendar") },
+    ],
+    [t]
+  );
 
-  const [activeTab, setActiveTab] = useState<Tab>(TABS[0]);
+  const [activeTab, setActiveTab] = useState<Tab>(() => ({
+    id: "availability",
+    text: t("bookingManagement.tabs.availability"),
+  }));
 
   const content = useMemo(() => {
     switch (activeTab.id) {
@@ -42,7 +41,7 @@ const BookingManagementScene = () => {
         <div className="flex items-center sm:w-full sm:mt-3">
           <Tabs
             activelTabId={activeTab.id}
-            tabs={TABS as unknown as Tab[]}
+            tabs={tabs}
             onSelect={(t) => setActiveTab(t as Tab)}
           />
         </div>

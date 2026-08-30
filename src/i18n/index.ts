@@ -4,7 +4,7 @@ import { getRequestConfig } from "next-intl/server";
 import { createSharedPathnamesNavigation } from "next-intl/navigation";
 import i18nConfig from "./config";
 import { AbstractIntlMessages } from "next-intl";
-import { enUS, th } from "date-fns/locale";
+import { enUS, ru, th } from "date-fns/locale";
 
 export { NextIntlClientProvider, useTranslations, useLocale } from "next-intl";
 
@@ -12,7 +12,7 @@ export { getTranslations } from "next-intl/server";
 
 export const DATE_FNS_LOCALES = {
   en: enUS,
-  th,
+  ru,
 };
 
 export default getRequestConfig(async ({ locale }) => {
@@ -20,8 +20,7 @@ export default getRequestConfig(async ({ locale }) => {
 
   return {
     messages: (await import(`./dictionaries/${locale}/index.ts`)).default as
-      | AbstractIntlMessages
-      | undefined,
+      AbstractIntlMessages | undefined,
   };
 });
 

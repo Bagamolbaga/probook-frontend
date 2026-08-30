@@ -1,108 +1,108 @@
 const keywords =
-  "bowers, bowers app, bowers booking, bowers appointment, bowers salon, bowers spa, bowers software, bowers book online, bowers innovation, bowers salon booking, bowers management, bowers reservation, bowers beauty, bowers scheduling, bowers platform, bowers client management, bowers salon management system, bowers salon software, bowers spa software, bowers business tools, โบเวอร์, bowers ไทย, bowers แอป, bowers จอง, bowers ร้านเสริมสวย, bowers ซาลอน, bowers นวัตกรรม, bowers จองออนไลน์, bowers ระบบบริหารร้านเสริมสวย, bowers เครื่องมือธุรกิจ, bowers ระบบจอง";
+  "probook, probook app, probook booking, probook appointment, probook salon, probook spa, probook software, probook book online, probook innovation, probook salon booking, probook management, probook reservation, probook beauty, probook scheduling, probook platform, probook client management, probook salon management system, probook salon software, probook spa software, probook business tools, ProBook ไทย, ProBook แอป, ProBook จอง, ProBook ร้านเสริมสวย, ProBook ซาลอน, ProBook นวัตกรรม, ProBook จองออนไลน์, ProBook ระบบบริหารร้านเสริมสวย, ProBook เครื่องมือธุรกิจ, ProBook ระบบจอง";
 
-const description = "Bowers is an online booking platform for beauty salons and spas. ระบบจองออนไลน์สำหรับร้านเสริมสวยและสปา สะดวก รวดเร็ว ใช้งานง่าย";
+const description = "ProBook is an online booking platform for beauty salons and spas. ระบบจองออนไลน์สำหรับร้านเสริมสวยและสปา สะดวก รวดเร็ว ใช้งานง่าย";
 
 export const metadata = {
   pages: {
     default: {
-      title: "Bowers - Online Beauty Salon Booking Platform",
+      title: "ProBook - Online Beauty Salon Booking Platform",
       description,
       keywords,
     },
     search: {
-      title: "Bowers - Online Beauty Salon Booking Platform",
+      title: "ProBook - Online Beauty Salon Booking Platform",
       description,
     },
     services: {
-      title: "Services | Bowers",
+      title: "Services | ProBook",
       description,
     },
     pricing: {
-      title: "Pricing | Bowers",
+      title: "Pricing | ProBook",
       description,
     },
     about: {
-      title: "About us | Bowers",
+      title: "About us | ProBook",
       description,
     },
     contact: {
-      title: "Contact us | Bowers",
+      title: "Contact us | ProBook",
       description,
     },
     terms: {
-      title: "Term & conditions | Bowers",
+      title: "Term & conditions | ProBook",
       description,
     },
     privacy_policy: {
-      title: "Privacy policy | Bowers",
+      title: "Privacy policy | ProBook",
       description,
     },
     support: {
-      title: "Support | Bowers",
+      title: "Support | ProBook",
       description,
     },
     signUp: {
-      title: "Sign Up | Bowers",
+      title: "Sign Up | ProBook",
       description,
     },
     signIn: {
-      title: "Sign In | Bowers",
+      title: "Sign In | ProBook",
       description,
     },
     recoveryPassword: {
-      title: "Recovery Password | Bowers",
+      title: "Recovery Password | ProBook",
       description,
     },
     dashboard: {
       default: {
-        title: "Dashboard | Bowers",
+        title: "Dashboard | ProBook",
         description,
       },
       account: {
-        title: "Account | Bowers",
+        title: "Account | ProBook",
         description,
       },
       booking_creation: {
-        title: "New booking | Bowers",
+        title: "New booking | ProBook",
         description,
       },
       booking_management: {
-        title: "Calendar | Bowers",
+        title: "Calendar | ProBook",
         description,
       },
       business_services: {
-        title: "Business services | Bowers",
+        title: "Business services | ProBook",
         description,
       },
       customer_database: {
-        title: "Customer database | Bowers",
+        title: "Customer database | ProBook",
         description,
       },
       staff_management: {
-        title: "Staff management | Bowers",
+        title: "Staff management | ProBook",
         description,
       },
     },
     booking_flow: {
       default: {
-        title: "Booking | Bowers",
+        title: "Booking | ProBook",
         description,
       },
       booking_manage: {
-        title: "Manage booking | Bowers",
+        title: "Manage booking | ProBook",
         description,
       },
       booking_creation: {
-        title: "New booking | Bowers",
+        title: "New booking | ProBook",
         description,
       },
       booking_confirmation: {
-        title: "Confirm booking | Bowers",
+        title: "Confirm booking | ProBook",
         description,
       },
       booking_cancelation: {
-        title: "Cancel booking | Bowers",
+        title: "Cancel booking | ProBook",
         description,
       },
     },

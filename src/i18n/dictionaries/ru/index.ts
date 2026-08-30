@@ -14,7 +14,7 @@ import { metadata } from "./metadata";
 import { navigation } from "./navigation";
 import { ui } from "./ui";
 
-const TH = {
+const RU: IntlMessages = {
   metadata,
   landingHome,
   landingSearch: search,
@@ -22,14 +22,14 @@ const TH = {
   landingPricing: pricingPage,
   landingContact: contact,
   booking,
+  auth,
+  dashboard,
   bookingManagement,
   staffManagement,
   businessServices,
   customerDatabase,
-  auth,
-  dashboard,
   ui,
   navigation,
 };
 
-export default TH;
+export default RU;

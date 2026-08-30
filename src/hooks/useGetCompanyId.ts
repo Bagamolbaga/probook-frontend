@@ -22,9 +22,7 @@ export const useGetCompanyId = (options?: UseGetCompanyIdArgs) => {
   return {
     companyId:
       options?.companyId ||
-      sessionCompanyId ||
-      localStorage.getItem("companyId") ||
-      "69659c81f8f44cd8cda03ac8",
+      sessionCompanyId || "",
     setSelectCompany,
   };
 };

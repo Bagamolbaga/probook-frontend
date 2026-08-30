@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { FC } from "react";
-import {
-  useGetCompanyServicesTypesQuery,
-} from "@/api/queries/company/serviceTypes";
+import { useGetCompanyServicesTypesQuery } from "@/api/queries/company/serviceTypes";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { useTranslations } from "next-intl";
 
 type Props = {
   serviceTypeId: string;
 };
 
 const ServiceTypeCell: FC<Props> = ({ serviceTypeId }) => {
-  const {companyId} = useGetCompanyId()
-  const getCompanyServicesTypesQuery = useGetCompanyServicesTypesQuery({companyId});
+  const t = useTranslations();
+  const { companyId } = useGetCompanyId();
+  const getCompanyServicesTypesQuery = useGetCompanyServicesTypesQuery({ companyId });
 
   const findedType = (getCompanyServicesTypesQuery.data?.results || []).find(
     (s) => s.name === serviceTypeId
@@ -26,7 +26,7 @@ const ServiceTypeCell: FC<Props> = ({ serviceTypeId }) => {
     );
   }
 
-  return <div>Not found type</div>;
+  return <div>{t("ui.components.serviceTypeCell.notFound")}</div>;
 };
 
 export default ServiceTypeCell;

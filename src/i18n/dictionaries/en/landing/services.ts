@@ -1,6 +1,6 @@
 export const services = {
   section1: {
-    title: "Reserve in <purple>Seconds</purple> with Bowers",
+    title: "Reserve in <purple>Seconds</purple> with ProBook",
     preTitle1: "Simplify scheduling and management",
     preTitle2: "Enhance satisfaction and growth",
     form: {

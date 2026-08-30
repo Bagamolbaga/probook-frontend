@@ -1,5 +1,5 @@
 export const auth = {
-  title1: "Welcome to Bowers",
+  title1: "Welcome to ProBook",
   title2: "Sign in to your account",
   subTitle: "Enter your details to proceed further",
   rememberMe: "Remember me",

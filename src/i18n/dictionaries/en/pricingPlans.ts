@@ -8,7 +8,7 @@ export const pricingPlans = {
       text: "Tailored for small beauty stores, the Starter Kit provides essential tools for teams with fewer staff members.",
       whatsIncluded: "What's included:",
       includeItems: {
-        "1": "Bowers Ecosystem",
+        "1": "ProBook Ecosystem",
         "2": "Appointment Booking",
         "3": "Support up to 5 Staff Members",
       },
@@ -19,7 +19,7 @@ export const pricingPlans = {
       text: "Ideal for medium-sized stores, the Growth Plan offers advanced tools to manage a growing team efficiently.",
       whatsIncluded: "What's included:",
       includeItems: {
-        "1": "Bowers Ecosystem",
+        "1": "ProBook Ecosystem",
         "2": "Appointment Booking",
         "3": "Support up to 15 Staff Members",
         "4": "Free Store Photoshoot",
@@ -32,7 +32,7 @@ export const pricingPlans = {
       text: "Designed for large beauty stores, the Enterprise Edition offers across multiple teams.",
       whatsIncluded: "What's included:",
       includeItems: {
-        "1": "Bowers Ecosystem",
+        "1": "ProBook Ecosystem",
         "2": "Appointment Booking",
         "3": "Support up to unlimited Staff Members",
         "4": "Free Store Photoshoot",

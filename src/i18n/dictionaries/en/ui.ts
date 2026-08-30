@@ -47,7 +47,7 @@ export const actions = {
   viewAll: "View all",
   on: "On",
   off: "Off",
-}
+};
 
 export const workingShifts = {
   fullday: "Full day",
@@ -61,7 +61,7 @@ export const workingShifts = {
     afternoon: "Afternoon (14pm-18pm)",
     off: "Day off",
   },
-}
+};
 
 export const ui = {
   actions,
@@ -90,5 +90,58 @@ export const ui = {
     evening: "Evening",
     from: "From",
     to: "To",
+  },
+  components: {
+    workingTimePicker: {
+      workingTime: "Working time",
+      breakTime: "Break time",
+      break: "Break",
+      noOption: "No option",
+      add: "Add",
+    },
+    bookingDetails: {
+      title: "Booking details",
+      close: "Close",
+      customer: "Customer",
+      email: "Email",
+      professional: "Professional",
+      date: "Date",
+      time: "Time",
+      services: "Services",
+      status: "Status",
+    },
+    bookingCreatedToast: {
+      newBooking: "New booking",
+      new: "New",
+      withSpecialist: "with {name}",
+      timeTbd: "Time TBD",
+      noServicesSelected: "No services selected",
+      moreServices: "+{count} more",
+      services: "Services",
+      total: "Total",
+    },
+    comment: {
+      deleteTitle: "Are you sure you want to delete this comment?",
+      deleteDescription: "This comment will be permanently deleted",
+      updated: "Updated",
+    },
+    serviceTypeCell: {
+      notFound: "Service type not found",
+    },
+    bookingSuccess: {
+      storeInfo: "Store info",
+      getDirections: "Get directions",
+      appointmentDetails: "Appointment details",
+      date: "Date",
+      time: "Time",
+      duration: "Duration",
+      selectedServices: "Selected services",
+      professional: "Professional",
+      paidAtStore: "Service will be paid at the store",
+      poweredBy: "Powered by ProBook",
+      specialistAvatar: "Specialist avatar",
+      hours: "{count} hr",
+      minutes: "{count} min",
+    },
   },
 };

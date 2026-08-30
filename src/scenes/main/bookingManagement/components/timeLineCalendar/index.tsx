@@ -458,7 +458,7 @@ const TimeLineCalendar = () => {
         <TimeLineBreakItem
           key={`${rowData.id}-dailyBreak`}
           type="dailyBreak"
-          label="Break"
+          label={t("bookingManagement.calendar.break")}
           row={rowData}
           currentDate={selectedDate}
           width={width}
@@ -675,7 +675,7 @@ const TimeLineCalendar = () => {
               <ArrowSecondaryDownIcon className="-rotate-90" />
             </Button>
             <Link href={`/booking-creation`} className="ml-3">
-              <Button variant="primary">Add Customer</Button>
+              <Button variant="primary">{t("bookingManagement.addCustomer")}</Button>
             </Link>
           </div>
         </div>
@@ -800,31 +800,33 @@ const TimeLineCalendar = () => {
               <div className="size-3 flex items-center justify-center rounded-full bg-purplePrimary">
                 <div className="size-1 rounded-full bg-white" />
               </div>
-              <p className="text-sm">Walk-in / Direct Contact</p>
+              <p className="text-sm">{t("bookingManagement.calendar.walkIn")}</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="size-3 flex items-center justify-center rounded-full bg-[#2CE5F6]">
                 <div className="size-1 rounded-full bg-white" />
               </div>
-              <p className="text-sm">SMS Booking</p>
+              <p className="text-sm">{t("bookingManagement.calendar.smsBooking")}</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="size-3 flex items-center justify-center rounded-full bg-yellowPrimary">
                 <div className="size-1 rounded-full bg-white" />
               </div>
-              <p className="text-sm">Email Booking</p>
+              <p className="text-sm">{t("bookingManagement.calendar.emailBooking")}</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="size-3 flex items-center justify-center rounded-full bg-greenPrimary">
                 <div className="size-1 rounded-full bg-white" />
               </div>
-              <p className="text-sm">Email Booking - Confirmed</p>
+              <p className="text-sm">
+                {t("bookingManagement.calendar.emailBookingConfirmed")}
+              </p>
             </div>
             <div className="flex items-center gap-3">
               <div className="size-3 flex items-center justify-center rounded-full bg-greyPrimary">
                 <div className="size-1 rounded-full bg-white" />
               </div>
-              <p className="text-sm">Off</p>
+              <p className="text-sm">{t("bookingManagement.calendar.off")}</p>
             </div>
           </div>
         </div>

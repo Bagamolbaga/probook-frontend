@@ -122,10 +122,10 @@ const ChangeDailyBreakTimePopup: FC<Props> = ({
         await createShift.mutateAsync({ companyId, body });
       }
 
-      toaster.success("Daily break changed");
+      toaster.success(t("bookingManagement.calendar.dailyBreakChanged"));
       handleClose();
     } catch {
-      toaster.error("Something went wrong");
+      toaster.error(t("ui.errors.wentWrong"));
     }
   };
 
@@ -133,7 +133,9 @@ const ChangeDailyBreakTimePopup: FC<Props> = ({
     <Modal isOpen={isOpen} handleClose={handleClose}>
       <div className="relative w-[320px] h-fit p-4 rounded-lg shadow-secondary bg-white">
         <div className="flex justify-between items-center">
-          <span className="text-sm font-bold text-greyPrimary">Change Break Time</span>
+          <span className="text-sm font-bold text-greyPrimary">
+            {t("bookingManagement.calendar.changeBreakTime")}
+          </span>
           <Button className="size-8 p-0" variant="resting-active" onClick={handleClose}>
             <CloseIcon className="w-5 h-5 stroke-greyPrimary" />
           </Button>
@@ -143,7 +145,9 @@ const ChangeDailyBreakTimePopup: FC<Props> = ({
           {(["breakFrom", "breakTo"] as const).map((fieldName) => (
             <div key={fieldName} className="flex flex-col">
               <p className="mb-1 text-sm text-greyPrimary">
-                {fieldName === "breakFrom" ? "From time" : "To time"}
+                {fieldName === "breakFrom"
+                  ? t("ui.timeSelectInput.fromTime")
+                  : t("ui.timeSelectInput.toTime")}
               </p>
               <FormControl fullWidth>
                 <Controller
@@ -164,11 +168,15 @@ const ChangeDailyBreakTimePopup: FC<Props> = ({
                       setValue={form.setValue}
                       renderOption={(option) => <p className="text-sm">{option.label}</p>}
                       renderOptionSelected={(option) => (
-                        <p className="text-sm">{option?.label || "Break"}</p>
+                        <p className="text-sm">
+                          {option?.label || t("bookingManagement.calendar.break")}
+                        </p>
                       )}
                       renderEmptyOption={() => (
                         <div className="py-[6px] pl-2 pr-1">
-                          <p className="text-sm text-greyPrimary">No option</p>
+                          <p className="text-sm text-greyPrimary">
+                            {t("bookingManagement.calendar.noOption")}
+                          </p>
                         </div>
                       )}
                       error={hasError}

@@ -109,12 +109,12 @@ const WorkingTimePicker = ({
   };
 
   const handleHideWorkingTime = () => {
-    handleHideBreakTime()
+    handleHideBreakTime();
 
     form.setValue("from", undefined);
     form.setValue("to", undefined);
   };
-  
+
   const handleHideBreakTime = () => {
     form.setValue("breakFrom", undefined);
     form.setValue("breakTo", undefined);
@@ -141,7 +141,9 @@ const WorkingTimePicker = ({
   return (
     <div className="w-full mt-2 flex items-center gap-5 sm:flex-col">
       <div className="w-full">
-        <p className="mb-2 text-sm text-greyPrimary">Working Time</p>
+        <p className="mb-2 text-sm text-greyPrimary">
+          {t("ui.components.workingTimePicker.workingTime")}
+        </p>
         <div className="w-full flex items-center gap-2">
           <FormControl fullWidth>
             <Controller
@@ -201,7 +203,9 @@ const WorkingTimePicker = ({
         </div>
       </div>
       <div className="w-full">
-        <p className="mb-2 text-sm text-greyPrimary">Break Time</p>
+        <p className="mb-2 text-sm text-greyPrimary">
+          {t("ui.components.workingTimePicker.breakTime")}
+        </p>
         {isShowBreakTime ? (
           <div className="w-full flex items-center gap-2">
             <FormControl fullWidth>
@@ -220,11 +224,17 @@ const WorkingTimePicker = ({
                       <p className={cn("text-sm")}>{option.label}</p>
                     )}
                     renderOptionSelected={(option) => (
-                      <p className={cn("text-sm")}>{option ? option.label : "Break"}</p>
+                      <p className={cn("text-sm")}>
+                        {option
+                          ? option.label
+                          : t("ui.components.workingTimePicker.break")}
+                      </p>
                     )}
                     renderEmptyOption={() => (
                       <div className="py-[6px] pl-2 pr-1">
-                        <p className={"text-sm text-greyPrimary"}>No option</p>
+                        <p className={"text-sm text-greyPrimary"}>
+                          {t("ui.components.workingTimePicker.noOption")}
+                        </p>
                       </div>
                     )}
                     error={!form.watch("breakFrom")}
@@ -251,11 +261,17 @@ const WorkingTimePicker = ({
                       <p className={cn("text-sm")}>{option.label}</p>
                     )}
                     renderOptionSelected={(option) => (
-                      <p className={cn("text-sm")}>{option ? option.label : "Break"}</p>
+                      <p className={cn("text-sm")}>
+                        {option
+                          ? option.label
+                          : t("ui.components.workingTimePicker.break")}
+                      </p>
                     )}
                     renderEmptyOption={() => (
                       <div className="py-[6px] pl-2 pr-1">
-                        <p className={"text-sm text-greyPrimary"}>No option</p>
+                        <p className={"text-sm text-greyPrimary"}>
+                          {t("ui.components.workingTimePicker.noOption")}
+                        </p>
                       </div>
                     )}
                     error={!form.watch("breakTo")}
@@ -278,7 +294,7 @@ const WorkingTimePicker = ({
               className="!py-3"
               onClick={handleShowBreakTime}
             >
-              Add
+              {t("ui.components.workingTimePicker.add")}
             </Button>
           </div>
         )}

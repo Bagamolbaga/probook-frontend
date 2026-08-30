@@ -118,7 +118,9 @@ const SuccessBooked = ({ company, booking }: Props) => {
 
         <div className="w-full mt-10">
           <div className="w-full py-2 px-3 rounded-lg bg-greyBackgroundLight">
-            <p className="text-sm font-bold">Store Info</p>
+            <p className="text-sm font-bold">
+              {t("ui.components.bookingSuccess.storeInfo")}
+            </p>
           </div>
 
           <div className="w-full mt-4 flex justify-between gap-6 rounded-xl border border-greyOutlineSecondary sm:flex-col">
@@ -130,7 +132,7 @@ const SuccessBooked = ({ company, booking }: Props) => {
                 href={`https://www.google.com/maps/dir/?api=1&destination=${company.pos.lat},${company.pos.lng}`}
                 className="mt-[6px] text-sm font-bold underline text-purplePrimary"
               >
-                Get Direction
+                {t("ui.components.bookingSuccess.getDirections")}
               </Link>
             </div>
             <div className="w-1/2 bg-greyOutline">
@@ -149,7 +151,9 @@ const SuccessBooked = ({ company, booking }: Props) => {
           </div>
 
           <div className="w-full mt-4 py-2 px-3 rounded-lg bg-greyBackgroundLight">
-            <p className="text-sm font-bold">Appointment Details</p>
+            <p className="text-sm font-bold">
+              {t("ui.components.bookingSuccess.appointmentDetails")}
+            </p>
           </div>
 
           <div className="w-full mt-4 pb-4 flex flex-col gap-2 border-b border-greyOutlineSecondary">
@@ -157,7 +161,9 @@ const SuccessBooked = ({ company, booking }: Props) => {
               <div className="w-1/2">
                 <div className="flex items-center gap-3">
                   <CalendarIcon className="stroke-greyPrimary" />
-                  <p className="text-sm text-greyPrimary">Date</p>
+                  <p className="text-sm text-greyPrimary">
+                    {t("ui.components.bookingSuccess.date")}
+                  </p>
                 </div>
               </div>
               <div className="w-1/2">
@@ -168,7 +174,9 @@ const SuccessBooked = ({ company, booking }: Props) => {
               <div className="w-1/2">
                 <div className="flex items-center gap-3">
                   <ClockIcon className="stroke-greyPrimary" />
-                  <p className="text-sm text-greyPrimary">Time</p>
+                  <p className="text-sm text-greyPrimary">
+                    {t("ui.components.bookingSuccess.time")}
+                  </p>
                 </div>
               </div>
               <div className="w-1/2">
@@ -181,13 +189,19 @@ const SuccessBooked = ({ company, booking }: Props) => {
               <div className="w-1/2">
                 <div className="flex items-center gap-3">
                   <SpeedIcon className="stroke-greyPrimary" />
-                  <p className="text-sm text-greyPrimary">Duration</p>
+                  <p className="text-sm text-greyPrimary">
+                    {t("ui.components.bookingSuccess.duration")}
+                  </p>
                 </div>
               </div>
               <div className="w-1/2">
                 <p className="text-sm">
-                  {duration.hours ? `${duration.hours} hr` : ""}{" "}
-                  {duration.mins ? `${duration.mins} min` : ""}
+                  {duration.hours
+                    ? t("ui.components.bookingSuccess.hours", { count: duration.hours })
+                    : ""}{" "}
+                  {duration.mins
+                    ? t("ui.components.bookingSuccess.minutes", { count: duration.mins })
+                    : ""}
                 </p>
               </div>
             </div>
@@ -195,7 +209,9 @@ const SuccessBooked = ({ company, booking }: Props) => {
               <div className="w-1/2">
                 <div className="flex items-center gap-3">
                   <HotIcon className="stroke-greyPrimary" />
-                  <p className="text-sm text-greyPrimary">Selected services</p>
+                  <p className="text-sm text-greyPrimary">
+                    {t("ui.components.bookingSuccess.selectedServices")}
+                  </p>
                 </div>
               </div>
               <div className="w-1/2 flex flex-col gap-2">
@@ -210,7 +226,9 @@ const SuccessBooked = ({ company, booking }: Props) => {
               <div className="w-1/2">
                 <div className="flex items-center gap-3">
                   <EmployeeIcon className="stroke-greyPrimary" />
-                  <p className="text-sm text-greyPrimary">Professional</p>
+                  <p className="text-sm text-greyPrimary">
+                    {t("ui.components.bookingSuccess.professional")}
+                  </p>
                 </div>
               </div>
               <div className="w-1/2 flex items-center gap-2">
@@ -220,7 +238,7 @@ const SuccessBooked = ({ company, booking }: Props) => {
                       className="size-6 object-cover"
                       fill
                       src={booking.specialist.avatar}
-                      alt={`${booking.specialist.firstName} ${booking.specialist.lastName} - Bowers`}
+                      alt={`${booking.specialist.firstName} ${booking.specialist.lastName} — ${t("ui.components.bookingSuccess.specialistAvatar")}`}
                     />
                   </div>
                 ) : (
@@ -229,8 +247,7 @@ const SuccessBooked = ({ company, booking }: Props) => {
                   </div>
                 )}
                 <p className="text-sm text-greyPrimary">
-                  {booking.specialist.firstName}{" "}
-                  {booking.specialist.lastName}
+                  {booking.specialist.firstName} {booking.specialist.lastName}
                 </p>
               </div>
             </div>
@@ -277,11 +294,13 @@ const SuccessBooked = ({ company, booking }: Props) => {
             </svg>
 
             <p className="text-sm font-bold text-purplePrimary">
-              Service will be paid at the store
+              {t("ui.components.bookingSuccess.paidAtStore")}
             </p>
           </div>
 
-          <p className="mt-4 text-center text-sm text-greyPrimary">Powered by Bowers</p>
+          <p className="mt-4 text-center text-sm text-greyPrimary">
+            {t("ui.components.bookingSuccess.poweredBy")}
+          </p>
         </div>
       </div>
     </div>

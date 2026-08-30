@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { FC, ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import Button from "@/components/ui/button";
 import Modal from "@/components/ui/modal";
@@ -37,30 +38,30 @@ type DetailProps = {
 
 const statusConfig: Record<
   UpdateBookingForm["status"],
-  { label: string; containerClassName: string; dotClassName: string }
+  { labelKey: string; containerClassName: string; dotClassName: string }
 > = {
   BLOCKED: {
-    label: "Blocked",
+    labelKey: "blocked",
     containerClassName: "bg-redExtraLight text-redPrimary",
     dotClassName: "bg-redPrimary",
   },
   PENDING: {
-    label: "Awaiting confirmation",
+    labelKey: "pending",
     containerClassName: "bg-yellowExtraLight text-darkPrimary",
     dotClassName: "bg-yellowPrimary",
   },
   COMPLETED: {
-    label: "Completed",
+    labelKey: "completed",
     containerClassName: "bg-greenExtraLight text-greenPrimary",
     dotClassName: "bg-greenPrimary",
   },
   OFF: {
-    label: "Cancelled",
+    labelKey: "cancelled",
     containerClassName: "bg-greyBackgroundLight text-greyPrimary",
     dotClassName: "bg-greyPrimary",
   },
   CONFIRMED: {
-    label: "Confirmed",
+    labelKey: "confirmed",
     containerClassName: "bg-greenExtraLight text-greenPrimary",
     dotClassName: "bg-greenPrimary",
   },
@@ -98,6 +99,7 @@ const Initials = ({ firstName, lastName }: { firstName: string; lastName: string
 const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose }) => {
   const booking = updateBookingForm.getValues();
   const locale = useLocale();
+  const t = useTranslations();
   const status = statusConfig[booking.status];
   const totalDuration = booking.services.reduce(
     (total, service) => total + service.selectedOption.duration,
@@ -133,7 +135,7 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-xl font-bold text-darkPrimary">
-                Booking #{booking.bookingId}
+                {t("bookingManagement.detailModal.booking", { id: booking.bookingId })}
               </h2>
               <div
                 className={cn(
@@ -142,7 +144,7 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
                 )}
               >
                 <span className={cn("size-2 rounded-full", status.dotClassName)} />
-                {status.label}
+                {t(`bookingManagement.detailModal.statuses.${status.labelKey}` as any)}
               </div>
             </div>
             <p className="mt-2 text-sm capitalize text-greyPrimary">
@@ -150,7 +152,7 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
             </p>
           </div>
           <Button
-            aria-label="Close booking details"
+            aria-label={t("bookingManagement.detailModal.close")}
             className="size-9 shrink-0 p-0"
             variant="resting-active"
             onClick={handleClose}
@@ -162,17 +164,25 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
         <div className="max-h-[calc(100vh-180px)] overflow-y-auto bg-greyBackground/50 px-6 py-5 sm:px-4">
           <div className="mb-4 grid grid-cols-3 gap-3 sm:grid-cols-1">
             <div className="rounded-xl bg-blueExtraLight p-4">
-              <p className="text-xs text-greyPrimary">Time</p>
+              <p className="text-xs text-greyPrimary">
+                {t("bookingManagement.detailModal.time")}
+              </p>
               <p className="mt-1 font-bold text-darkPrimary">
                 {booking.time?.start || "—"}–{booking.time?.end || "—"}
               </p>
             </div>
             <div className="rounded-xl bg-greenExtraLight p-4">
-              <p className="text-xs text-greyPrimary">Duration</p>
-              <p className="mt-1 font-bold text-darkPrimary">{totalDuration} min</p>
+              <p className="text-xs text-greyPrimary">
+                {t("bookingManagement.detailModal.duration")}
+              </p>
+              <p className="mt-1 font-bold text-darkPrimary">
+                {t("bookingManagement.detailModal.minutes", { count: totalDuration })}
+              </p>
             </div>
             <div className="rounded-xl bg-yellowExtraLight p-4">
-              <p className="text-xs text-greyPrimary">Total</p>
+              <p className="text-xs text-greyPrimary">
+                {t("bookingManagement.detailModal.total")}
+              </p>
               <p className="mt-1 font-bold text-darkPrimary">
                 {formatCurrency(booking.totalPrice)}
               </p>
@@ -180,7 +190,10 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
           </div>
 
           <div className="space-y-4">
-            <Section icon={<PersonIcon />} title="Customer">
+            <Section
+              icon={<PersonIcon />}
+              title={t("bookingManagement.detailModal.customer")}
+            >
               <div className="flex items-center gap-3">
                 <Initials
                   firstName={booking.customer.firstName}
@@ -192,13 +205,17 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
                   </p>
                   <p className="mt-1 flex items-center gap-2 truncate text-sm text-greyPrimary">
                     <EmailIcon className="size-4 shrink-0 stroke-greyPrimary" />
-                    {booking.customer.email || "Not provided"}
+                    {booking.customer.email ||
+                      t("bookingManagement.detailModal.emailNotProvided")}
                   </p>
                 </div>
               </div>
             </Section>
 
-            <Section icon={<PersonIcon />} title="Specialist">
+            <Section
+              icon={<PersonIcon />}
+              title={t("bookingManagement.detailModal.specialist")}
+            >
               {booking.assignee ? (
                 <div className="flex items-center gap-3">
                   <Initials
@@ -211,7 +228,8 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
                     </p>
                     <p className="mt-1 flex items-center gap-2 truncate text-sm text-greyPrimary">
                       <EmailIcon className="size-4 shrink-0 stroke-greyPrimary" />
-                      {booking.assignee.email || "Not provided"}
+                      {booking.assignee.email ||
+                        t("bookingManagement.detailModal.emailNotProvided")}
                     </p>
                     {booking.assignee.specialties.length ? (
                       <div className="mt-3 flex flex-wrap gap-2">
@@ -228,11 +246,16 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-greyPrimary">Not assigned</p>
+                <p className="text-sm text-greyPrimary">
+                  {t("bookingManagement.detailModal.specialistNotAssigned")}
+                </p>
               )}
             </Section>
 
-            <Section icon={<StoreIcon />} title="Services">
+            <Section
+              icon={<StoreIcon />}
+              title={t("bookingManagement.detailModal.services")}
+            >
               {booking.services.length ? (
                 <div className="divide-y divide-greyOutline">
                   {booking.services.map((service) => (
@@ -248,7 +271,9 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
                             .join(" · ")}
                         </p>
                         <p className="mt-1 text-xs text-greyPrimary">
-                          {service.selectedOption.duration} min
+                          {t("bookingManagement.detailModal.minutes", {
+                            count: service.selectedOption.duration,
+                          })}
                         </p>
                       </div>
                       <p className="shrink-0 text-sm font-bold text-darkPrimary">
@@ -258,26 +283,44 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-greyPrimary">No services</p>
+                <p className="text-sm text-greyPrimary">
+                  {t("bookingManagement.detailModal.noServices")}
+                </p>
               )}
             </Section>
 
-            <Section icon={<CalendarIcon />} title="Booking information">
+            <Section
+              icon={<CalendarIcon />}
+              title={t("bookingManagement.detailModal.bookingInformation")}
+            >
               <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-1">
-                <Detail icon={<CalendarIcon />} label="Date" value={formattedDate} />
+                <Detail
+                  icon={<CalendarIcon />}
+                  label={t("bookingManagement.detailModal.date")}
+                  value={formattedDate}
+                />
                 <Detail
                   icon={<ClockIcon />}
-                  label="Time"
+                  label={t("bookingManagement.detailModal.time")}
                   value={`${booking.time?.start || "—"}–${booking.time?.end || "—"}`}
                 />
                 <Detail
                   icon={<MoneyIcon />}
-                  label="Total"
+                  label={t("bookingManagement.detailModal.total")}
                   value={formatCurrency(booking.totalPrice)}
                 />
-                <Detail label="Reference" value={`#${booking.bookingId}`} />
-                <Detail label="Created" value={formatDateTime(booking.createdAt)} />
-                <Detail label="Last updated" value={formatDateTime(booking.updatedAt)} />
+                <Detail
+                  label={t("bookingManagement.detailModal.reference")}
+                  value={`#${booking.bookingId}`}
+                />
+                <Detail
+                  label={t("bookingManagement.detailModal.created")}
+                  value={formatDateTime(booking.createdAt)}
+                />
+                <Detail
+                  label={t("bookingManagement.detailModal.lastUpdated")}
+                  value={formatDateTime(booking.updatedAt)}
+                />
               </div>
             </Section>
           </div>

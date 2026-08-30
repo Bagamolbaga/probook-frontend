@@ -1,14 +1,53 @@
 export const bookingManagement = {
   title: "Booking Management",
   tabs: {
+    availability: "Availability",
     calendar: "Calendar",
-    "new_booking": "New booking"
+    new_booking: "New booking",
+  },
+  calendar: {
+    break: "Break",
+    dailyBreakChanged: "Daily break changed",
+    changeBreakTime: "Change break time",
+    noOption: "No option",
+    walkIn: "Walk-in / Direct Contact",
+    smsBooking: "SMS Booking",
+    emailBooking: "Email Booking",
+    emailBookingConfirmed: "Email Booking - Confirmed",
+    off: "Off",
+  },
+  detailModal: {
+    booking: "Booking #{id}",
+    close: "Close booking details",
+    statuses: {
+      blocked: "Blocked",
+      pending: "Awaiting confirmation",
+      completed: "Completed",
+      cancelled: "Cancelled",
+      confirmed: "Confirmed",
+    },
+    time: "Time",
+    duration: "Duration",
+    total: "Total",
+    customer: "Customer",
+    specialist: "Specialist",
+    services: "Services",
+    bookingInformation: "Booking information",
+    emailNotProvided: "Not provided",
+    specialistNotAssigned: "Not assigned",
+    noServices: "No services",
+    date: "Date",
+    reference: "Reference",
+    created: "Created",
+    lastUpdated: "Last updated",
+    minutes: "{count} min",
   },
   today: "Today",
   addCustomer: "Add Customer",
   emptyBooking: {
     title: "No employees found?",
-    subTitle: "Try uploading more files to your storage or create new <br></br> employee information from your desktop"
+    subTitle:
+      "Try uploading more files to your storage or create new <br></br> employee information from your desktop",
   },
   status: {
     PENDING: "Awaiting Confirmation",
@@ -38,7 +77,7 @@ export const bookingManagement = {
         placeholder: "Add your comment",
         sendBtn: "Send",
       },
-    }
+    },
   },
   actions: {
     save: "Save",
@@ -46,6 +85,6 @@ export const bookingManagement = {
   },
   deleteModal: {
     title: "Are you sure you want to delete this booking?",
-    subTitle: "This booking will be permanently deleted"
-  }
-}
+    subTitle: "This booking will be permanently deleted",
+  },
+};

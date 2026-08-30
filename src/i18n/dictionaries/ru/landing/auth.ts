@@ -1,0 +1,21 @@
+export const auth = {
+  title1: "Добро пожаловать в ProBook",
+  title2: "Войдите в аккаунт",
+  subTitle: "Введите данные, чтобы продолжить",
+  rememberMe: "Запомнить меня",
+  recoverPassword: "Восстановить пароль",
+  iAgreeTerms: "Я принимаю <link>условия использования</link>",
+  iAgreeNews: "Я согласен получать новости",
+  signIn: "Войти",
+  signUp: "Регистрация",
+  orSignInWith: "Или войдите через",
+  selectAvailableDaysOfWeek: "Выберите доступные дни недели",
+  selectAvailableHoursOfDay: "Выберите доступные часы",
+  recoverPasswordPage: {
+    title1: "Забыли пароль?",
+    title2: "Введите данные для восстановления.",
+    emailSendSuccess: "Письмо успешно отправлено",
+    passwordSetSuccess: "Пароль успешно установлен",
+    recoverBtn: "Восстановить",
+  },
+};

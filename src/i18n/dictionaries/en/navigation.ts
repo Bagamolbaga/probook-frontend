@@ -15,7 +15,7 @@ export const navigation = {
       "privacy-policy": "Privacy policy",
       terms: "Terms of service",
       connectWithUs: "Connect with us",
-      allRightReserved: "All Right Reserved | Bowers 2025",
+      allRightReserved: "All Right Reserved | ProBook 2025",
     },
   },
   sidebar: {

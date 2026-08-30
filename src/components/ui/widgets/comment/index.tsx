@@ -9,6 +9,7 @@ import ThreeDotsIcon from "../../icons/ThreeDots";
 import Button from "../../button";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import ConfirmationModal from "../../modal/ConfirmationModal";
+import { useTranslations } from "next-intl";
 
 type Props = {
   comment: TComment;
@@ -17,6 +18,7 @@ type Props = {
 };
 
 const Comment: FC<Props> = ({ comment, editHandler, deleteHandler }) => {
+  const t = useTranslations();
   const ref = useRef<HTMLDivElement>(null);
   const [openActions, setOpenActions] = useState(false);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
@@ -62,8 +64,8 @@ const Comment: FC<Props> = ({ comment, editHandler, deleteHandler }) => {
       )} */}
       <ConfirmationModal
         isOpen={showDeleteConfirmModal}
-        title="Are you sure you want to delete this comment?"
-        subTitle="This comment will be permanently deleted"
+        title={t("ui.components.comment.deleteTitle")}
+        subTitle={t("ui.components.comment.deleteDescription")}
         pozitiveHandler={pozitiveConfirmationHandler}
         negativeHandler={negativeConfirmationHandler}
       />
@@ -103,7 +105,7 @@ const Comment: FC<Props> = ({ comment, editHandler, deleteHandler }) => {
             <p className="text-xs text-greyPrimary">
               {format(comment.updated_at, "dd MMM")}{" "}
               {!isEqual(comment.created_at, comment.updated_at) && (
-                <span className="ml-1 text-xs">Updated</span>
+                <span className="ml-1 text-xs">{t("ui.components.comment.updated")}</span>
               )}
             </p>
           </div>
