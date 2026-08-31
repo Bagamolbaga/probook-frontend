@@ -86,7 +86,7 @@ export type TCustomerBookingHistoryItem = {
   };
   date: string;
   slots: number[];
-  status: Exclude<BookingStatus, "WALK_IN">;
+  status: BookingStatus;
   createdAt: string;
   updatedAt?: string;
 };

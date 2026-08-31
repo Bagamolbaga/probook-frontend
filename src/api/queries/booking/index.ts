@@ -10,7 +10,10 @@ import { useApiClient } from "@/api/context";
 import {
   TCreateBookingArgs,
   TDeleteBookingsArgs,
+  TGetBookingAvailabilityArgs,
   TGetBookingArgs,
+  TBookingAvailability,
+  TUpdateApiBookingArgs,
   TUpdateBookingByAdminArgs,
   TUpdateBookingByTokenArgs,
 } from "@/api/entities/booking";
@@ -126,6 +129,29 @@ export const useGetBookingQuery = (options: Options<TGetBookingArgs, TApiBooking
   });
 };
 
+export const useGetBookingAvailabilityQuery = (
+  options: Options<TGetBookingAvailabilityArgs, TBookingAvailability>
+) => {
+  const apiClient = useApiClient();
+  const { companyId, bookingId, specialistId, date, queryOptions } = options;
+
+  return useQuery({
+    queryKey: ["booking_availability", companyId, specialistId, date, bookingId],
+    queryFn: async () =>
+      (
+        await apiClient.bookings.getBookingAvailability({
+          companyId,
+          bookingId,
+          specialistId,
+          date,
+        })
+      ).data,
+    staleTime: 1000 * 30,
+    enabled: Boolean(companyId && bookingId && specialistId && date),
+    ...queryOptions,
+  });
+};
+
 export const useGetAllBookingsQuery = (
   options: Options<TGetAllBookings, TGetResponse<TApiBooking[]>>
 ) => {
@@ -219,6 +245,31 @@ export const useCreateBookingQuery = () => {
           queryKey: ["bookings_min", args.companyId],
         }),
       ]),
+  });
+};
+
+export const useUpdateApiBookingQuery = () => {
+  const apiClient = useApiClient();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: TUpdateApiBookingArgs) => apiClient.bookings.updateBooking(input),
+    onSuccess: async (response, args) => {
+      queryClient.setQueryData(
+        ["booking", args.companyId, args.bookingId],
+        response.data
+      );
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["bookings", args.companyId] }),
+        queryClient.invalidateQueries({
+          queryKey: ["bookings_min", args.companyId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["all_bookings", args.companyId],
+        }),
+      ]);
+    },
   });
 };
 

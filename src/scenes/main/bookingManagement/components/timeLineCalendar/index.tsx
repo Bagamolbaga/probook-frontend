@@ -30,6 +30,7 @@ import UpdateBookingModal from "../components/UpdateBookingModal";
 import TimeLineBreakItem from "./components/TimeLineBreakItem";
 import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
 import Button from "@/components/ui/button";
+import { BOOKING_STATUSES, BOOKING_STATUS_STYLES } from "@/constants/bookingStatuses";
 import { TIME_SLOTS } from "@/constants/timeSlots";
 import { cn } from "@/utils/cn";
 
@@ -233,6 +234,7 @@ const TimeLineCalendar = () => {
       const lastSlotIsEven = shift.slots.at(-1) && shift.slots.at(-1)! % 2 === 0;
 
       const status = shift.status;
+      const statusStyles = BOOKING_STATUS_STYLES[status];
       const content = (
         <div
           key={shift.id}
@@ -254,28 +256,14 @@ const TimeLineCalendar = () => {
           <div className="w-full h-full bg-white">
             <div
               className={cn(
-                "w-full h-full px-[6px] flex items-center rounded overflow-hidden cursor-pointer ",
-                {
-                  "bg-purplePrimary/10 hover:bg-purplePrimary/20": !shift.customer.email,
-                  "bg-yellowPrimary/10 hover:bg-yellowPrimary/20": status === "PENDING",
-                  "bg-greenPrimary/10 hover:bg-greenPrimary/20":
-                    status === "COMPLETED" || status === "CONFIRMED",
-                  "bg-redExtraLight/10 hover:bg-redExtraLight/20": status === "BLOCKED",
-                  // "bg-blueExtraLight/10 hover:bg-blueExtraLight/20": status === "break",
-                  "bg-greyPrimary/10 hover:bg-greyPrimary/20": status === "OFF",
-                }
+                "w-full h-full px-[6px] flex items-center rounded overflow-hidden cursor-pointer",
+                statusStyles.timelineClassName
               )}
             >
               <p
                 className={cn(
                   "text-sm font-bold text-nowrap text-ellipsis overflow-hidden",
-                  {
-                    "text-purplePrimary": !shift.customer.email,
-                    "text-yellowPrimary": status === "PENDING",
-                    "text-greenPrimary": status === "COMPLETED" || status === "CONFIRMED",
-                    "text-redPrimary": status === "BLOCKED",
-                    "text-greyPrimary": status === "OFF",
-                  }
+                  statusStyles.textClassName
                 )}
               >
                 {shift.customer.firstName} {shift.customer.lastName}
@@ -796,38 +784,21 @@ const TimeLineCalendar = () => {
             </div>
           </div>
           <div className="w-full mt-5 flex items-center justify-center gap-4 sm:flex-wrap">
-            <div className="flex items-center gap-3">
-              <div className="size-3 flex items-center justify-center rounded-full bg-purplePrimary">
-                <div className="size-1 rounded-full bg-white" />
+            {BOOKING_STATUSES.map((status) => (
+              <div className="flex items-center gap-3" key={status}>
+                <div
+                  className={cn(
+                    "size-3 flex items-center justify-center rounded-full",
+                    BOOKING_STATUS_STYLES[status].dotClassName
+                  )}
+                >
+                  <div className="size-1 rounded-full bg-white" />
+                </div>
+                <p className="text-sm">
+                  {t(`bookingManagement.calendar.statuses.${status}` as any)}
+                </p>
               </div>
-              <p className="text-sm">{t("bookingManagement.calendar.walkIn")}</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="size-3 flex items-center justify-center rounded-full bg-[#2CE5F6]">
-                <div className="size-1 rounded-full bg-white" />
-              </div>
-              <p className="text-sm">{t("bookingManagement.calendar.smsBooking")}</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="size-3 flex items-center justify-center rounded-full bg-yellowPrimary">
-                <div className="size-1 rounded-full bg-white" />
-              </div>
-              <p className="text-sm">{t("bookingManagement.calendar.emailBooking")}</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="size-3 flex items-center justify-center rounded-full bg-greenPrimary">
-                <div className="size-1 rounded-full bg-white" />
-              </div>
-              <p className="text-sm">
-                {t("bookingManagement.calendar.emailBookingConfirmed")}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="size-3 flex items-center justify-center rounded-full bg-greyPrimary">
-                <div className="size-1 rounded-full bg-white" />
-              </div>
-              <p className="text-sm">{t("bookingManagement.calendar.off")}</p>
-            </div>
+            ))}
           </div>
         </div>
       </div>

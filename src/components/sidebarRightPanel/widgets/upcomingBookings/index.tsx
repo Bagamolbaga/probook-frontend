@@ -109,7 +109,7 @@ export const UpcomingBookingsWidget = ({ period, date }: Props) => {
         (booking) =>
           UPCOMING_STATUSES.has(booking.status) &&
           booking.slots.length > 0 &&
-          getBookingStart(booking) < now
+          getBookingStart(booking) >= now
       )
       .sort(
         (left, right) =>

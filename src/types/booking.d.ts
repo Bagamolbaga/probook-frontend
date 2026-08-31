@@ -1,6 +1,5 @@
 type CalendarEventStatus = "booked" | "pending" | "completed" | "break" | "error" | "off";
-type BookingStatus =
-  "BLOCKED" | "PENDING" | "COMPLETED" | "OFF" | "CONFIRMED" | "WALK_IN";
+type BookingStatus = "BLOCKED" | "PENDING" | "COMPLETED" | "OFF" | "CONFIRMED";
 
 type TApiBookingCustomer = {
   id: string;
@@ -67,7 +66,7 @@ type TApiBooking = {
   customer: TApiBookingCustomer;
   date: string;
   slots: number[];
-  status: Exclude<BookingStatus, "WALK_IN">;
+  status: BookingStatus;
   createdAt?: string;
   updatedAt?: string;
   otp_sent?: boolean;

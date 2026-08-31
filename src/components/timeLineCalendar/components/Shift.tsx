@@ -1,4 +1,5 @@
 import { TIME_SLOTS, TTimeSlot } from "@/constants/timeSlots";
+import { BOOKING_STATUS_STYLES } from "@/constants/bookingStatuses";
 import { FormattedDataItem } from "@/scenes/main/bookingManagement/components/timeLineCalendar";
 import { cn } from "@/utils/cn";
 
@@ -41,6 +42,7 @@ const Shift = ({ data, row, col, headerTimes, handleOpenBookingDetails }: Props)
     const lastSlotIsEven = shift.slots.at(-1) && shift.slots.at(-1)! % 2 === 0;
 
     const status = shift.status;
+    const statusStyles = BOOKING_STATUS_STYLES[status];
     const content = (
       <div
         key={shift.id}
@@ -62,28 +64,14 @@ const Shift = ({ data, row, col, headerTimes, handleOpenBookingDetails }: Props)
         <div className="w-full h-full bg-white">
           <div
             className={cn(
-              "w-full h-full px-[6px] flex items-center rounded overflow-hidden cursor-pointer ",
-              {
-                "bg-purplePrimary/10 hover:bg-purplePrimary/20": !shift.customer.email,
-                "bg-yellowPrimary/10 hover:bg-yellowPrimary/20": status === "PENDING",
-                "bg-greenPrimary/10 hover:bg-greenPrimary/20":
-                  status === "COMPLETED" || status === "CONFIRMED",
-                "bg-redExtraLight/10 hover:bg-redExtraLight/20": status === "BLOCKED",
-                // "bg-blueExtraLight/10 hover:bg-blueExtraLight/20": status === "break",
-                "bg-greyPrimary/10 hover:bg-greyPrimary/20": status === "OFF",
-              }
+              "w-full h-full px-[6px] flex items-center rounded overflow-hidden cursor-pointer",
+              statusStyles.timelineClassName
             )}
           >
             <p
               className={cn(
                 "text-sm font-bold text-nowrap text-ellipsis overflow-hidden",
-                {
-                  "text-purplePrimary": !shift.customer.email,
-                  "text-yellowPrimary": status === "PENDING",
-                  "text-greenPrimary": status === "COMPLETED" || status === "CONFIRMED",
-                  "text-redPrimary": status === "BLOCKED",
-                  "text-greyPrimary": status === "OFF",
-                }
+                statusStyles.textClassName
               )}
             >
               {shift.customer.firstName} {shift.customer.lastName}
