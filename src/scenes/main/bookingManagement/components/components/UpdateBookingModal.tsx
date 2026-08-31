@@ -68,12 +68,12 @@ const statusConfig: Record<
 };
 
 const Section = ({ icon, title, children }: SectionProps) => (
-  <section className="rounded-xl border border-greyOutline bg-white p-5 sm:p-4">
-    <div className="mb-4 flex items-center gap-3">
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-purpleExtraLight [&_svg]:size-5 [&_svg]:stroke-purplePrimary">
+  <section className="rounded-lg border border-greyOutline bg-white p-4">
+    <div className="mb-3 flex items-center gap-2">
+      <div className="flex size-7 shrink-0 items-center justify-center [&_svg]:size-[18px] [&_svg]:stroke-purplePrimary">
         {icon}
       </div>
-      <h3 className="font-bold text-darkPrimary">{title}</h3>
+      <h3 className="text-sm font-bold text-darkPrimary">{title}</h3>
     </div>
     {children}
   </section>
@@ -90,7 +90,7 @@ const Detail = ({ icon, label, value }: DetailProps) => (
 );
 
 const Initials = ({ firstName, lastName }: { firstName: string; lastName: string }) => (
-  <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-purpleExtraLight text-sm font-bold uppercase text-purplePrimary">
+  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-purpleExtraLight text-xs font-bold uppercase text-purplePrimary">
     {firstName.charAt(0)}
     {lastName.charAt(0)}
   </div>
@@ -130,66 +130,66 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
 
   return (
     <Modal isOpen={isOpen} enableMobile handleClose={handleClose}>
-      <div className="w-[720px] max-w-[calc(100vw-40px)] sm:w-full sm:max-w-none">
-        <header className="flex items-start justify-between gap-4 border-b border-greyOutline px-6 py-5 sm:px-4">
+      <div className="w-[680px] max-w-[calc(100vw-40px)] sm:w-full sm:max-w-none">
+        <header className="flex items-start justify-between gap-4 border-b border-greyOutline px-5 py-4 sm:px-4">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-xl font-bold text-darkPrimary">
+              <h2 className="text-lg font-bold text-darkPrimary">
                 {t("bookingManagement.detailModal.booking", { id: booking.bookingId })}
               </h2>
               <div
                 className={cn(
-                  "flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold",
+                  "flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-bold",
                   status.containerClassName
                 )}
               >
-                <span className={cn("size-2 rounded-full", status.dotClassName)} />
+                <span className={cn("size-1.5 rounded-full", status.dotClassName)} />
                 {t(`bookingManagement.detailModal.statuses.${status.labelKey}` as any)}
               </div>
             </div>
-            <p className="mt-2 text-sm capitalize text-greyPrimary">
+            <p className="mt-1.5 text-sm capitalize text-greyPrimary">
               {formattedDate} · {booking.time?.start || "—"}–{booking.time?.end || "—"}
             </p>
           </div>
           <Button
             aria-label={t("bookingManagement.detailModal.close")}
-            className="size-9 shrink-0 p-0"
+            className="size-8 shrink-0 p-0"
             variant="resting-active"
             onClick={handleClose}
           >
-            <CloseIcon className="size-5" />
+            <CloseIcon className="size-4" />
           </Button>
         </header>
 
-        <div className="max-h-[calc(100vh-180px)] overflow-y-auto bg-greyBackground/50 px-6 py-5 sm:px-4">
-          <div className="mb-4 grid grid-cols-3 gap-3 sm:grid-cols-1">
-            <div className="rounded-xl bg-blueExtraLight p-4">
+        <div className="max-h-[calc(100vh-160px)] overflow-y-auto bg-greyBackground/30 px-5 py-4 sm:px-4">
+          <div className="mb-3 grid grid-cols-3 gap-2.5 sm:grid-cols-1">
+            <div className="rounded-lg border border-greenPrimary/50 bg-greenPrimary/10 p-3.5">
               <p className="text-xs text-greyPrimary">
                 {t("bookingManagement.detailModal.time")}
               </p>
-              <p className="mt-1 font-bold text-darkPrimary">
+              <p className="mt-1 text-sm font-bold text-darkPrimary">
                 {booking.time?.start || "—"}–{booking.time?.end || "—"}
               </p>
             </div>
-            <div className="rounded-xl bg-greenExtraLight p-4">
+            <div className="rounded-lg border border-yellowPrimary/50 bg-yellowPrimary/10 p-3.5">
               <p className="text-xs text-greyPrimary">
                 {t("bookingManagement.detailModal.duration")}
               </p>
-              <p className="mt-1 font-bold text-darkPrimary">
+              <p className="mt-1 text-sm font-bold text-darkPrimary">
                 {t("bookingManagement.detailModal.minutes", { count: totalDuration })}
               </p>
             </div>
-            <div className="rounded-xl bg-yellowExtraLight p-4">
+            <div className="rounded-lg border border-purplePrimary/50 bg-purplePrimary/10 p-3.5">
               <p className="text-xs text-greyPrimary">
                 {t("bookingManagement.detailModal.total")}
               </p>
-              <p className="mt-1 font-bold text-darkPrimary">
+              <p className="mt-1 text-sm font-bold text-darkPrimary">
                 {formatCurrency(booking.totalPrice)}
               </p>
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Section
               icon={<PersonIcon />}
               title={t("bookingManagement.detailModal.customer")}
@@ -200,7 +200,7 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
                   lastName={booking.customer.lastName}
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-bold text-darkPrimary">
+                  <p className="truncate text-sm font-bold text-darkPrimary">
                     {booking.customer.firstName} {booking.customer.lastName}
                   </p>
                   <p className="mt-1 flex items-center gap-2 truncate text-sm text-greyPrimary">
@@ -223,7 +223,7 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
                     lastName={booking.assignee.lastName}
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-bold text-darkPrimary">
+                    <p className="truncate text-sm font-bold text-darkPrimary">
                       {booking.assignee.fullName}
                     </p>
                     <p className="mt-1 flex items-center gap-2 truncate text-sm text-greyPrimary">
@@ -235,7 +235,7 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
                       <div className="mt-3 flex flex-wrap gap-2">
                         {booking.assignee.specialties.map((specialty) => (
                           <span
-                            className="rounded-full bg-greyBackgroundLight px-2.5 py-1 text-xs text-greyPrimary"
+                            className="rounded-full bg-greyBackgroundLight px-2 py-0.5 text-[11px] text-greyPrimary"
                             key={specialty}
                           >
                             {specialty}
@@ -264,7 +264,9 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
                       key={service.id}
                     >
                       <div className="min-w-0">
-                        <p className="font-bold text-darkPrimary">{service.name}</p>
+                        <p className="text-sm font-bold text-darkPrimary">
+                          {service.name}
+                        </p>
                         <p className="mt-1 text-xs text-greyPrimary">
                           {[service.category?.name, service.selectedOption.name]
                             .filter(Boolean)
@@ -293,7 +295,7 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
               icon={<CalendarIcon />}
               title={t("bookingManagement.detailModal.bookingInformation")}
             >
-              <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-1">
+              <div className="grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-1">
                 <Detail
                   icon={<CalendarIcon />}
                   label={t("bookingManagement.detailModal.date")}
