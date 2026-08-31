@@ -16,6 +16,11 @@ export type TGetBookingByTokenArgs = {
   token: string;
 };
 
+export type TGetBookingArgs = {
+  companyId: string | number;
+  bookingId: string;
+};
+
 export type TCreateBookingArgs = {
   companyId: string;
   data: {
@@ -143,6 +148,12 @@ export class ApiClientBookings extends ApiClientCore {
 
     return instance.get<TGetResponse<TApiBookingMin[]>>(
       `/companies/${companyId}/bookings/min?${params.toString()}`
+    );
+  }
+
+  async getBooking({ companyId, bookingId }: TGetBookingArgs) {
+    return this.instanceWithoutAuth.get<TApiBooking>(
+      `/companies/${companyId}/bookings/${bookingId}`
     );
   }
 

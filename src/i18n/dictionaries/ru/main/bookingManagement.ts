@@ -5,6 +5,58 @@ export const bookingManagement = {
     calendar: "Календарь",
     new_booking: "Новое бронирование",
   },
+  sidebar: {
+    periods: {
+      day: "День",
+      week: "Неделя",
+      month: "Месяц",
+    },
+    selectDate: "Выбрать дату",
+    overview: {
+      title: "Основное состояние",
+      range: {
+        day: "Сегодня",
+        week: "Текущая неделя",
+        month: "Текущий месяц",
+      },
+      total: "Всего записей",
+      confirmed: "Подтверждено",
+      pending: "Ожидают",
+      completed: "Завершено",
+      error: "Не удалось загрузить данные",
+    },
+    staffWorkload: {
+      title: "Загрузка сотрудников",
+      employees:
+        "{count, plural, one {# сотрудник} few {# сотрудника} many {# сотрудников} other {# сотрудника}}",
+      bookings:
+        "{count, plural, one {# запись} few {# записи} many {# записей} other {# записи}}",
+      noSchedule: "График не настроен",
+      empty: "Сотрудники не найдены",
+      error: "Не удалось загрузить данные",
+    },
+    upcoming: {
+      title: "Ближайшие записи",
+      range: {
+        day: "До конца дня",
+        week: "До конца недели",
+        month: "До конца месяца",
+      },
+      customer: "Клиент",
+      noServices: "Услуги не указаны",
+      service: "Услуга",
+      total: "Итого",
+      openDetails: "Открыть детали записи клиента {name}",
+      withSpecialist: "Специалист: {name}",
+      moreServices: "+{count}",
+      statuses: {
+        pending: "Ожидает",
+        confirmed: "Подтверждено",
+      },
+      empty: "Предстоящих записей нет",
+      error: "Не удалось загрузить данные",
+    },
+  },
   calendar: {
     break: "Перерыв",
     dailyBreakChanged: "Ежедневный перерыв изменён",
@@ -19,6 +71,9 @@ export const bookingManagement = {
   detailModal: {
     booking: "Бронирование #{id}",
     close: "Закрыть детали бронирования",
+    loading: "Загружаем детали бронирования…",
+    loadError: "Не удалось загрузить детали бронирования",
+    dismiss: "Закрыть",
     statuses: {
       blocked: "Заблокировано",
       pending: "Ожидает подтверждения",

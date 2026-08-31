@@ -10,6 +10,7 @@ import { useApiClient } from "@/api/context";
 import {
   TCreateBookingArgs,
   TDeleteBookingsArgs,
+  TGetBookingArgs,
   TUpdateBookingByAdminArgs,
   TUpdateBookingByTokenArgs,
 } from "@/api/entities/booking";
@@ -70,6 +71,8 @@ export const useGetBookingsQuery = (
       companyId,
       queryParams?.start_date?.getTime(),
       queryParams?.end_date?.getTime(),
+      queryParams?.offset,
+      queryParams?.limit,
     ],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
@@ -105,6 +108,20 @@ export const useGetBookingsMinQuery = (
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
     enabled: !!companyId,
+    ...queryOptions,
+  });
+};
+
+export const useGetBookingQuery = (options: Options<TGetBookingArgs, TApiBooking>) => {
+  const apiClient = useApiClient();
+  const { companyId, bookingId, queryOptions } = options;
+
+  return useQuery({
+    queryKey: ["booking", companyId, bookingId],
+    queryFn: async () =>
+      (await apiClient.bookings.getBooking({ companyId, bookingId })).data,
+    staleTime: 1000 * 60,
+    enabled: Boolean(companyId && bookingId),
     ...queryOptions,
   });
 };

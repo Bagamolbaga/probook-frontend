@@ -6,6 +6,7 @@ import MainPagesTitle from "@/components/mainPagesTitle";
 import { useMemo, useState } from "react";
 import Tabs from "@/components/ui/tab";
 import Calendar from "./components/calendar";
+import BookingDetailsModalHost from "./components/BookingDetailsModalHost";
 
 type Tab = { id: "availability" | "calendar"; text: string };
 
@@ -35,25 +36,28 @@ const BookingManagementScene = () => {
   }, [activeTab]);
 
   return (
-    <div className="w-full min-h-[100vh] px-7 py-6 bg-greyOutline sm:px-5 sm:py-6 sm:pb-[64px]">
-      <div className="pb-6 flex justify-between items-center">
-        <MainPagesTitle text={t("bookingManagement.title")} />
-        <div className="flex items-center sm:w-full sm:mt-3">
-          <Tabs
-            activelTabId={activeTab.id}
-            tabs={tabs}
-            onSelect={(t) => setActiveTab(t as Tab)}
-          />
+    <>
+      <BookingDetailsModalHost />
+      <div className="w-full min-h-[100vh] px-7 py-6 bg-greyOutline sm:px-5 sm:py-6 sm:pb-[64px]">
+        <div className="pb-6 flex justify-between items-center">
+          <MainPagesTitle text={t("bookingManagement.title")} />
+          <div className="flex items-center sm:w-full sm:mt-3">
+            <Tabs
+              activelTabId={activeTab.id}
+              tabs={tabs}
+              onSelect={(t) => setActiveTab(t as Tab)}
+            />
+          </div>
+        </div>
+        <div className="w-full min-h-[calc(100vh-62px-52px)] flex sm:min-h-[calc(100vh-62px-86px)] sm:pb-5">
+          {/* <SuperAdminChecker> */}
+          {/* <SubscriptionChecker> */}
+          {content}
+          {/* </SubscriptionChecker> */}
+          {/* </SuperAdminChecker> */}
         </div>
       </div>
-      <div className="w-full min-h-[calc(100vh-62px-52px)] flex sm:min-h-[calc(100vh-62px-86px)] sm:pb-5">
-        {/* <SuperAdminChecker> */}
-        {/* <SubscriptionChecker> */}
-        {content}
-        {/* </SubscriptionChecker> */}
-        {/* </SuperAdminChecker> */}
-      </div>
-    </div>
+    </>
   );
 };
 

@@ -10,7 +10,7 @@ export function formatCurrency(
     currency?: string;
     locale?: string;
     shouldOmitFractions?: boolean;
-  } = { style: "currency", currency: "THB", locale: "th-TH", shouldOmitFractions: false }
+  } = { style: "currency", currency: "RUB", locale: "ru-RU", shouldOmitFractions: false }
 ) {
   const price = Number(totalPrice);
 

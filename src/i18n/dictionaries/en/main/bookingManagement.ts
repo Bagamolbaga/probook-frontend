@@ -5,6 +5,56 @@ export const bookingManagement = {
     calendar: "Calendar",
     new_booking: "New booking",
   },
+  sidebar: {
+    periods: {
+      day: "Day",
+      week: "Week",
+      month: "Month",
+    },
+    selectDate: "Select date",
+    overview: {
+      title: "Overview",
+      range: {
+        day: "Today",
+        week: "Current week",
+        month: "Current month",
+      },
+      total: "Total bookings",
+      confirmed: "Confirmed",
+      pending: "Pending",
+      completed: "Completed",
+      error: "Unable to load data",
+    },
+    staffWorkload: {
+      title: "Staff workload",
+      employees: "{count, plural, one {# employee} other {# employees}}",
+      bookings: "{count, plural, one {# booking} other {# bookings}}",
+      noSchedule: "Schedule not configured",
+      empty: "No employees found",
+      error: "Unable to load data",
+    },
+    upcoming: {
+      title: "Upcoming bookings",
+      range: {
+        day: "Until the end of today",
+        week: "Until the end of the week",
+        month: "Until the end of the month",
+      },
+      customer: "Customer",
+      noServices: "No services specified",
+      service: "Service",
+      total: "Total",
+      openDetails: "Open booking details for {name}",
+      withSpecialist: "Specialist: {name}",
+      moreServices: "+{count}",
+      statuses: {
+        pending: "Pending",
+        confirmed: "Confirmed",
+      },
+      empty: "No upcoming bookings",
+      error: "Unable to load data",
+    },
+  },
   calendar: {
     break: "Break",
     dailyBreakChanged: "Daily break changed",
@@ -19,6 +69,9 @@ export const bookingManagement = {
   detailModal: {
     booking: "Booking #{id}",
     close: "Close booking details",
+    loading: "Loading booking details…",
+    loadError: "Unable to load booking details",
+    dismiss: "Close",
     statuses: {
       blocked: "Blocked",
       pending: "Awaiting confirmation",

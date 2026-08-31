@@ -26,7 +26,7 @@ import { useGetBookingsQuery } from "@/api/queries/booking";
 import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
 import { useGetCompanyShiftsForDateRangeQuery } from "@/api/queries/company/shift";
 import { useGetCompanyDetailsQuery } from "@/api/queries/company";
-import UpdateBookingModal from "./components/UpdateBookingModal";
+import UpdateBookingModal from "../components/UpdateBookingModal";
 import TimeLineBreakItem from "./components/TimeLineBreakItem";
 import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
 import Button from "@/components/ui/button";
