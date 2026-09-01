@@ -39,7 +39,7 @@ export class ApiClientCore {
     this.setupInterceptors();
   }
 
-  private async errorInterceptor(error: AxiosError) {
+  private async errorInterceptor(error: AxiosError, signOutOnUnauthorized: boolean) {
     console.log("Interceptor caught:", error);
 
     const originalRequest = error.config as AxiosRequestConfig & {
@@ -119,8 +119,8 @@ export class ApiClientCore {
     });
 
     // Обработка 401
-    if (error.response?.status === 401) {
-      await signOut({ redirect: false });
+    if (signOutOnUnauthorized && error.response?.status === 401) {
+      await signOut({ callbackUrl: "/sign-in" });
       // Можно не логировать 401 как ошибку, если это ожидаемо
       // Sentry уже залогировал с level: 'info'
     }
@@ -131,12 +131,12 @@ export class ApiClientCore {
   private setupInterceptors() {
     this.instance.interceptors.response.use(
       (response: AxiosResponse) => response,
-      async (error: AxiosError) => this.errorInterceptor(error)
+      async (error: AxiosError) => this.errorInterceptor(error, true)
     );
-    
+
     this.instanceWithoutAuth.interceptors.response.use(
       (response: AxiosResponse) => response,
-      async (error: AxiosError) => this.errorInterceptor(error)
+      async (error: AxiosError) => this.errorInterceptor(error, false)
     );
   }
 

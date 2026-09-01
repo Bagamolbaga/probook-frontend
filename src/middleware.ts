@@ -13,6 +13,30 @@ const intlMiddleware = createMiddleware({
   defaultLocale: i18nConfig.defaultLocale,
 });
 
+const locales = i18nConfig.locales.map((locale) => locale.id);
+const localePrefixRegex = new RegExp(`^/(?:${locales.join("|")})(?=/|$)`, "i");
+
+const normalizePathname = (pathname: string) => {
+  const pathnameWithoutLocale = pathname.replace(localePrefixRegex, "") || "/";
+
+  return pathnameWithoutLocale.length > 1
+    ? pathnameWithoutLocale.replace(/\/$/, "")
+    : pathnameWithoutLocale;
+};
+
+const isPublicPathname = (pathname: string) => {
+  const normalizedPathname = normalizePathname(pathname);
+
+  return (
+    PUBLIC_ROUTES.includes(normalizedPathname) ||
+    normalizedPathname === "/about" ||
+    normalizedPathname === "/support" ||
+    normalizedPathname.startsWith("/company/") ||
+    normalizedPathname.startsWith("/recovery-password/") ||
+    normalizedPathname.startsWith("/sign-up/")
+  );
+};
+
 const authMiddleware = withAuth(
   // Note that this callback is only invoked if
   // the `authorized` callback has returned `true`
@@ -36,24 +60,11 @@ const authMiddleware = withAuth(
 );
 
 export default function middleware(req: NextRequest) {
-  const publicPathnameRegex = RegExp(
-    `^(/(${i18nConfig.locales.map((i) => i.id).join("|")}))?(${PUBLIC_ROUTES.flatMap(
-      (p) => (p === "/" ? ["", "/"] : p)
-    ).join("|")})/?$`,
-    "i"
-  );
-
-  const [slash, ...publicRoutesWithoutSlash] = PUBLIC_ROUTES;
-  const isPublicPage =
-    publicPathnameRegex.test(req.nextUrl.pathname) ||
-    publicRoutesWithoutSlash.some((r) => req.nextUrl.pathname.includes(r));
-  return intlMiddleware(req);
-
-  if (isPublicPage) {
+  if (isPublicPathname(req.nextUrl.pathname)) {
     return intlMiddleware(req);
-  } else {
-    return (authMiddleware as any)(req);
   }
+
+  return (authMiddleware as any)(req);
 }
 
 export const config = {

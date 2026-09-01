@@ -47,6 +47,8 @@ const Sidebar = () => {
     [getCompanyDetailsQuery.data]
   );
 
+  console.log({user: session?.user});
+
   return (
     <nav className="h-full pt-[26px] pb-[28px] flex flex-col">
       <Link href="/" className="relative h-[30px] mb-[26px]">
@@ -80,7 +82,7 @@ const Sidebar = () => {
             companyDetails?.logo ? (
               <Image
                 className="w-full h-full object-cover"
-                src={companyDetails.logo}
+                src={session?.user?.avatar || ""}
                 width={30}
                 height={30}
                 alt={companyDetails.name}

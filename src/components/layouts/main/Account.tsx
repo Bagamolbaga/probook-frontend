@@ -84,10 +84,10 @@ const NavigationItem: FC<NavigationItemProps> = ({ title, desc, href, icon: Icon
 };
 
 const AccountLayout = ({ children }: PropsWithChildren) => {
-  const setSelectCompany = useStore(useSuperAdminStore, st => st.setSelectCompany)
+  const setSelectCompany = useStore(useSuperAdminStore, (state) => state.setSelectCompany);
   const logoutHandler = () => {
-    setSelectCompany(undefined)
-    void signOut();
+    setSelectCompany(undefined);
+    void signOut({ callbackUrl: "/sign-in" });
   };
 
   return (

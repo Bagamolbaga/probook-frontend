@@ -9,6 +9,7 @@ export const auth = {
   signIn: "Войти",
   signUp: "Регистрация",
   orSignInWith: "Или войдите через",
+  signInWithGoogle: "Войти через Google",
   selectAvailableDaysOfWeek: "Выберите доступные дни недели",
   selectAvailableHoursOfDay: "Выберите доступные часы",
   recoverPasswordPage: {

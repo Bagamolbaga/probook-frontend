@@ -108,7 +108,11 @@ export const BaseHeader: FC<Props> = ({
 
     if (session?.user) {
       return (
-        <Button variant="primary" rounded onClick={() => signOut()}>
+        <Button
+          variant="primary"
+          rounded
+          onClick={() => void signOut({ callbackUrl: "/sign-in" })}
+        >
           {`${(session?.user as any).name || `${session?.user.first_name} ${session?.user.last_name}`} | Log out`}
         </Button>
       );

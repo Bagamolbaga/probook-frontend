@@ -9,6 +9,7 @@ export const auth = {
   signIn: "Sign In",
   signUp: "Sign Up",
   orSignInWith: "Or sign in with",
+  signInWithGoogle: "Sign in with Google",
   selectAvailableDaysOfWeek: "Select available days of week",
   selectAvailableHoursOfDay: "Select available hours of day",
   recoverPasswordPage: {
@@ -16,6 +17,6 @@ export const auth = {
     title2: "Enter your details to recover.",
     emailSendSuccess: "Email was sent successfully",
     passwordSetSuccess: "Password was set successfully",
-    recoverBtn: "Recover"
+    recoverBtn: "Recover",
   },
 };

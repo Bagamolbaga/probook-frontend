@@ -34,6 +34,19 @@ async function exchangeGoogleToken(idToken: string): Promise<AuthResponse> {
   return data;
 }
 
+function toBackendAuthUser(data: AuthResponse): BackendAuthUser {
+  return {
+    id: String(data.user.id),
+    name: data.user.fullName || `${data.user.firstName} ${data.user.lastName}`.trim(),
+    email: data.user.email,
+    image: data.user.avatar || null,
+    accessToken: data.accessToken,
+    refreshToken: data.refreshToken,
+    accessTokenExpires: Date.now() + data.expiresIn * 1000,
+    backendUser: data.user,
+  };
+}
+
 async function refreshAccessToken(token: BackendJwt): Promise<BackendJwt> {
   if (!token.refreshToken) return { ...token, error: "RefreshAccessTokenError" };
 
@@ -70,6 +83,13 @@ export const authOptions: AuthOptions = {
         },
       },
       httpOptions: { timeout: 10000 },
+      async profile(_profile, tokens) {
+        if (!tokens.id_token) {
+          throw new Error("Google did not return an ID token");
+        }
+
+        return toBackendAuthUser(await exchangeGoogleToken(tokens.id_token));
+      },
     }),
     CredentialsProvider({
       name: "credentials",
@@ -86,16 +106,7 @@ export const authOptions: AuthOptions = {
             password: credentials.password,
           });
 
-          return {
-            id: String(data.user.id),
-            name: data.user.fullName || `${data.user.firstName} ${data.user.lastName}`,
-            email: data.user.email,
-            image: data.user.avatar || null,
-            accessToken: data.accessToken,
-            refreshToken: data.refreshToken,
-            accessTokenExpires: Date.now() + data.expiresIn * 1000,
-            backendUser: data.user,
-          } satisfies BackendAuthUser;
+          return toBackendAuthUser(data);
         } catch {
           return null;
         }
@@ -107,9 +118,11 @@ export const authOptions: AuthOptions = {
       name: "access_token",
       options: {
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "lax",
         path: "/",
-        secure: process.env.DISABLE_COOKIE_SECURE !== "true",
+        secure:
+          process.env.NODE_ENV === "production" &&
+          process.env.DISABLE_COOKIE_SECURE !== "true",
       },
     },
   },
@@ -132,7 +145,10 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user, account, trigger }) {
       const backendToken = token as BackendJwt;
 
-      if (user && account?.provider === "credentials") {
+      if (
+        user &&
+        (account?.provider === "credentials" || account?.provider === "google")
+      ) {
         const backendUser = user as BackendAuthUser;
         return {
           ...backendToken,
@@ -142,25 +158,6 @@ export const authOptions: AuthOptions = {
           user: backendUser.backendUser,
           error: undefined,
         };
-      }
-
-      if (account?.provider === "google") {
-        if (!account.id_token)
-          return { ...backendToken, error: "RefreshAccessTokenError" };
-
-        try {
-          const data = await exchangeGoogleToken(account.id_token);
-          return {
-            ...backendToken,
-            accessToken: data.accessToken,
-            refreshToken: data.refreshToken,
-            accessTokenExpires: Date.now() + data.expiresIn * 1000,
-            user: data.user,
-            error: undefined,
-          };
-        } catch {
-          return { ...backendToken, error: "RefreshAccessTokenError" };
-        }
       }
 
       if (

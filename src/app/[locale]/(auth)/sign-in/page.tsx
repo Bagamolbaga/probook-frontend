@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import BusinessSignInScene from "@/scenes/auth/business/signIn";
 import { authOptions } from "@/lib/auth";
+import { getSafeCallbackUrl } from "@/utils/auth";
 
 export async function generateMetadata({
   params,
@@ -21,11 +22,17 @@ export async function generateMetadata({
   };
 }
 
-const SignInPage = async () => {
+const SignInPage = async ({
+  params,
+  searchParams,
+}: {
+  params: { locale: string };
+  searchParams: { callbackUrl?: string };
+}) => {
   const session = await getServerSession(authOptions);
 
   if (session) {
-    redirect("/dashboard");
+    redirect(getSafeCallbackUrl(searchParams.callbackUrl, params.locale));
   }
 
   return <BusinessSignInScene />;

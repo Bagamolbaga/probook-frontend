@@ -8,23 +8,23 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { FormControlLabel } from "@mui/material";
-import { Link, useRouter, useTranslations } from "@/i18n";
+import { Link, useLocale, useTranslations } from "@/i18n";
 
 import Button from "@/components/ui/button";
 import TextField from "@/components/ui/inputs/TextField";
 import RadioButton from "@/components/ui/inputs/RadioButton";
 
 import LogoIcon from "@/components/ui/icons/LogoFull";
-import TwitterBrandIcon from "@/components/ui/icons/TwitterBrand";
 import GoogleBrandIcon from "@/components/ui/icons/GoogleBrand";
-import FacebookBrandIcon from "@/components/ui/icons/FacebookBrand";
 import { EMAIL_REGEXP, PASSWORD_REGEXP } from "@/utils/regexps";
 import ImageStep1 from "@/assets/business_signIn_step_1.svg";
 import { toaster } from "@/components/ui/toaster";
+import { getSafeCallbackUrl } from "@/utils/auth";
 
 type SignInForm = {
   email: string;
@@ -34,7 +34,10 @@ type SignInForm = {
 
 const BusinessSignInScene = () => {
   const t = useTranslations();
+  const locale = useLocale();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = getSafeCallbackUrl(searchParams.get("callbackUrl"), locale);
 
   const { handleSubmit, register, reset, clearErrors, watch, setValue, formState } =
     useForm<SignInForm>({
@@ -50,7 +53,7 @@ const BusinessSignInScene = () => {
       });
 
       if (res?.ok) {
-        router.push("/dashboard");
+        router.replace(callbackUrl);
       } else {
         toaster.error("Invalid credentials");
       }
@@ -65,9 +68,7 @@ const BusinessSignInScene = () => {
       <div className="w-2/3 min-h-screen px-layoutLeftRight md:px-layoutLeftRight_md sm:px-layoutLeftRight_sm rounded-r-[20px] bg-white sm:w-full sm:rounded-none">
         <div className="min-h-screen max-w-[770px] ml-auto flex flex-col justify-end">
           <div className="min-h-screen py-20 pr-[240px] rounded-r-[20px] bg-white md:pr-[120px] sm:w-full sm:pr-0 sm:flex sm:flex-col sm:items-center">
-            <h3 className="text-[32px] sm:text-center">
-              {t("auth.title1")}
-            </h3>
+            <h3 className="text-[32px] sm:text-center">{t("auth.title1")}</h3>
             <h3 className="text-[32px] sm:text-center"> {t("auth.title2")}</h3>
             <p className="mt-6 text-sm text-greyPrimary sm:text-center">
               {t("auth.subTitle")}
@@ -142,14 +143,16 @@ const BusinessSignInScene = () => {
                   <Button variant="resting">{t("auth.signUp")}</Button>
                 </Link> */}
               </div>
-              {/* <div className="flex items-center gap-[6px]">
-                <TwitterBrandIcon className="cursor-pointer transition-all fill-greyPrimary hover:fill-purplePrimary" />
-                <div>
+              <div className="flex items-center gap-[6px]">
+                <button
+                  type="button"
+                  aria-label={t("auth.signInWithGoogle")}
+                  onClick={() => void signIn("google", { callbackUrl })}
+                >
                   <GoogleBrandIcon className="cursor-pointer transition-all fill-greyPrimary hover:fill-purplePrimary" />
-                </div>
-                <FacebookBrandIcon className="cursor-pointer transition-all fill-greyPrimary hover:fill-purplePrimary" />
+                </button>
                 <p className="ml-2 text-sm text-greyPrimary">{t("auth.orSignInWith")}</p>
-              </div> */}
+              </div>
             </div>
           </div>
         </div>
