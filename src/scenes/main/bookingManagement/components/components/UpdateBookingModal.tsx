@@ -19,6 +19,12 @@ import { cn } from "@/utils/cn";
 import { formatCurrency } from "@/utils/formatCurrency";
 import type { UpdateBookingForm } from "./types";
 import BookingEditForm from "./BookingEditForm";
+import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import {
+  hasPermission,
+  isSpecialistMembership,
+  SPECIALIST_PERMISSIONS,
+} from "@/utils/permissions";
 
 type Props = {
   isOpen: boolean;
@@ -104,6 +110,13 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
   const booking = updateBookingForm.getValues();
   const locale = useLocale();
   const t = useTranslations();
+  const { activeCompany } = useGetCompanyId();
+  const specialistMode =
+    isSpecialistMembership(activeCompany) && !activeCompany?.roles.includes("OWNER");
+  const canEdit = specialistMode
+    ? hasPermission(activeCompany, SPECIALIST_PERMISSIONS.rescheduleBookings) ||
+      hasPermission(activeCompany, SPECIALIST_PERMISSIONS.updateBookingStatus)
+    : true;
   const status = statusConfig[booking.status];
   const totalDuration = booking.services.reduce(
     (total, service) => total + service.selectedOption.duration,
@@ -169,7 +182,7 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            {!isEditing ? (
+            {!isEditing && canEdit ? (
               <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
                 {t("bookingManagement.detailModal.edit.action")}
               </Button>
@@ -187,6 +200,7 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
 
         {isEditing ? (
           <BookingEditForm
+            specialistMode={specialistMode}
             updateBookingForm={updateBookingForm}
             onCancel={() => {
               setIsEditing(false);

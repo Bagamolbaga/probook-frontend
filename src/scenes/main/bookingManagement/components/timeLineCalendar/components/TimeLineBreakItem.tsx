@@ -2,6 +2,8 @@ import { FC, useState } from "react";
 import { cn } from "@/utils/cn";
 import ChangeDailyBreakTimePopup from "./ChangeDailyBreakTimePopup";
 import { FormattedDataItem } from "..";
+import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { isOwnerMembership } from "@/utils/permissions";
 
 type TimeLineBreakItemProps = {
   row: FormattedDataItem;
@@ -23,6 +25,8 @@ const TimeLineBreakItem: FC<TimeLineBreakItemProps> = ({
   currentDate,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { activeCompany } = useGetCompanyId();
+  const canEditSchedule = isOwnerMembership(activeCompany);
 
   const openHandler = () => {
     setIsOpen(true);
@@ -35,12 +39,14 @@ const TimeLineBreakItem: FC<TimeLineBreakItemProps> = ({
 
   return (
     <>
-      <ChangeDailyBreakTimePopup
-        isOpen={isOpen}
-        row={row}
-        currentDate={currentDate}
-        handleClose={closeHandler}
-      />
+      {canEditSchedule ? (
+        <ChangeDailyBreakTimePopup
+          isOpen={isOpen}
+          row={row}
+          currentDate={currentDate}
+          handleClose={closeHandler}
+        />
+      ) : null}
       <div
         key={row.specialist.id + "-break"}
         data-type={type}
@@ -53,14 +59,15 @@ const TimeLineBreakItem: FC<TimeLineBreakItemProps> = ({
           left: `calc(${paddingLeft}%)`,
           width: `calc(${width}%)`,
         }}
-        onClick={() => type === "dailyBreak" && openHandler()}
+        onClick={() => type === "dailyBreak" && canEditSchedule && openHandler()}
       >
         <div className="w-full h-full bg-white">
           <div
             className={cn(
               "w-full h-full px-[6px] flex items-center justify-center rounded overflow-hidden bg-greyPrimary/10",
               {
-                "cursor-pointer hover:bg-greyPrimary/20": type === "dailyBreak",
+                "cursor-pointer hover:bg-greyPrimary/20":
+                  type === "dailyBreak" && canEditSchedule,
               }
             )}
           >

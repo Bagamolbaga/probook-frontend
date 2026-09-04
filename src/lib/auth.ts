@@ -4,7 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import type { User } from "@/types/user";
 
-type AuthResponse = {
+export type AuthResponse = {
   accessToken: string;
   refreshToken: string;
   expiresIn: number;
@@ -96,15 +96,21 @@ export const authOptions: AuthOptions = {
       credentials: {
         email: { type: "email" },
         password: { type: "password" },
+        invitationToken: { type: "text" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials.password) return null;
+        if (!credentials?.password) return null;
 
         try {
-          const { data } = await axios.post<AuthResponse>(`${apiUrl}/auth/login`, {
-            email: credentials.email,
-            password: credentials.password,
-          });
+          const { data } = credentials.invitationToken
+            ? await axios.post<AuthResponse>(
+                `${apiUrl}/auth/invitations/${credentials.invitationToken}/register-password`,
+                { password: credentials.password }
+              )
+            : await axios.post<AuthResponse>(`${apiUrl}/auth/login`, {
+                email: credentials.email,
+                password: credentials.password,
+              });
 
           return toBackendAuthUser(data);
         } catch {
@@ -160,16 +166,6 @@ export const authOptions: AuthOptions = {
         };
       }
 
-      if (
-        backendToken.accessToken &&
-        backendToken.accessTokenExpires &&
-        Date.now() < backendToken.accessTokenExpires - 30_000
-      ) {
-        return backendToken;
-      }
-
-      if (backendToken.refreshToken) return refreshAccessToken(backendToken);
-
       if (trigger === "update" && backendToken.accessToken) {
         try {
           const { data } = await axios.get<{ user: User }>(`${apiUrl}/auth/me`, {
@@ -180,6 +176,16 @@ export const authOptions: AuthOptions = {
           return { ...backendToken, error: "RefreshAccessTokenError" };
         }
       }
+
+      if (
+        backendToken.accessToken &&
+        backendToken.accessTokenExpires &&
+        Date.now() < backendToken.accessTokenExpires - 30_000
+      ) {
+        return backendToken;
+      }
+
+      if (backendToken.refreshToken) return refreshAccessToken(backendToken);
 
       return backendToken;
     },

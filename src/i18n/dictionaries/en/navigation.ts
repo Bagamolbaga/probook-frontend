@@ -19,10 +19,11 @@ export const navigation = {
     },
   },
   sidebar: {
+    activeCompany: "Active company",
     dashboard: "Dashboard",
     "booking-management": "Booking management",
     "booking-creation": "New booking",
-    "calendar": "Calendar",
+    calendar: "Calendar",
     "staff-management": "Staff management",
     "business-services": "Business services",
     "customer-database": "Customer database",

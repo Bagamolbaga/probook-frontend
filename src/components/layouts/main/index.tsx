@@ -11,16 +11,8 @@ import useWindowWidth from "@/hooks/useWindowWidth";
 import Sidebar from "@/components/sidebar";
 import SidebarRightPanel from "@/components/sidebarRightPanel";
 import MobileSidebar from "@/components/sidebar/MobileSidebar";
-import { redirect } from "@/i18n";
-import { useAppSession } from "@/hooks/useAppSession";
 
 export default function DashboardLayout({ children }: PropsWithChildren) {
-  const {data: session} = useAppSession()
-
-  if (!session?.user?.company_id && !session?.user?.is_superuser) {
-    // redirect("/")
-  }
-
   const { sidebarIsOpen, toggleOpenSidebar } = useStore(useThemeStore, (state) => state);
   const { deviceType } = useWindowWidth();
   const isMobileOrTablet = deviceType === "mobile" || deviceType === "tablet";

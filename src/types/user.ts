@@ -1,3 +1,25 @@
+export type CompanyMembershipRole = "OWNER" | "SPECIALIST";
+
+export type CompanyMembershipStatus = "ACTIVE" | "SUSPENDED";
+
+export type CompanyMembership = {
+  id: string;
+  companyId: string;
+  companyName: string;
+  roles: CompanyMembershipRole[];
+  status: CompanyMembershipStatus;
+  specialistProfileId: string | null;
+  permissions: string[];
+};
+
+export type UserCompany = {
+  id: string;
+  name: string | null;
+  roles: CompanyMembershipRole[];
+  specialistProfileId: string | null;
+  permissions: string[];
+};
+
 export type User = {
   id: number;
   _id?: string;
@@ -14,6 +36,8 @@ export type User = {
   fullName?: string;
   createdAt?: string;
   updatedAt?: string;
+  memberships?: CompanyMembership[];
+  companies?: UserCompany[];
   // Legacy domain screens still use these fields until their API models migrate.
   company_id: string | number | null;
   username: string;

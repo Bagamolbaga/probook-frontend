@@ -56,6 +56,10 @@ export type TUpdateApiBookingArgs = TGetBookingArgs & {
   };
 };
 
+export type TRescheduleOwnBookingArgs = TGetBookingArgs & {
+  data: { date: string; slots: number[] };
+};
+
 export type TCreateBookingArgs = {
   companyId: string;
   data: {
@@ -158,7 +162,8 @@ export class ApiClientBookings extends ApiClientCore {
 
     const params = new URLSearchParams(formattedQueryParams);
 
-    return this.instanceWithoutAuth.get<TGetResponse<TApiBooking[]>>(
+    const instance = this.isAuth ? this.instance : this.instanceWithoutAuth;
+    return instance.get<TGetResponse<TApiBooking[]>>(
       `/companies/${companyId}/bookings?${params.toString()}`
     );
   }
@@ -187,9 +192,8 @@ export class ApiClientBookings extends ApiClientCore {
   }
 
   async getBooking({ companyId, bookingId }: TGetBookingArgs) {
-    return this.instanceWithoutAuth.get<TApiBooking>(
-      `/companies/${companyId}/bookings/${bookingId}`
-    );
+    const instance = this.isAuth ? this.instance : this.instanceWithoutAuth;
+    return instance.get<TApiBooking>(`/companies/${companyId}/bookings/${bookingId}`);
   }
 
   async getBookingAvailability({
@@ -215,6 +219,13 @@ export class ApiClientBookings extends ApiClientCore {
     );
   }
 
+  async rescheduleOwnBooking({ companyId, bookingId, data }: TRescheduleOwnBookingArgs) {
+    return this.instance.patch<TApiBooking>(
+      `/companies/${companyId}/my/bookings/${bookingId}/reschedule`,
+      data
+    );
+  }
+
   async getBookingByToken({ token }: TGetBookingByTokenArgs) {
     return this.instanceWithoutAuth.post<TBooking>(`/bookings/get-booking/`, { token });
   }
@@ -225,10 +236,8 @@ export class ApiClientBookings extends ApiClientCore {
       date: format(data.date, "yyyy-MM-dd"),
     };
 
-    return this.instanceWithoutAuth.post<TApiBooking>(
-      `/companies/${companyId}/bookings`,
-      formattedDate
-    );
+    const instance = this.isAuth ? this.instance : this.instanceWithoutAuth;
+    return instance.post<TApiBooking>(`/companies/${companyId}/bookings`, formattedDate);
   }
 
   async updateBookingByToken({ token, data }: TUpdateBookingByTokenArgs) {

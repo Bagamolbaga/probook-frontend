@@ -16,6 +16,7 @@ import {
   TUpdateApiBookingArgs,
   TUpdateBookingByAdminArgs,
   TUpdateBookingByTokenArgs,
+  TRescheduleOwnBookingArgs,
 } from "@/api/entities/booking";
 import {
   TGetCompanySalesAndCustomerStat,
@@ -268,6 +269,27 @@ export const useUpdateApiBookingQuery = () => {
         queryClient.invalidateQueries({
           queryKey: ["all_bookings", args.companyId],
         }),
+      ]);
+    },
+  });
+};
+
+export const useRescheduleOwnBookingMutation = () => {
+  const apiClient = useApiClient();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: TRescheduleOwnBookingArgs) =>
+      apiClient.bookings.rescheduleOwnBooking(input),
+    onSuccess: async (response, args) => {
+      queryClient.setQueryData(
+        ["booking", args.companyId, args.bookingId],
+        response.data
+      );
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["bookings", args.companyId] }),
+        queryClient.invalidateQueries({ queryKey: ["bookings_min", args.companyId] }),
+        queryClient.invalidateQueries({ queryKey: ["all_bookings", args.companyId] }),
       ]);
     },
   });

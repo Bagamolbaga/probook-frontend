@@ -7,7 +7,6 @@ import {
 } from "@tanstack/react-query";
 import { useApiClient } from "@/api/context";
 import {
-  TCreateCompanySpecialistsArgs,
   TDeleteCompanySpecialistsArgs,
   TGetCompanyShiftsForDateRangeArgs,
   TGetCompanySpecialistsArgs,
@@ -17,6 +16,7 @@ import { useGetCompanyId } from "@/hooks/useGetCompanyId";
 
 type Options<T> = T & {
   queryOptions?: UndefinedInitialDataOptions;
+  enabled?: boolean;
 };
 
 type TGetSpecialists = {
@@ -27,7 +27,7 @@ export const useGetCompanySpecialistsQuery = (
   options: Options<TGetCompanySpecialistsArgs>
 ) => {
   const apiClient = useApiClient();
-  const { queryOptions, companyId, queryParams } = options;
+  const { queryOptions, companyId, queryParams, enabled } = options;
 
   const fetcherFn = async () => {
     return (await apiClient.company.getCompanySpecialists({ companyId, queryParams }))
@@ -38,24 +38,7 @@ export const useGetCompanySpecialistsQuery = (
     queryKey: ["specialists", companyId, queryParams?.limit, queryParams?.offset],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: !!companyId,
-    // ...queryOptions,
-  });
-};
-
-export const useCreateCompanySpecialistsQuery = () => {
-  const apiClient = useApiClient();
-  const queryClient = useQueryClient();
-  const { companyId } = useGetCompanyId();
-
-  return useMutation({
-    mutationFn: (input: Omit<TCreateCompanySpecialistsArgs, "companyId">) =>
-      apiClient.company.createCompanySpecialist({ companyId, ...input }),
-    onSuccess: () => {
-      return queryClient.invalidateQueries({
-        queryKey: ["specialists", companyId],
-      });
-    },
+    enabled: enabled ?? !!companyId,
   });
 };
 

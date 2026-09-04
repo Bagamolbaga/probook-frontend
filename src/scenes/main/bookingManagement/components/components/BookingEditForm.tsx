@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 
 import {
   useGetBookingAvailabilityQuery,
+  useRescheduleOwnBookingMutation,
   useUpdateApiBookingQuery,
 } from "@/api/queries/booking";
 import { useGetCompanyServicesQuery } from "@/api/queries/company/services";
@@ -40,6 +41,7 @@ type Props = {
   onCancel: () => void;
   onSaved: () => void;
   onDirtyChange: (isDirty: boolean) => void;
+  specialistMode?: boolean;
 };
 
 const EMPTY_SERVICE_SELECTIONS: ServiceSelection[] = [];
@@ -89,6 +91,7 @@ const BookingEditForm = ({
   onCancel,
   onSaved,
   onDirtyChange,
+  specialistMode = false,
 }: Props) => {
   const t = useTranslations("bookingManagement.detailModal.edit");
   const booking = updateBookingForm.getValues();
@@ -115,8 +118,14 @@ const BookingEditForm = ({
   const date = useWatch({ control: form.control, name: "date" });
   const startSlot = useWatch({ control: form.control, name: "startSlot" });
   const status = useWatch({ control: form.control, name: "status" });
-  const specialistsQuery = useGetCompanySpecialistsQuery({ companyId });
-  const servicesQuery = useGetCompanyServicesQuery({ companyId });
+  const specialistsQuery = useGetCompanySpecialistsQuery({
+    companyId,
+    enabled: !specialistMode,
+  });
+  const servicesQuery = useGetCompanyServicesQuery({
+    companyId,
+    enabled: !specialistMode,
+  });
   const availabilityQuery = useGetBookingAvailabilityQuery({
     companyId,
     bookingId: booking.bookingId,
@@ -124,8 +133,19 @@ const BookingEditForm = ({
     date,
   });
   const updateBookingMutation = useUpdateApiBookingQuery();
-  const services = servicesQuery.data?.results || EMPTY_SERVICES;
-  const specialists = specialistsQuery.data?.results || EMPTY_SPECIALISTS;
+  const rescheduleOwnBookingMutation = useRescheduleOwnBookingMutation();
+  const services = specialistMode
+    ? booking.services.map((service) => ({
+        ...service,
+        options: [service.selectedOption],
+        specialists: [booking.assignee!],
+      }))
+    : servicesQuery.data?.results || EMPTY_SERVICES;
+  const specialists = specialistMode
+    ? booking.assignee
+      ? [booking.assignee]
+      : EMPTY_SPECIALISTS
+    : specialistsQuery.data?.results || EMPTY_SPECIALISTS;
   const [datePickerAnchor, setDatePickerAnchor] = useState<HTMLElement | null>(null);
   const selectedDate = date ? parse(date, "yyyy-MM-dd", new Date()) : undefined;
 
@@ -187,7 +207,8 @@ const BookingEditForm = ({
     servicesAreSupported &&
     slotsNeeded > 0 &&
     hasValidStartSlot &&
-    !updateBookingMutation.isPending;
+    !updateBookingMutation.isPending &&
+    !rescheduleOwnBookingMutation.isPending;
 
   const resetTime = () => form.setValue("startSlot", "", { shouldDirty: true });
 
@@ -230,6 +251,37 @@ const BookingEditForm = ({
     );
 
     try {
+      if (specialistMode) {
+        const wasRescheduled =
+          values.date !== format(booking.date, "yyyy-MM-dd") ||
+          slots.some((slot, index) => slot !== booking.time?.slots[index]);
+        let response = wasRescheduled
+          ? await rescheduleOwnBookingMutation.mutateAsync({
+              companyId,
+              bookingId: booking.bookingId,
+              data: { date: values.date, slots },
+            })
+          : null;
+
+        if (values.status !== booking.status) {
+          response = await updateBookingMutation.mutateAsync({
+            companyId,
+            bookingId: booking.bookingId,
+            data: {
+              specialistId: values.specialistId,
+              services: values.services,
+              date: values.date,
+              slots,
+              status: values.status,
+            },
+          });
+        }
+
+        if (response) updateBookingForm.reset(toViewFormValues(response.data, companyId));
+        onSaved();
+        return;
+      }
+
       const response = await updateBookingMutation.mutateAsync({
         companyId,
         bookingId: booking.bookingId,
@@ -257,29 +309,31 @@ const BookingEditForm = ({
       <div className="space-y-3">
         <section className="rounded-lg border border-greyOutline bg-white p-4">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-1">
-            <label className="text-xs font-bold text-darkPrimary">
-              {t("specialist")}
-              <UiSelect
-                className="mt-2"
-                displayEmpty
-                fullWidth
-                size="small"
-                value={specialistId}
-                onChange={(event) => {
-                  form.setValue("specialistId", String(event.target.value), {
-                    shouldDirty: true,
-                  });
-                  resetTime();
-                }}
-              >
-                <MenuItem value="">{t("selectSpecialist")}</MenuItem>
-                {specialists.map((specialist) => (
-                  <MenuItem key={specialist.id} value={specialist.id}>
-                    {specialist.fullName}
-                  </MenuItem>
-                ))}
-              </UiSelect>
-            </label>
+            {!specialistMode ? (
+              <label className="text-xs font-bold text-darkPrimary">
+                {t("specialist")}
+                <UiSelect
+                  className="mt-2"
+                  displayEmpty
+                  fullWidth
+                  size="small"
+                  value={specialistId}
+                  onChange={(event) => {
+                    form.setValue("specialistId", String(event.target.value), {
+                      shouldDirty: true,
+                    });
+                    resetTime();
+                  }}
+                >
+                  <MenuItem value="">{t("selectSpecialist")}</MenuItem>
+                  {specialists.map((specialist) => (
+                    <MenuItem key={specialist.id} value={specialist.id}>
+                      {specialist.fullName}
+                    </MenuItem>
+                  ))}
+                </UiSelect>
+              </label>
+            ) : null}
 
             <label className="text-xs font-bold text-darkPrimary">
               {t("status")}
@@ -298,7 +352,14 @@ const BookingEditForm = ({
                   )
                 }
               >
-                {BOOKING_STATUSES.map((option) => (
+                {(specialistMode
+                  ? [
+                      status,
+                      ...(status === "PENDING" ? (["CONFIRMED"] as const) : []),
+                      ...(status === "CONFIRMED" ? (["COMPLETED"] as const) : []),
+                    ]
+                  : BOOKING_STATUSES
+                ).map((option) => (
                   <MenuItem key={option} value={option}>
                     {t(`statuses.${option}`)}
                   </MenuItem>
@@ -308,102 +369,104 @@ const BookingEditForm = ({
           </div>
         </section>
 
-        <section className="rounded-lg border border-greyOutline bg-white p-4">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="text-sm font-bold text-darkPrimary">{t("services")}</h3>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              disabled={!specialistId || services.length <= fields.length}
-              onClick={handleAddService}
-            >
-              {t("addService")}
-            </Button>
-          </div>
+        {!specialistMode ? (
+          <section className="rounded-lg border border-greyOutline bg-white p-4">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-sm font-bold text-darkPrimary">{t("services")}</h3>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={!specialistId || services.length <= fields.length}
+                onClick={handleAddService}
+              >
+                {t("addService")}
+              </Button>
+            </div>
 
-          <div className="mt-3 space-y-3">
-            {fields.map((field, index) => {
-              const selection = serviceSelections[index];
-              const selectedService = services.find(
-                (service) => getEntityId(service) === selection?.serviceId
-              );
+            <div className="mt-3 space-y-3">
+              {fields.map((field, index) => {
+                const selection = serviceSelections[index];
+                const selectedService = services.find(
+                  (service) => getEntityId(service) === selection?.serviceId
+                );
 
-              return (
-                <div
-                  className="grid grid-cols-[1fr_1fr_auto] gap-2 sm:grid-cols-1"
-                  key={field.id}
-                >
-                  <UiSelect
-                    aria-label={t("service")}
-                    fullWidth
-                    size="small"
-                    value={selection?.serviceId || ""}
-                    onChange={(event) =>
-                      handleServiceChange(index, String(event.target.value))
-                    }
+                return (
+                  <div
+                    className="grid grid-cols-[1fr_1fr_auto] gap-2 sm:grid-cols-1"
+                    key={field.id}
                   >
-                    <MenuItem value="">{t("selectService")}</MenuItem>
-                    {services.map((service) => (
-                      <MenuItem key={service.id} value={getEntityId(service)}>
-                        {service.name}
-                      </MenuItem>
-                    ))}
-                  </UiSelect>
+                    <UiSelect
+                      aria-label={t("service")}
+                      fullWidth
+                      size="small"
+                      value={selection?.serviceId || ""}
+                      onChange={(event) =>
+                        handleServiceChange(index, String(event.target.value))
+                      }
+                    >
+                      <MenuItem value="">{t("selectService")}</MenuItem>
+                      {services.map((service) => (
+                        <MenuItem key={service.id} value={getEntityId(service)}>
+                          {service.name}
+                        </MenuItem>
+                      ))}
+                    </UiSelect>
 
-                  <UiSelect
-                    aria-label={t("serviceOption")}
-                    fullWidth
-                    size="small"
-                    value={selection?.optionId || ""}
-                    onChange={(event) => {
-                      form.setValue(
-                        `services.${index}.optionId`,
-                        String(event.target.value),
-                        {
-                          shouldDirty: true,
-                        }
-                      );
-                      resetTime();
-                    }}
-                  >
-                    <MenuItem value="">{t("selectOption")}</MenuItem>
-                    {selectedService?.options.map((option) => (
-                      <MenuItem key={getEntityId(option)} value={getEntityId(option)}>
-                        {option.name || selectedService.name} · {option.duration}{" "}
-                        {t("min")}
-                      </MenuItem>
-                    ))}
-                  </UiSelect>
+                    <UiSelect
+                      aria-label={t("serviceOption")}
+                      fullWidth
+                      size="small"
+                      value={selection?.optionId || ""}
+                      onChange={(event) => {
+                        form.setValue(
+                          `services.${index}.optionId`,
+                          String(event.target.value),
+                          {
+                            shouldDirty: true,
+                          }
+                        );
+                        resetTime();
+                      }}
+                    >
+                      <MenuItem value="">{t("selectOption")}</MenuItem>
+                      {selectedService?.options.map((option) => (
+                        <MenuItem key={getEntityId(option)} value={getEntityId(option)}>
+                          {option.name || selectedService.name} · {option.duration}{" "}
+                          {t("min")}
+                        </MenuItem>
+                      ))}
+                    </UiSelect>
 
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="red-outline"
-                    disabled={fields.length === 1}
-                    onClick={() => {
-                      remove(index);
-                      resetTime();
-                    }}
-                  >
-                    {t("remove")}
-                  </Button>
-                </div>
-              );
-            })}
-          </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="red-outline"
+                      disabled={fields.length === 1}
+                      onClick={() => {
+                        remove(index);
+                        resetTime();
+                      }}
+                    >
+                      {t("remove")}
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
 
-          {!servicesAreSupported && specialistId ? (
-            <p className="mt-3 text-xs text-redPrimary">{t("unsupportedService")}</p>
-          ) : null}
+            {!servicesAreSupported && specialistId ? (
+              <p className="mt-3 text-xs text-redPrimary">{t("unsupportedService")}</p>
+            ) : null}
 
-          <div className="mt-3 flex justify-end gap-4 border-t border-greyOutline pt-3 text-xs text-greyPrimary">
-            <span>{t("duration", { count: totalDuration })}</span>
-            <span className="font-bold text-darkPrimary">
-              {formatCurrency(totalPrice)}
-            </span>
-          </div>
-        </section>
+            <div className="mt-3 flex justify-end gap-4 border-t border-greyOutline pt-3 text-xs text-greyPrimary">
+              <span>{t("duration", { count: totalDuration })}</span>
+              <span className="font-bold text-darkPrimary">
+                {formatCurrency(totalPrice)}
+              </span>
+            </div>
+          </section>
+        ) : null}
 
         <section className="rounded-lg border border-greyOutline bg-white p-4">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-1">

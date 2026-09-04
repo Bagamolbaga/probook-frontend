@@ -8,7 +8,6 @@ import UserNameWithAvatar from "@/components/ui/table/customCells/UserNameWithAv
 import EditIcon from "@/components/ui/icons/Edit";
 import DeleteIcon from "@/components/ui/icons/Delete";
 import {
-  useCreateCompanySpecialistsQuery,
   useDeleteCompanySpecialistsQuery,
   useGetCompanySpecialistsQuery,
   useUpdateCompanySpecialistsQuery,
@@ -33,8 +32,15 @@ import { SHIFT_COLORS } from "@/constants/shiftColors";
 import { useGetCompanyDetailsQuery } from "@/api/queries/company";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
 import Table from "@/components/ui/table";
-import { TCreateCompanySpecialistsArgs } from "@/api/entities/company";
 import { TimeManager } from "@/utils/timeManager";
+import {
+  useCompanyInvitationsQuery,
+  useCreateInvitationMutation,
+  useResendInvitationMutation,
+  useRevokeInvitationMutation,
+} from "@/api/queries/invitations";
+import type { InvitationDeliveryResponse } from "@/api/entities/invitation";
+import Modal from "@/components/ui/modal";
 
 export type CreateSpecialistForm = {
   _specialistId?: string;
@@ -87,12 +93,18 @@ const StaffListTable = () => {
   const createCompanyShiftQuery = useCreateCompanyShiftQuery();
   const updateCompanyShiftQuery = useUpdateCompanyShiftQuery();
 
-  const createCompanySpecialistsQuery = useCreateCompanySpecialistsQuery();
+  const createInvitationMutation = useCreateInvitationMutation();
+  const invitationsQuery = useCompanyInvitationsQuery(companyId);
+  const resendInvitationMutation = useResendInvitationMutation();
+  const revokeInvitationMutation = useRevokeInvitationMutation();
   const updateCompanySpecialistsQuery = useUpdateCompanySpecialistsQuery();
   const deleteCompanySpecialistsQuery = useDeleteCompanySpecialistsQuery();
 
   const [isOpenCreateModal, setIsOpenCreateModal] = useState(false);
   const [isOpenUpdateModal, setIsOpenUpdateModal] = useState(false);
+  const [createdInvitation, setCreatedInvitation] =
+    useState<InvitationDeliveryResponse | null>(null);
+  const [copyingInvitationId, setCopyingInvitationId] = useState<string | null>(null);
   const [specialistIdDeleteConfirmModal, setSpecialistIdDeleteConfirmModal] = useState<
     string | null
   >(null);
@@ -158,6 +170,31 @@ const StaffListTable = () => {
     return [];
   }, [getCompanySpecialistsQuery.data, getCompanyShiftsQuery.data]);
 
+  const pendingInvitations = useMemo(
+    () =>
+      (invitationsQuery.data?.results || []).filter(
+        (invitation) => invitation.status === "PENDING"
+      ),
+    [invitationsQuery.data?.results]
+  );
+
+  const copyInvitationLink = async (invitationId: string) => {
+    setCopyingInvitationId(invitationId);
+
+    try {
+      const { data } = await resendInvitationMutation.mutateAsync({
+        companyId,
+        invitationId,
+      });
+      await navigator.clipboard.writeText(data.inviteUrl);
+      toaster.success(t("staffManagement.staffList.invitation.copied"));
+    } catch {
+      toaster.error(t("ui.errors.wentWrong"));
+    } finally {
+      setCopyingInvitationId(null);
+    }
+  };
+
   const showCreateModalHandler = () => {
     setIsOpenCreateModal(true);
   };
@@ -217,21 +254,24 @@ const StaffListTable = () => {
     customShiftId?: TShift["id"]
   ) => {
     try {
-      const bodyDefaultData: TCreateCompanySpecialistsArgs["data"] = {
-        email: formData.email,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        defaultShift: String(customShiftId || formData.shift.id),
-        services: [],
-      };
-
-      const { data } = await createCompanySpecialistsQuery.mutateAsync({
-        data: bodyDefaultData,
+      const { data } = await createInvitationMutation.mutateAsync({
+        companyId,
+        data: {
+          email: formData.email,
+          roles: ["SPECIALIST"],
+          specialistProfile: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            defaultShiftId: String(customShiftId || formData.shift.id),
+            serviceIds: [],
+          },
+        },
       });
 
       if (data) {
         hideCreateModalHandler();
-        toaster.success("Specialist created");
+        setCreatedInvitation(data);
+        toaster.success(t("staffManagement.staffList.invitation.created"));
       }
     } catch (error) {
       toaster.error(t("ui.errors.wentWrong"));
@@ -249,10 +289,7 @@ const StaffListTable = () => {
 
       if (initData && formData._specialistId) {
         const body = {
-          email: formData.email,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          defaultShift: String(customShiftId || formData.shift.id),
+          defaultShiftId: String(customShiftId || formData.shift.id),
         };
 
         const { data } = await updateCompanySpecialistsQuery.mutateAsync({
@@ -556,9 +593,11 @@ const StaffListTable = () => {
   const formIsValid = Boolean(
     formData.firstName && formData.lastName && formData.email && formData.shift
   );
-  const createNewStaffBtnIsActive =
-    !createCompanySpecialistsQuery.isPending && formIsValid;
+  const createNewStaffBtnIsActive = !createInvitationMutation.isPending && formIsValid;
   const updateStaffBtnIsActive = !updateCompanySpecialistsQuery.isPending && formIsValid;
+
+  console.log({pendingInvitations});
+
 
   if (firstLoading) {
     return (
@@ -570,7 +609,8 @@ const StaffListTable = () => {
 
   if (
     !getCompanySpecialistsQuery.isPending &&
-    !getCompanySpecialistsQuery.data?.results.length
+    !getCompanySpecialistsQuery.data?.results.length &&
+    !pendingInvitations.length
   ) {
     return (
       <>
@@ -609,7 +649,7 @@ const StaffListTable = () => {
             className="mt-6 flex items-center gap-3"
             variant="dark"
             onClick={() => setIsOpenCreateModal(true)}
-            disabled={createCompanySpecialistsQuery.isPending}
+            disabled={createInvitationMutation.isPending}
           >
             <PlusRight />
             <p className="text-sm text-white">
@@ -623,6 +663,40 @@ const StaffListTable = () => {
 
   return (
     <>
+      <Modal
+        isOpen={Boolean(createdInvitation)}
+        handleClose={() => setCreatedInvitation(null)}
+      >
+        <div className="w-[520px] max-w-full p-6">
+          <h3 className="text-xl font-bold">
+            {t("staffManagement.staffList.invitation.title")}
+          </h3>
+          <p className="mt-3 text-sm text-greyPrimary">
+            {t("staffManagement.staffList.invitation.deliveryStatus", {
+              status: createdInvitation?.invitation.deliveryStatus || "PENDING",
+            })}
+          </p>
+          {createdInvitation?.inviteUrl ? (
+            <div className="mt-5 flex gap-3">
+              <input
+                className="min-w-0 flex-1 rounded-lg border border-greyOutlineSecondary px-3 text-sm"
+                readOnly
+                value={createdInvitation.inviteUrl}
+                aria-label={t("staffManagement.staffList.invitation.link")}
+              />
+              <Button
+                variant="primary"
+                onClick={() => {
+                  void navigator.clipboard.writeText(createdInvitation.inviteUrl);
+                  toaster.success(t("staffManagement.staffList.invitation.copied"));
+                }}
+              >
+                {t("staffManagement.staffList.invitation.copy")}
+              </Button>
+            </div>
+          ) : null}
+        </div>
+      </Modal>
       <CreateUpdateSpecialistModal
         headerTitle={t("staffManagement.staffList.updateModal.createTitle")}
         isOpen={isOpenCreateModal}
@@ -667,6 +741,72 @@ const StaffListTable = () => {
         negativeHandler={() => setSpecialistIdDeleteConfirmModal(null)}
       />
       <div className="w-full h-full flex flex-col px-7 pt-6 pb-4 rounded-xl bg-white sm:px-5 sm:py-6">
+        {pendingInvitations.length ? (
+          <div className="mb-6 rounded-xl border border-greyOutlineSecondary p-4">
+            <h3 className="text-sm font-bold">
+              {t("staffManagement.staffList.invitation.pendingTitle")}
+            </h3>
+            <div className="mt-3 space-y-2">
+              {pendingInvitations.map((invitation) => (
+                <div
+                  key={invitation.id}
+                  className="flex items-center justify-between gap-3 text-sm"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-bold">
+                      {`${invitation.specialistProfile.firstName} ${invitation.specialistProfile.lastName}`.trim()}
+                    </p>
+                    <p className="truncate font-bold">{invitation.email}</p>
+                    <p className="text-xs text-greyPrimary">
+                      {invitation.deliveryStatus}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      disabled={
+                        resendInvitationMutation.isPending ||
+                        copyingInvitationId === invitation.id
+                      }
+                      onClick={() => void copyInvitationLink(invitation.id)}
+                    >
+                      {t("staffManagement.staffList.invitation.copy")}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="resting-active"
+                      disabled={resendInvitationMutation.isPending}
+                      onClick={() => {
+                        void resendInvitationMutation
+                          .mutateAsync({
+                            companyId,
+                            invitationId: invitation.id,
+                          })
+                          .then(({ data }) => setCreatedInvitation(data));
+                      }}
+                    >
+                      {t("staffManagement.staffList.invitation.resend")}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="red-outline"
+                      disabled={revokeInvitationMutation.isPending}
+                      onClick={() =>
+                        void revokeInvitationMutation.mutateAsync({
+                          companyId,
+                          invitationId: invitation.id,
+                        })
+                      }
+                    >
+                      {t("staffManagement.staffList.invitation.revoke")}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
         <div className="flex items-center justify-between sm:flex-col">
           {/* <div className="text-xl font-bold">
             <Button
@@ -723,7 +863,7 @@ const StaffListTable = () => {
             rowSelection={true}
             loading={
               getCompanySpecialistsQuery.isPending ||
-              createCompanySpecialistsQuery.isPending ||
+              createInvitationMutation.isPending ||
               updateCompanySpecialistsQuery.isPending ||
               deleteCompanySpecialistsQuery.isPending
             }

@@ -140,15 +140,21 @@ const TimeLineCalendar = () => {
     const selectedDateString = format(selectedDate, "yyyy-MM-dd");
     const res = data.map((item) => {
       const specialistShift = getCompanyShiftsForDateRangeQuery.data?.results.find(
-        (entry) => entry.specialist.id === item.specialist.id
+        (entry) => String(entry.specialist.id) === String(item.specialist.id)
       );
       const overrideShift = specialistShift?.shifts.find(
         (shift) => shift.kind === "override" && shift.date === selectedDateString
       );
+      const specialist = getCompanySpecialistsQuery.data?.results.find(
+        (specialist) => String(specialist.id) === String(item.specialist.id)
+      );
+      const assignedDefaultShift =
+        specialistShift?.defaultShift ||
+        (typeof specialist?.defaultShift === "object"
+          ? specialist.defaultShift
+          : undefined);
       const defaultShift =
-        specialistShift?.defaultShift?.kind === "default"
-          ? specialistShift.defaultShift
-          : undefined;
+        assignedDefaultShift?.kind === "default" ? assignedDefaultShift : undefined;
       const customWorkingShift = overrideShift || defaultShift;
 
       return {
@@ -716,7 +722,7 @@ const TimeLineCalendar = () => {
                   >
                     <div
                       className={cn(
-                        "min-w-[120px] py-5 flex justify-center items-center text-sm text-wrap text-greyPrimary",
+                        "min-w-[120px] ml-[-100%] py-5 flex justify-center items-center text-sm text-wrap text-greyPrimary",
                         {
                           "font-bold text-purplePrimary": colIsEqualCurrentTime(col),
                           // "text-greyPrimary": !colIsEqualCurrentTime(col),

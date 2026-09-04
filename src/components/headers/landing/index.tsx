@@ -17,6 +17,7 @@ import { useAppSession } from "@/hooks/useAppSession";
 import { useGetCompanyDetailsQuery } from "@/api/queries/company";
 import Spinner from "@/components/ui/loaders/Spinner";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { isOwnerMembership } from "@/utils/permissions";
 
 type Props = {
   color?: "dark" | "white" | "transparent";
@@ -43,10 +44,10 @@ export const BaseHeader: FC<Props> = ({
   const { data: session } = useAppSession();
   const [mobileMenuIsOpen, setMobileMenuIsOpen] = useState(false);
   const [isTransparent, setIsTransparent] = useState(true);
-  const {companyId} = useGetCompanyId()
+  const { companyId, activeCompany } = useGetCompanyId();
 
   const getCompanyDetailsQuery = useGetCompanyDetailsQuery({
-    companyId
+    companyId,
   });
 
   const variants: Variants = {
@@ -90,17 +91,23 @@ export const BaseHeader: FC<Props> = ({
   );
 
   const renderSignInOrLogoutBtn = () => {
-    if (session?.user?.company_id) {
+    if (session?.user && activeCompany) {
       return (
         <Button
           variant="primary"
           rounded
-          onClick={() => router.push(MAIN_NAVIGATION_ENUM["/dashboard"].path)}
+          onClick={() =>
+            router.push(
+              isOwnerMembership(activeCompany)
+                ? MAIN_NAVIGATION_ENUM["/dashboard"].path
+                : MAIN_NAVIGATION_ENUM["/booking-management"].path
+            )
+          }
         >
           {getCompanyDetailsQuery.isPending ? (
             <Spinner className="size-4 !text-purplePrimary fill-white" />
           ) : (
-            getCompanyDetailsQuery.data?.name
+            getCompanyDetailsQuery.data?.name || activeCompany.name
           )}
         </Button>
       );
