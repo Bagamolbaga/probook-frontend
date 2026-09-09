@@ -369,6 +369,7 @@ const BookingCreation = () => {
     <>
       <AuthModal
         isDashboard
+        companyId={companyId}
         hideLabelRequiredSymbol
         nameInputPlaceholder={t(
           "booking.clientInformationStep.name.placeholderEnterClientName"

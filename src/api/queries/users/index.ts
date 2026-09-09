@@ -17,6 +17,8 @@ import {
   TGetCustomerBookingHistoryArgs,
   TGetCustomerDetailsArgs,
   TGetCustomersArgs,
+  TLookupCustomerByEmailArgs,
+  TLookupCustomersArgs,
 } from "@/api/entities/user/customer";
 import { useAppSession } from "@/hooks/useAppSession";
 import { useStore } from "zustand";
@@ -65,6 +67,57 @@ export const useGetCustomersQuery = (options: TGetCustomersArgs) => {
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
     enabled: Boolean(companyId && session?.accessToken && currentUserId),
+  });
+};
+
+export const useLookupCustomersQuery = (
+  options: TLookupCustomersArgs & { enabled?: boolean }
+) => {
+  const apiClient = useApiClient();
+  const { data: session } = useAppSession();
+  const { companyId, search, limit = 5, enabled = true } = options;
+  const currentUserId = session?.user?._id || session?.user?.id;
+
+  return useQuery({
+    queryKey: [
+      "customer_lookup",
+      "authenticated",
+      currentUserId,
+      companyId,
+      search,
+      limit,
+    ],
+    queryFn: async () =>
+      (await apiClient.customerUser.lookupCustomers({ companyId, search, limit })).data,
+    staleTime: 1000 * 60,
+    enabled: Boolean(
+      enabled && companyId && search.length >= 3 && session?.accessToken && currentUserId
+    ),
+  });
+};
+
+export const useLookupCustomerByEmailQuery = (
+  options: TLookupCustomerByEmailArgs & { enabled?: boolean }
+) => {
+  const apiClient = useApiClient();
+  const { data: session } = useAppSession();
+  const { companyId, email, enabled = true } = options;
+  const currentUserId = session?.user?._id || session?.user?.id;
+
+  return useQuery({
+    queryKey: [
+      "customer_lookup_by_email",
+      "authenticated",
+      currentUserId,
+      companyId,
+      email,
+    ],
+    queryFn: async () =>
+      (await apiClient.customerUser.lookupCustomerByEmail({ companyId, email })).data,
+    staleTime: 1000 * 60,
+    enabled: Boolean(
+      enabled && companyId && email && session?.accessToken && currentUserId
+    ),
   });
 };
 

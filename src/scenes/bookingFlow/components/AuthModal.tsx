@@ -3,8 +3,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { FC, useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { FC, useEffect, useMemo, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { parsePhoneNumber, isPossiblePhoneNumber } from "react-phone-number-input/input";
 import PhoneTextInput from "@/components/ui/inputs/PhoneTextInput";
 import Button from "@/components/ui/button";
@@ -21,6 +21,12 @@ import { useAppSession } from "@/hooks/useAppSession";
 import Spinner from "@/components/ui/loaders/Spinner";
 import FacebookIcon from "@/components/ui/icons/FacebookIcon";
 import { getUserCompanies } from "@/utils/permissions";
+import {
+  useLookupCustomerByEmailQuery,
+  useLookupCustomersQuery,
+} from "@/api/queries/users";
+import type { TCustomerLookupItem } from "@/api/entities/user/customer";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export type AuthForm = {
   first_name: string;
@@ -31,6 +37,7 @@ export type AuthForm = {
 
 type Props = {
   isDashboard?: boolean;
+  companyId?: string;
   hideLabelRequiredSymbol?: boolean;
   nameInputPlaceholder?: string;
   isOpen: boolean;
@@ -41,6 +48,7 @@ type Props = {
 
 const AuthModal: FC<Props> = ({
   isDashboard,
+  companyId = "",
   hideLabelRequiredSymbol,
   nameInputPlaceholder,
   isLoading,
@@ -55,7 +63,50 @@ const AuthModal: FC<Props> = ({
   const socialAuth = searchParams.get("socialAuth");
   const storeId = searchParams.get("storeId");
 
-  const { handleSubmit, register, setError, setValue, formState } = useForm<AuthForm>();
+  const { control, handleSubmit, register, setError, setValue, formState } =
+    useForm<AuthForm>();
+  const email = useWatch({ control, name: "email", defaultValue: "" });
+  const normalizedEmail = email.trim().toLowerCase();
+  const debouncedEmail = useDebounce(normalizedEmail, 350);
+  const [selectedCustomerEmail, setSelectedCustomerEmail] = useState("");
+  const isCompleteEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(debouncedEmail);
+  const lookupEnabled = Boolean(
+    isDashboard &&
+    isOpen &&
+    companyId &&
+    debouncedEmail.length >= 3 &&
+    selectedCustomerEmail !== normalizedEmail
+  );
+  const customerLookupQuery = useLookupCustomersQuery({
+    companyId,
+    search: debouncedEmail,
+    limit: 5,
+    enabled: lookupEnabled,
+  });
+  const companyMatches = useMemo(
+    () => customerLookupQuery.data?.results ?? [],
+    [customerLookupQuery.data?.results]
+  );
+  const globalLookupQuery = useLookupCustomerByEmailQuery({
+    companyId,
+    email: debouncedEmail,
+    enabled: Boolean(lookupEnabled && isCompleteEmail),
+  });
+  const customerSuggestions = useMemo(() => {
+    if (!globalLookupQuery.data) return companyMatches;
+    return [
+      globalLookupQuery.data,
+      ...companyMatches.filter((customer) => customer.id !== globalLookupQuery.data?.id),
+    ].slice(0, 5);
+  }, [companyMatches, globalLookupQuery.data]);
+  const isCustomerLookupPending =
+    customerLookupQuery.isFetching || globalLookupQuery.isFetching;
+
+  useEffect(() => {
+    if (selectedCustomerEmail && normalizedEmail !== selectedCustomerEmail) {
+      setSelectedCustomerEmail("");
+    }
+  }, [normalizedEmail, selectedCustomerEmail]);
 
   useEffect(() => {
     if (socialAuth === "google" || socialAuth === "facebook") {
@@ -82,6 +133,52 @@ const AuthModal: FC<Props> = ({
         handleContinue({ ...formData, phone });
       }
     }
+  };
+
+  const selectCustomer = (customer: TCustomerLookupItem) => {
+    const customerEmail = customer.email.trim().toLowerCase();
+    setValue("first_name", customer.firstName || "", { shouldValidate: true });
+    setValue("last_name", customer.lastName || "", { shouldValidate: true });
+    setValue("email", customer.email, { shouldValidate: true });
+    setValue("phone", customer.phone || "", { shouldValidate: true });
+    setSelectedCustomerEmail(customerEmail);
+  };
+
+  const renderCustomerSuggestions = () => {
+    if (isCustomerLookupPending) {
+      return (
+        <div className="flex min-h-12 items-center justify-center">
+          <Spinner className="h-5" />
+        </div>
+      );
+    }
+
+    if (!customerSuggestions.length) return null;
+
+    return (
+      <div role="listbox" aria-label="Customer suggestions">
+        {customerSuggestions.map((customer) => {
+          const name = `${customer.firstName || ""} ${customer.lastName || ""}`.trim();
+          return (
+            <button
+              key={customer.id}
+              type="button"
+              role="option"
+              aria-selected={selectedCustomerEmail === customer.email.toLowerCase()}
+              className="w-full px-3 py-2 text-left hover:bg-greyBg"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => selectCustomer(customer)}
+            >
+              {name && <span className="block text-sm font-bold">{name}</span>}
+              <span className="block text-sm text-greyPrimary">{customer.email}</span>
+              {customer.phone && (
+                <span className="block text-xs text-greyPrimary">{customer.phone}</span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    );
   };
 
   const handleSubmitWithPhoneHandler = (formData: AuthForm) => {
@@ -144,6 +241,8 @@ const AuthModal: FC<Props> = ({
           <TextField
             className="px-3 rounded-xl border border-greyOutline"
             id="email"
+            type="email"
+            autoComplete="off"
             register={register}
             error={formState.errors.email}
             rules={{
@@ -152,6 +251,15 @@ const AuthModal: FC<Props> = ({
             showError
             highlightFullBorderWhenFocus
             iconLeft={<PersonIcon />}
+            withSelect={
+              lookupEnabled && (isCustomerLookupPending || customerSuggestions.length > 0)
+            }
+            renderSelectContent={renderCustomerSuggestions()}
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={
+              lookupEnabled && (isCustomerLookupPending || customerSuggestions.length > 0)
+            }
           />
         </>
       );

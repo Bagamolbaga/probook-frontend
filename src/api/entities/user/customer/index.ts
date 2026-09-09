@@ -31,6 +31,22 @@ export type TBookingCustomerListItem = {
   moneySpent: number;
 };
 
+export type TCustomerLookupItem = Pick<
+  TBookingCustomerListItem,
+  "id" | "email" | "firstName" | "lastName" | "phone" | "avatar"
+>;
+
+export type TLookupCustomersArgs = {
+  companyId: string;
+  search: string;
+  limit?: number;
+};
+
+export type TLookupCustomerByEmailArgs = {
+  companyId: string;
+  email: string;
+};
+
 export type TBookingCustomerDetails = TBookingCustomerListItem & {
   firstBooking: string;
 };
@@ -124,6 +140,20 @@ export class ApiClientCustomerUser extends ApiClientCore {
 
     return this.instance.get<TGetResponse<TBookingCustomerListItem[]>>(
       `/companies/${companyId}/customers?${params.toString()}`
+    );
+  }
+
+  async lookupCustomers({ companyId, search, limit = 5 }: TLookupCustomersArgs) {
+    const params = new URLSearchParams({ search, limit: String(limit) });
+    return this.instance.get<TGetResponse<TCustomerLookupItem[]>>(
+      `/companies/${companyId}/customers/lookup?${params.toString()}`
+    );
+  }
+
+  async lookupCustomerByEmail({ companyId, email }: TLookupCustomerByEmailArgs) {
+    const params = new URLSearchParams({ email });
+    return this.instance.get<TCustomerLookupItem | null>(
+      `/companies/${companyId}/customers/lookup-by-email?${params.toString()}`
     );
   }
 
