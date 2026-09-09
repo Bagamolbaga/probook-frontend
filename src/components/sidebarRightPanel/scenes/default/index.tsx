@@ -7,7 +7,7 @@ import { cn } from "@/utils/cn";
 import { useGetCompanyDetailsQuery } from "@/api/queries/company";
 import Header from "../../Header";
 import MockAvatar from "@/assets/home_page_section_7_3.png";
-import LogoCircleIcon from "@/components/ui/icons/LogoCircle";
+import LogoIcon from "@/components/ui/icons/LogoIcon";
 import { useAppSession } from "@/hooks/useAppSession";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
 
@@ -35,7 +35,7 @@ export const DefaultHeader = () => {
         >
           {!session?.user?.avatar ? (
             <div className="w-full h-full p-1 overflow-hidden">
-              <LogoCircleIcon className="w-full h-full" />
+              <LogoIcon className="w-full h-full" />
             </div>
           ) : (
             <Image width={36} height={36} src={avatarSrc} alt={"Bowers"} />

@@ -19,6 +19,7 @@ import { useTranslations } from "next-intl";
 import { formatCurrency } from "@/utils/formatCurrency";
 import MainPagesTitle from "@/components/mainPagesTitle";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { isOwnerMembership } from "@/utils/permissions";
 import { useRouter } from "@/i18n";
 import { MAIN_NAVIGATION_ENUM } from "@/constants/navigations";
 import Table from "@/components/ui/table";
@@ -38,7 +39,8 @@ const EMPTY_CUSTOMER_ROWS: TRowItem[] = [];
 
 const CustomerDatabaseScene = () => {
   const t = useTranslations();
-  const { companyId } = useGetCompanyId();
+  const { companyId, activeCompany } = useGetCompanyId();
+  const canCreateCustomers = isOwnerMembership(activeCompany);
   const router = useRouter();
   const toggleOpenSidebar = useStore(useThemeStore, (st) => st.toggleOpenSidebar);
 
@@ -231,15 +233,18 @@ const CustomerDatabaseScene = () => {
           <p className="mt-3 text-sm text-center text-greyPrimary">
             {t("customerDatabase.empty.subTitle")}
           </p>
-          <Button
-            className="mt-6 flex items-center gap-3"
-            variant="primary"
-            // onClick={() => setIsOpenCreateModal(true)}
-            // disabled={createCompanySpecialistsQuery.isPending}
-          >
-            <PlusRight />
-            <p className="text-sm text-white">{t("customerDatabase.empty.createList")}</p>
-          </Button>
+          {canCreateCustomers && (
+            <Button
+              className="mt-6 flex items-center gap-3"
+              variant="primary"
+              onClick={openCreateModalHandler}
+            >
+              <PlusRight />
+              <p className="text-sm text-white">
+                {t("customerDatabase.empty.createList")}
+              </p>
+            </Button>
+          )}
         </div>
       </div>
     );
@@ -279,14 +284,16 @@ const CustomerDatabaseScene = () => {
                     )}
                   </p>
                 </div>
-                <Button
-                  className="text-nowrap"
-                  variant="dark"
-                  iconLeft={<PlusRight />}
-                  onClick={openCreateModalHandler}
-                >
-                  {t("customerDatabase.createNewBtn")}
-                </Button>
+                {canCreateCustomers && (
+                  <Button
+                    className="text-nowrap"
+                    variant="dark"
+                    iconLeft={<PlusRight />}
+                    onClick={openCreateModalHandler}
+                  >
+                    {t("customerDatabase.createNewBtn")}
+                  </Button>
+                )}
               </div>
             </div>
             <div className="flex mt-6 h-full sm:mt-5">

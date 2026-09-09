@@ -11,6 +11,8 @@ import MainPagesTitle from "@/components/mainPagesTitle";
 import SuperAdminChecker from "@/components/superAdminChecker";
 import { useStore } from "zustand";
 import { useSuperAdminStore } from "@/stores/superAdmin";
+import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { isOwnerMembership } from "@/utils/permissions";
 
 const NAVIGATION: NavigationItemProps[] = [
   {
@@ -84,9 +86,17 @@ const NavigationItem: FC<NavigationItemProps> = ({ title, desc, href, icon: Icon
 };
 
 const AccountLayout = ({ children }: PropsWithChildren) => {
-  const setSelectCompany = useStore(useSuperAdminStore, (state) => state.setSelectCompany);
+  const setSelectCompany = useStore(
+    useSuperAdminStore,
+    (state) => state.setSelectCompany
+  );
+  const { activeCompany, setActiveCompanyId } = useGetCompanyId();
+  const navigation = isOwnerMembership(activeCompany)
+    ? NAVIGATION
+    : NAVIGATION.filter((item) => item.href !== "/account/billing");
   const logoutHandler = () => {
     setSelectCompany(undefined);
+    setActiveCompanyId(undefined);
     void signOut({ callbackUrl: "/sign-in" });
   };
 
@@ -101,7 +111,7 @@ const AccountLayout = ({ children }: PropsWithChildren) => {
             {children}
             <div className="min-w-[280px] flex flex-col justify-between">
               <div className="w-full flex flex-col rounded-xl border border-greyOutlineSecondary">
-                {NAVIGATION.map((i) => (
+                {navigation.map((i) => (
                   <NavigationItem key={i.href} {...i} />
                 ))}
               </div>

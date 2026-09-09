@@ -3,7 +3,7 @@
 "use client";
 
 import Image from "next/image";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { MAIN_NAVIGATION } from "@/constants/navigations";
 import { useStore } from "zustand";
 import { Link, usePathname, useTranslations } from "@/i18n";
@@ -13,41 +13,53 @@ import { useThemeStore } from "@/stores/theme";
 import useWindowWidth from "@/hooks/useWindowWidth";
 import NavItem from "./NavItem";
 import LogoFullIcon from "../ui/icons/LogoFull";
-import LogoWithoutSymbolsIcon from "../ui/icons/LogoWithoutSymbols";
+import LogoIcon from "../ui/icons/LogoIcon";
 
-import MockAvatar from "@/assets/home_page_section_7_3.png";
 import { useMemo } from "react";
 import { useGetCompanyDetailsQuery } from "@/api/queries/company";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import {
+  hasPermission,
+  isOwnerMembership,
+  SPECIALIST_PERMISSIONS,
+} from "@/utils/permissions";
 
 const Sidebar = () => {
   const t = useTranslations();
   const { data: session } = useSession();
   const { deviceType } = useWindowWidth();
   const sidebarIsOpen = useStore(useThemeStore, (state) => state.sidebarIsOpen);
-  const {companyId} = useGetCompanyId()
+  const { companyId, activeCompany } = useGetCompanyId();
+  const isOwner = isOwnerMembership(activeCompany);
 
   const getCompanyDetailsQuery = useGetCompanyDetailsQuery({
-    companyId
+    companyId,
   });
 
   const isMobileOrTablet = deviceType === "mobile" || deviceType === "tablet";
 
   const MAIN_NAVIGATION_i18n = useMemo(
     () =>
-      MAIN_NAVIGATION.map((i) => ({
+      MAIN_NAVIGATION.filter((item) => {
+        if (isOwner) return true;
+
+        return (
+          item.path === "/booking-creation" ||
+          item.path === "/booking-management" ||
+          (item.path === "/customer-database" &&
+            hasPermission(activeCompany, SPECIALIST_PERMISSIONS.readAssignedCustomers))
+        );
+      }).map((i) => ({
         ...i,
         label: t(`navigation.sidebar.${i.i18_id}` as any),
       })),
-    []
+    [activeCompany, isOwner, t]
   );
 
   const companyDetails = useMemo(
     () => getCompanyDetailsQuery.data,
     [getCompanyDetailsQuery.data]
   );
-
-  console.log({user: session?.user});
 
   return (
     <nav className="h-full pt-[26px] pb-[28px] flex flex-col">
@@ -59,7 +71,7 @@ const Sidebar = () => {
             "hidden pointer-events-none": isMobileOrTablet,
           })}
         />
-        <LogoWithoutSymbolsIcon
+        <LogoIcon
           className={clsx("absolute top-0 left-[30px] w-fit h-full transition-all", {
             "opacity-0 pointer-events-none": sidebarIsOpen,
             "opacity-100": !sidebarIsOpen,
@@ -75,17 +87,17 @@ const Sidebar = () => {
         </div>
 
         <NavItem
-          label={companyDetails?.name || ""}
+          label={companyDetails?.name || activeCompany?.name || ""}
           path="/account"
           isActive={usePathname().includes("/account")}
           icon={() =>
-            companyDetails?.logo ? (
+            session?.user?.avatar ? (
               <Image
                 className="w-full h-full object-cover"
-                src={session?.user?.avatar || ""}
+                src={session.user.avatar}
                 width={30}
                 height={30}
-                alt={companyDetails.name}
+                alt={companyDetails?.name || activeCompany?.name || "Account"}
               />
             ) : null
           }

@@ -62,7 +62,10 @@ export type CreateBookingForm = {
 
 const BookingCreation = () => {
   const t = useTranslations();
-  const { companyId } = useGetCompanyId();
+  const { companyId, activeCompany } = useGetCompanyId();
+  const specialistMode = Boolean(
+    activeCompany?.roles.includes("SPECIALIST") && !activeCompany.roles.includes("OWNER")
+  );
 
   const router = useRouter();
   const rightPanelRef = useRef<HTMLDivElement>(null);
@@ -327,13 +330,20 @@ const BookingCreation = () => {
           )
       );
 
-      return getCompanySpecialistsQuery.data.results.filter((specialist) =>
-        serviceSpecialistIds.every((ids) => ids.has(specialist.id))
+      return getCompanySpecialistsQuery.data.results.filter(
+        (specialist) =>
+          (!specialistMode || specialist.id === activeCompany?.specialistProfileId) &&
+          serviceSpecialistIds.every((ids) => ids.has(specialist.id))
       );
     }
 
     return [];
-  }, [getCompanySpecialistsQuery.data, form.watch("selectedServices")]);
+  }, [
+    activeCompany?.specialistProfileId,
+    form.watch("selectedServices"),
+    getCompanySpecialistsQuery.data,
+    specialistMode,
+  ]);
 
   const STEPS_i18n = useMemo(
     () => STEPS.map((s) => ({ ...s, text: t(`booking.steps.${s.id}` as any) })),
@@ -390,6 +400,7 @@ const BookingCreation = () => {
           )}
           {form.watch("_stepId") === "staffs" && (
             <StaffSelection
+              isHideAny={specialistMode}
               specialists={specialistForOnlySelectedServices}
               selectedSpecialist={form.watch("selectedStaff")}
               selectSpecialistHandler={selectSpecialistHandler}

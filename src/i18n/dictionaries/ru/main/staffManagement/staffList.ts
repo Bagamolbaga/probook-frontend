@@ -1,5 +1,16 @@
 export const staffList = {
   createNewBtn: "Создать",
+  invitation: {
+    created: "Приглашение создано",
+    title: "Приглашение специалиста",
+    deliveryStatus: "Статус отправки письма: {status}",
+    link: "Ссылка приглашения",
+    copy: "Скопировать",
+    copied: "Ссылка приглашения скопирована",
+    pendingTitle: "Ожидающие приглашения",
+    resend: "Отправить снова",
+    revoke: "Отозвать",
+  },
   empty: {
     title: "Сотрудники не найдены?",
     subTitle: "Добавьте информацию о новом сотруднике",

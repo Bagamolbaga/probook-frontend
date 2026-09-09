@@ -1,5 +1,16 @@
 export const staffList = {
   createNewBtn: "Create new",
+  invitation: {
+    created: "Invitation created",
+    title: "Specialist invitation",
+    deliveryStatus: "Email delivery: {status}",
+    link: "Invitation link",
+    copy: "Copy link",
+    copied: "Invitation link copied",
+    pendingTitle: "Pending invitations",
+    resend: "Resend",
+    revoke: "Revoke",
+  },
   empty: {
     title: "No employees found?",
     subTitle:

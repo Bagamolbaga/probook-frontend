@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import Button from "@/components/ui/button";
-import LogoCircleIcon from "@/components/ui/icons/LogoCircle";
+import LogoIcon from "@/components/ui/icons/LogoIcon";
 import { Link } from "@/i18n";
 import { cn } from "@/utils/cn";
 import { toSlug } from "@/utils/toSlug";
@@ -86,7 +86,7 @@ const TopServiceProviders = () => {
               {c.logo ? (
                 <Image className="object-cover" fill src={c.logo} alt={`${c.name} - Bowers`} />
               ) : (
-                <LogoCircleIcon fillColor="fill-darkPrimary" className="!size-14" />
+                <LogoIcon className="!size-14" />
               )}
             </div>
             <div>

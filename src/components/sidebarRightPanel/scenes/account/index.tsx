@@ -7,7 +7,7 @@ import MockAvatar from "@/assets/home_page_section_7_3.png";
 import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
 import NoteIcon from "@/components/ui/icons/Note";
 import Badge from "@/components/ui/badge";
-import LogoCircleIcon from "@/components/ui/icons/LogoCircle";
+import LogoIcon from "@/components/ui/icons/LogoIcon";
 import { cn } from "@/utils/cn";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
 
@@ -25,7 +25,7 @@ export const AccountHeader = () => {
         >
           {!session?.user?.avatar ? (
             <div className="w-full h-full p-1 overflow-hidden">
-              <LogoCircleIcon className="w-full h-full" />
+              <LogoIcon className="w-full h-full" />
             </div>
           ) : (
             <Image width={36} height={36} src={avatarSrc} alt={"Bowers"} />

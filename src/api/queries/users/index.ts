@@ -46,17 +46,25 @@ export const useUploadUserAvatarQuery = () => {
 
 export const useGetCustomersQuery = (options: TGetCustomersArgs) => {
   const apiClient = useApiClient();
+  const { data: session } = useAppSession();
   const { queryParams = {}, companyId } = options;
+  const currentUserId = session?.user?._id || session?.user?.id;
 
   const fetcherFn = async () => {
     return (await apiClient.customerUser.getCustomers({ companyId, queryParams })).data;
   };
 
   return useQuery({
-    queryKey: ["customers", companyId, ...Object.values(queryParams)],
+    queryKey: [
+      "customers",
+      "authenticated",
+      currentUserId,
+      companyId,
+      ...Object.values(queryParams),
+    ],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: !!companyId,
+    enabled: Boolean(companyId && session?.accessToken && currentUserId),
   });
 };
 
@@ -80,7 +88,9 @@ export const useGetCustomerDetailsQuery = (
   options: Options<TGetCustomerDetailsArgs, TBookingCustomerDetails>
 ) => {
   const apiClient = useApiClient();
+  const { data: session } = useAppSession();
   const { companyId, customerId } = options;
+  const currentUserId = session?.user?._id || session?.user?.id;
 
   const fetcherFn = async () => {
     return (await apiClient.customerUser.getCustomerDetails({ companyId, customerId }))
@@ -88,10 +98,10 @@ export const useGetCustomerDetailsQuery = (
   };
 
   return useQuery({
-    queryKey: ["customer_details", companyId, customerId],
+    queryKey: ["customer_details", "authenticated", currentUserId, companyId, customerId],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: Boolean(companyId),
+    enabled: Boolean(companyId && customerId && session?.accessToken && currentUserId),
   });
 };
 
@@ -99,7 +109,9 @@ export const useGetCustomerBookingsHistoryQuery = (
   options: Options<TGetCustomerBookingHistoryArgs, unknown>
 ) => {
   const apiClient = useApiClient();
+  const { data: session } = useAppSession();
   const { companyId, customerId, queryParams = {} } = options;
+  const currentUserId = session?.user?._id || session?.user?.id;
 
   const fetcherFn = async () => {
     return (
@@ -112,10 +124,17 @@ export const useGetCustomerBookingsHistoryQuery = (
   };
 
   return useQuery({
-    queryKey: ["customer_bookings", companyId, customerId, ...Object.values(queryParams)],
+    queryKey: [
+      "customer_bookings",
+      "authenticated",
+      currentUserId,
+      companyId,
+      customerId,
+      ...Object.values(queryParams),
+    ],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: Boolean(companyId && customerId),
+    enabled: Boolean(companyId && customerId && session?.accessToken && currentUserId),
   });
 };
 

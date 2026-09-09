@@ -16,11 +16,12 @@ import { TGetServicesTypesArgs } from "@/api/entities/services";
 
 type Options<T> = T & {
   queryOptions?: UndefinedInitialDataOptions;
+  enabled?: boolean;
 };
 
 export const useGetCompanyServicesQuery = (options: Options<TGetCompanyServicesArgs>) => {
   const apiClient = useApiClient();
-  const { companyId, queryParams = {} } = options;
+  const { companyId, queryParams = {}, enabled } = options;
 
   const fetcherFn = async () => {
     return (await apiClient.company.getCompanyServices({ companyId, queryParams })).data;
@@ -30,8 +31,7 @@ export const useGetCompanyServicesQuery = (options: Options<TGetCompanyServicesA
     queryKey: ["services", companyId, ...Object.values(queryParams)],
     queryFn: fetcherFn,
     staleTime: 1000 * 60,
-    enabled: !!companyId,
-    // ...queryOptions,
+    enabled: enabled ?? !!companyId,
   });
 };
 

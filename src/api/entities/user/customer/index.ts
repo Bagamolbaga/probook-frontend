@@ -122,7 +122,7 @@ export class ApiClientCustomerUser extends ApiClientCore {
 
     const params = new URLSearchParams(formattedQueryParams);
 
-    return this.instanceWithoutAuth.get<TGetResponse<TBookingCustomerListItem[]>>(
+    return this.instance.get<TGetResponse<TBookingCustomerListItem[]>>(
       `/companies/${companyId}/customers?${params.toString()}`
     );
   }
@@ -132,7 +132,7 @@ export class ApiClientCustomerUser extends ApiClientCore {
   }
 
   async getCustomerDetails({ companyId, customerId }: TGetCustomerDetailsArgs) {
-    return this.instanceWithoutAuth.get<TBookingCustomerDetails>(
+    return this.instance.get<TBookingCustomerDetails>(
       `/companies/${companyId}/customers/${customerId}`
     );
   }
@@ -144,7 +144,7 @@ export class ApiClientCustomerUser extends ApiClientCore {
   }: TGetCustomerBookingHistoryArgs) {
     const params = new URLSearchParams(queryParams);
 
-    return this.instanceWithoutAuth.get<TGetResponse<TGetCustomerBookingHistoryRes>>(
+    return this.instance.get<TGetResponse<TGetCustomerBookingHistoryRes>>(
       `/companies/${companyId}/customers/${customerId}/bookings?${params.toString()}`
     );
   }

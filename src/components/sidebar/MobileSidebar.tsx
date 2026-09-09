@@ -7,21 +7,27 @@ import { useGetCompanyId } from "@/hooks/useGetCompanyId";
 import Image from "next/image";
 import Spinner from "../ui/loaders/Spinner";
 import { usePathname } from "@/i18n";
+import { isOwnerMembership } from "@/utils/permissions";
 
 const MobileSidebar = () => {
   const t = useTranslations();
-  const { companyId } = useGetCompanyId();
+  const { companyId, activeCompany } = useGetCompanyId();
+  const isOwner = isOwnerMembership(activeCompany);
   const getCompanyDetailsQuery = useGetCompanyDetailsQuery({
     companyId,
   });
 
   const MAIN_NAVIGATION_i18n = useMemo(
     () =>
-      MAIN_NAVIGATION.map((i) => ({
+      MAIN_NAVIGATION.filter((item) =>
+        isOwner
+          ? true
+          : item.path === "/booking-creation" || item.path === "/booking-management"
+      ).map((i) => ({
         ...i,
         label: t(`navigation.sidebar.${i.i18_id}` as any),
       })),
-    []
+    [isOwner, t]
   );
 
   const renderLogoIcon = () => {

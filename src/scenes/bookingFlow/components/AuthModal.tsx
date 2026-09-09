@@ -20,6 +20,7 @@ import { useSearchParams } from "next/navigation";
 import { useAppSession } from "@/hooks/useAppSession";
 import Spinner from "@/components/ui/loaders/Spinner";
 import FacebookIcon from "@/components/ui/icons/FacebookIcon";
+import { getUserCompanies } from "@/utils/permissions";
 
 export type AuthForm = {
   first_name: string;
@@ -64,7 +65,7 @@ const AuthModal: FC<Props> = ({
   }, [session?.user, setValue, socialAuth]);
 
   useEffect(() => {
-    if (session && !session.user?.company_id && session.user?.email) {
+    if (session?.user?.email && getUserCompanies(session.user).length === 0) {
       setValue("first_name", (session?.user as any)?.name || "");
       setValue("email", session?.user?.email || "");
     }
@@ -108,7 +109,7 @@ const AuthModal: FC<Props> = ({
   const authWithSocial = useMemo(() => {
     if (socialAuth === "google" || socialAuth === "facebook") return true;
 
-    if (session && !session.user?.company_id && session.user?.email) return true;
+    if (session?.user?.email && getUserCompanies(session.user).length === 0) return true;
   }, [socialAuth, session]);
 
   const renderEmailOrPhoneInput = () => {

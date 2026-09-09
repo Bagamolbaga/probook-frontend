@@ -6,6 +6,16 @@ export const BOOKING_STATUSES = [
   "OFF",
 ] as const satisfies readonly TApiBooking["status"][];
 
+export const SPECIALIST_BOOKING_STATUS_TRANSITIONS: Partial<
+  Record<TApiBooking["status"], readonly TApiBooking["status"][]>
+> = {
+  PENDING: ["CONFIRMED", "OFF"],
+  CONFIRMED: ["COMPLETED", "OFF"],
+};
+
+export const getSpecialistBookingStatusTransitions = (status: TApiBooking["status"]) =>
+  SPECIALIST_BOOKING_STATUS_TRANSITIONS[status] || [];
+
 type BookingStatusStyle = {
   timelineClassName: string;
   textClassName: string;

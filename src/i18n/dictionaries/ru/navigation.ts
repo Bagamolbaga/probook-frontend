@@ -19,6 +19,7 @@ export const navigation = {
     },
   },
   sidebar: {
+    activeCompany: "Активная компания",
     dashboard: "Панель управления",
     "booking-management": "Управление бронированиями",
     "booking-creation": "Создать бронь",

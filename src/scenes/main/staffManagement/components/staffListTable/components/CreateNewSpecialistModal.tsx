@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useCreateCompanySpecialistsQuery } from "@/api/queries/company/specialists";
 import Button from "@/components/ui/button";
 import StoreIcon from "@/components/ui/icons/Store";
 import TextField from "@/components/ui/inputs/TextField";
@@ -33,6 +32,7 @@ type Props = {
 
 const CreateUpdateSpecialistModal: FC<Props> = ({
   isOpen,
+  isUpdate,
   headerTitle,
   form,
   actionButton,
@@ -46,8 +46,6 @@ const CreateUpdateSpecialistModal: FC<Props> = ({
   const getCompanyShiftsQuery = useGetCompanyShiftsQuery({
     companyId,
   });
-  const createCompanySpecialistsQuery = useCreateCompanySpecialistsQuery();
-
   const localCloseHandler = () => {
     form.reset();
     handleClose();
@@ -119,6 +117,7 @@ const CreateUpdateSpecialistModal: FC<Props> = ({
               placeholder="First name..."
               register={form.register}
               rules={{ required: true }}
+              disabled={isUpdate}
               error={form.formState.errors.firstName}
             />
             <TextField
@@ -128,6 +127,7 @@ const CreateUpdateSpecialistModal: FC<Props> = ({
               placeholder="Last name..."
               register={form.register}
               rules={{ required: true }}
+              disabled={isUpdate}
               error={form.formState.errors.lastName}
             />
           </div>
@@ -139,6 +139,7 @@ const CreateUpdateSpecialistModal: FC<Props> = ({
               placeholder="Email..."
               register={form.register}
               rules={{ required: true }}
+              disabled={isUpdate}
               error={form.formState.errors.email}
             />
           </div>
@@ -290,11 +291,7 @@ const CreateUpdateSpecialistModal: FC<Props> = ({
         </div>
 
         <div className="mt-5 flex items-center justify-between gap-5">
-          <Button
-            variant="resting"
-            onClick={localCloseHandler}
-            disabled={createCompanySpecialistsQuery.isPending}
-          >
+          <Button variant="resting" onClick={localCloseHandler}>
             Cancel
           </Button>
           {actionButton}
