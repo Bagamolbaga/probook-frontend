@@ -48,8 +48,8 @@ export type { FormattedDataItem } from "../components/types";
 const TimeLineCalendar = () => {
   const t = useTranslations();
   const locale = useLocale() as keyof typeof DATE_FNS_LOCALES;
-  const { companyId } = useGetCompanyId();
-
+  const { companyId, activeCompany } = useGetCompanyId();
+  const specialistProfileId = activeCompany?.specialistProfileId;
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isOpenBookingDetailModal, setIsOpenBookingDetailModal] = useState(false);
 
@@ -103,9 +103,14 @@ const TimeLineCalendar = () => {
       return [];
     }
 
+    const specialists = activeCompany?.roles.includes("OWNER")
+      ? getCompanySpecialistsQuery.data.results
+      : getCompanySpecialistsQuery.data.results.filter(
+          (specialist) => specialist.id === specialistProfileId
+        );
     const data: FormattedDataItem[] = [];
 
-    getCompanySpecialistsQuery.data.results.forEach((s) => {
+    specialists.forEach((s) => {
       data.push({
         id: s.id,
         company: s.company || companyId,
@@ -166,6 +171,8 @@ const TimeLineCalendar = () => {
 
     return res;
   }, [
+    activeCompany,
+    specialistProfileId,
     getCompanySpecialistsQuery.data,
     getCompanyShiftsForDateRangeQuery.data,
     getBookingsQuery.data,
@@ -173,7 +180,6 @@ const TimeLineCalendar = () => {
     revalidateQueriesHandler,
     selectedDate,
   ]);
-
   const { HEADER_TIMES, COMPANY_SLOTS } = useMemo(() => {
     const slotManager = new TimeManager();
     const weekDay = format(selectedDate, "EEEE") as WorkingScheduleWeekDays;

@@ -383,7 +383,7 @@ export class ApiClientCompany extends ApiClientCore {
       start: format(start, "yyyy-MM-dd"),
       end: format(end, "yyyy-MM-dd"),
     });
-    const response = await this.instanceWithoutAuth.get<
+    const response = await this.instance.get<
       TGetResponse<
         {
           specialist: TSpecialist;
