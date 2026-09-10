@@ -16,7 +16,6 @@ import LogoFullIcon from "../ui/icons/LogoFull";
 import LogoIcon from "../ui/icons/LogoIcon";
 
 import { useMemo } from "react";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
 import {
   hasPermission,
@@ -29,12 +28,8 @@ const Sidebar = () => {
   const { data: session } = useSession();
   const { deviceType } = useWindowWidth();
   const sidebarIsOpen = useStore(useThemeStore, (state) => state.sidebarIsOpen);
-  const { companyId, activeCompany } = useGetCompanyId();
+  const { activeCompany } = useGetCompanyId();
   const isOwner = isOwnerMembership(activeCompany);
-
-  const getCompanyDetailsQuery = useGetCompanyDetailsQuery({
-    companyId,
-  });
 
   const isMobileOrTablet = deviceType === "mobile" || deviceType === "tablet";
 
@@ -54,11 +49,6 @@ const Sidebar = () => {
         label: t(`navigation.sidebar.${i.i18_id}` as any),
       })),
     [activeCompany, isOwner, t]
-  );
-
-  const companyDetails = useMemo(
-    () => getCompanyDetailsQuery.data,
-    [getCompanyDetailsQuery.data]
   );
 
   return (
@@ -87,7 +77,7 @@ const Sidebar = () => {
         </div>
 
         <NavItem
-          label={companyDetails?.name || activeCompany?.name || ""}
+          label={session?.user?.fullName || ""}
           path="/account"
           isActive={usePathname().includes("/account")}
           icon={() =>
@@ -97,9 +87,13 @@ const Sidebar = () => {
                 src={session.user.avatar}
                 width={30}
                 height={30}
-                alt={companyDetails?.name || activeCompany?.name || "Account"}
+                alt={session?.user?.fullName || ""}
               />
-            ) : null
+            ) : (
+              <div className="size-5 flex items-center justify-center text-[8px] text-purplePrimary bg-white">
+                {(session?.user?.firstName && session?.user?.lastName) ? session.user.firstName[0] + session.user.lastName[0] : null}
+              </div>
+            )
           }
         />
       </div>
