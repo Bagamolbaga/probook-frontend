@@ -65,8 +65,8 @@ export type TUploadUserAvatarArgs = {
 export type TUpdateBusinessUserLineId = { userId: number; lineUserId: string };
 
 export class ApiClientBusinessUser extends ApiClientCore {
-  constructor(token: string, currentUserId: number) {
-    super(token, currentUserId);
+  constructor(token: string, currentUserId: number, locale: "en" | "ru") {
+    super(token, currentUserId, locale);
   }
 
   async login({ email, password }: { email: string; password: string }) {

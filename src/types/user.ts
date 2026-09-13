@@ -27,9 +27,12 @@ export type User = {
   firstName?: string;
   lastName?: string;
   avatar?: string | null;
-  authProvider?: "password" | "google" | "both";
+  authProvider?: "password" | "google" | "both" | "email";
   googleId?: string;
   emailVerified?: boolean;
+  phone?: string | null;
+  preferredLocale?: "en" | "ru";
+  accountStatus?: "ACTIVE" | "UNCLAIMED" | "SUSPENDED";
   lastLoginAt?: string;
   fullName?: string;
   createdAt?: string;

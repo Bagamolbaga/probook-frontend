@@ -120,27 +120,25 @@ const TimeLineCalendar = () => {
       });
     });
 
-    getBookingsQuery.data.results
-      // .filter((b) => b.status !== "OFF" && b.status !== "BLOCKED")
-      .forEach((item) => {
-        const specialistId = item.specialist.id || item.specialist._id;
-        const findedIdx = data.findIndex((entry) => entry.id === specialistId);
+    getBookingsQuery.data.results.forEach((item) => {
+      const specialistId = item.specialist.id || item.specialist._id;
+      const findedIdx = data.findIndex((entry) => entry.id === specialistId);
 
-        if (findedIdx >= 0) {
-          data[findedIdx]._booking = item;
-          data[findedIdx].shifts.push({
-            id: item.id,
-            customer: item.customer,
-            slots: item.slots,
-            date: item.date,
-            status: item.status,
-            totalPrice: item.totalPrice,
-            createdAt: item.createdAt,
-            updatedAt: item.updatedAt,
-            services: item.services,
-          });
-        }
-      });
+      if (findedIdx >= 0) {
+        data[findedIdx]._booking = item;
+        data[findedIdx].shifts.push({
+          id: item.id,
+          customer: item.customer,
+          slots: item.slots,
+          date: item.date,
+          status: item.status,
+          totalPrice: item.totalPrice,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          services: item.services,
+        });
+      }
+    });
 
     const selectedDateString = format(selectedDate, "yyyy-MM-dd");
     const res = data.map((item) => {

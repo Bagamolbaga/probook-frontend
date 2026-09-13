@@ -251,7 +251,7 @@ const BookingManageScene = ({ token: tokenFromUrl }: Props) => {
   if (
     typeof hoursBeforeStartBooking === "number" &&
     hoursBeforeStartBooking < HORS_BEFORE_UPDATE_LINK_IS_OVERDUE &&
-    getBookingByTokenQuery.data?.status !== "OFF" &&
+    getBookingByTokenQuery.data?.status !== "CANCELLED" &&
     getBookingByTokenQuery.data?.status !== "BLOCKED"
   ) {
     return <UpdateLinkIsOverdue />;
@@ -294,7 +294,7 @@ const BookingManageScene = ({ token: tokenFromUrl }: Props) => {
 
   if (
     bookingIsCanceled ||
-    getBookingByTokenQuery.data?.status === "OFF" ||
+    getBookingByTokenQuery.data?.status === "CANCELLED" ||
     getBookingByTokenQuery.data?.status === "BLOCKED"
   ) {
     return (

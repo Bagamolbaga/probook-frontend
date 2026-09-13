@@ -3,6 +3,7 @@
 
 import { ReactNode, createContext, useContext, useMemo } from "react";
 import { useAppSession } from "@/hooks/useAppSession";
+import { useLocale } from "next-intl";
 import { ApiClient } from "./client";
 
 export const ApiClientContext = createContext<ApiClient | null>(null);
@@ -20,14 +21,19 @@ export function useApiClient() {
 
 export const ApiClientProvider = ({ children }: { children: ReactNode }) => {
   const session = useAppSession();
+  const locale = useLocale() as "en" | "ru";
 
   const apiClient = useMemo(() => {
     if (session.data?.accessToken && session.data.user?.id) {
-      return new ApiClient(session.data.accessToken, Number(session.data.user.id));
+      return new ApiClient(
+        session.data.accessToken,
+        Number(session.data.user.id),
+        locale
+      );
     }
 
-    return new ApiClient("", -1);
-  }, [session.data?.accessToken, session.data?.user?.id]);
+    return new ApiClient("", -1, locale);
+  }, [locale, session.data?.accessToken, session.data?.user?.id]);
 
   return (
     <ApiClientContext.Provider value={apiClient}>{children}</ApiClientContext.Provider>

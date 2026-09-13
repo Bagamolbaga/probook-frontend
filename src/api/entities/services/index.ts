@@ -21,21 +21,21 @@ export type TDeleteServicesTypeArgs = { serviceTypeId: number } & Omit<
 export type TSearchServicesAndStoresArgs = {
   search?: string;
   type?: string[];
-  date?: string;  //2025-07-01
-  start_time?: string;  //15:00
-  end_time?: string;  //16:00
+  date?: string; //2025-07-01
+  start_time?: string; //15:00
+  end_time?: string; //16:00
 };
 
 export type TSearchServicesAndStoresRes = {
   services: TService[];
-  companies: TCompany[]
-}
+  companies: TCompany[];
+};
 
 export type TGetServicesTypesRes = TServiceType_new[];
 
 export class ApiClientServices extends ApiClientCore {
-  constructor(token: string, currentUserId: number) {
-    super(token, currentUserId);
+  constructor(token: string, currentUserId: number, locale: "en" | "ru") {
+    super(token, currentUserId, locale);
   }
 
   async getServicesTypes({ companyId }: TGetServicesTypesArgs) {
@@ -69,14 +69,13 @@ export class ApiClientServices extends ApiClientCore {
       `/companies/services/?latest=true`
     );
   }
-  
+
   async searchServicesAndStores(query: TSearchServicesAndStoresArgs) {
     const params = new URLSearchParams();
 
-    const safeQuery = removeEmptyFields<Record<string, string>>(query)
+    const safeQuery = removeEmptyFields<Record<string, string>>(query);
 
-    Object.entries(safeQuery).forEach(([key, value]) => params.set(key, value))
-
+    Object.entries(safeQuery).forEach(([key, value]) => params.set(key, value));
 
     return this.instanceWithoutAuth.get<TSearchServicesAndStoresRes>(
       `/companies/services/search?${params.toString()}`

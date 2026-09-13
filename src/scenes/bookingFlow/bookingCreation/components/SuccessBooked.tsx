@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { useEffect, useMemo, useState } from "react";
 import { signOut } from "next-auth/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import { fromAddress, OutputFormat, setDefaults } from "react-geocode";
@@ -14,6 +14,7 @@ import ClockIcon from "@/components/ui/icons/Clock";
 import EmployeeIcon from "@/components/ui/icons/Employee";
 import HotIcon from "@/components/ui/icons/Hot";
 import PersonIcon from "@/components/ui/icons/Person";
+import Button from "@/components/ui/button";
 import SpeedIcon from "@/components/ui/icons/Speed";
 import { useAppSession } from "@/hooks/useAppSession";
 import { TimeManager } from "@/utils/timeManager";
@@ -30,6 +31,7 @@ type Props = {
 
 const SuccessBooked = ({ company, booking }: Props) => {
   const t = useTranslations();
+  const locale = useLocale();
   const router = useRouter();
   const { data: session } = useAppSession();
 
@@ -297,6 +299,21 @@ const SuccessBooked = ({ company, booking }: Props) => {
               {t("ui.components.bookingSuccess.paidAtStore")}
             </p>
           </div>
+          {!session?.user && (
+            <div className="mt-4 rounded-lg border border-purplePrimary/20 bg-purpleExtraLight p-4 text-center">
+              <p className="text-sm text-darkPrimary">
+                {t("booking.bookedSuccessStep.cabinetDescription")}
+              </p>
+              <Link
+                href={`/sign-in?mode=email-otp&callbackUrl=/${locale}/cabinet`}
+                className="mt-3 inline-flex"
+              >
+                <Button variant="primary">
+                  {t("booking.bookedSuccessStep.openCabinet")}
+                </Button>
+              </Link>
+            </div>
+          )}
 
           <p className="mt-4 text-center text-sm text-greyPrimary">
             {t("ui.components.bookingSuccess.poweredBy")}

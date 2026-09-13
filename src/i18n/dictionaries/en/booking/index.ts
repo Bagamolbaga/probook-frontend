@@ -24,7 +24,7 @@ export const clientInformationStep = {
   name: {
     label: "Name ",
     placeholder: "Enter your name",
-    placeholderEnterClientName: "Enter client name"
+    placeholderEnterClientName: "Enter client name",
   },
   phoneNumber: {
     label: "Phone number",
@@ -43,6 +43,10 @@ export const bookedSuccessStep = {
   title: "Schedule appointment successfully",
   desc: "We will send a confirmation via your {authType}.",
   btn: "Search page",
+  cabinetDescription: "Sign in with your email code to manage this booking.",
+  openCabinet: "Open my bookings",
+  repeatUnavailable:
+    "Some previously booked services are no longer available. Please choose replacements.",
 };
 
 export const booking = {
@@ -67,5 +71,5 @@ export const booking = {
   timeStep,
   clientInformationStep,
   verifyPhoneNumberStep,
-  bookedSuccessStep
+  bookedSuccessStep,
 };

@@ -25,13 +25,14 @@ export class ApiClientCore {
   public readonly instanceWithoutAuth: AxiosInstance;
   public readonly currentUserId: number;
 
-  constructor(accessToken: string, currentUserId: number) {
+  constructor(accessToken: string, currentUserId: number, locale: "en" | "ru" = "en") {
     this.currentUserId = currentUserId;
     this.instance = axios.create({
       baseURL: process.env.NEXT_PUBLIC_API_URL || "",
       headers: {
         "Content-Type": "application/json; charset=UTF-8",
         Authorization: `Bearer ${accessToken}`,
+        "X-Locale": locale,
       },
     });
     this.instanceWithoutAuth = axiosInstanceWithoutAuth;

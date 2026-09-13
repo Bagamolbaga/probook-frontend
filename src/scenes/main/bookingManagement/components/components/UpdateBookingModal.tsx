@@ -66,10 +66,10 @@ const statusConfig: Record<
     containerClassName: BOOKING_STATUS_STYLES.COMPLETED.badgeClassName,
     dotClassName: BOOKING_STATUS_STYLES.COMPLETED.dotClassName,
   },
-  OFF: {
+  CANCELLED: {
     labelKey: "cancelled",
-    containerClassName: BOOKING_STATUS_STYLES.OFF.badgeClassName,
-    dotClassName: BOOKING_STATUS_STYLES.OFF.dotClassName,
+    containerClassName: BOOKING_STATUS_STYLES.CANCELLED.badgeClassName,
+    dotClassName: BOOKING_STATUS_STYLES.CANCELLED.dotClassName,
   },
   CONFIRMED: {
     labelKey: "confirmed",

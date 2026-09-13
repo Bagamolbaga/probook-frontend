@@ -77,6 +77,7 @@ export type TCreateBookingArgs = {
       first_name: string;
       last_name: string;
     };
+    customerLocale: "en" | "ru";
     date: Date;
     slots: number[];
     status?: TApiBooking["status"];
@@ -146,8 +147,8 @@ export type TDeleteBookingComment = {
 export class ApiClientBookings extends ApiClientCore {
   private isAuth = false;
 
-  constructor(token: string, currentUserId: number) {
-    super(token, currentUserId);
+  constructor(token: string, currentUserId: number, locale: "en" | "ru") {
+    super(token, currentUserId, locale);
 
     if (token.length) {
       this.isAuth = true;

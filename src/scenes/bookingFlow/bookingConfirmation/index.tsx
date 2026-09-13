@@ -115,13 +115,13 @@ const BookingConfirmationScene: FC<Props> = ({ token: tokenFromUrl }) => {
   if (
     typeof hoursBeforeStartBooking === "number" &&
     hoursBeforeStartBooking < HORS_BEFORE_UPDATE_LINK_IS_OVERDUE &&
-    getBookingByTokenQuery.data?.status !== "OFF" &&
+    getBookingByTokenQuery.data?.status !== "CANCELLED" &&
     getBookingByTokenQuery.data?.status !== "BLOCKED"
   ) {
     return <UpdateLinkIsOverdue />;
   }
 
-  if (bookingIsConfirmed || bookingData?.status === "OFF") {
+  if (bookingIsConfirmed || bookingData?.status === "CANCELLED") {
     return (
       <div className="w-full flex flex-col items-center">
         <div className="max-w-[530px] flex flex-col items-center">

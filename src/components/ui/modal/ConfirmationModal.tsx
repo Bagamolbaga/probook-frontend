@@ -9,6 +9,8 @@ type Props = {
   subTitle?: string;
   pozitiveHandler: () => void;
   negativeHandler: () => void;
+  negativeLabel?: string;
+  positiveLabel?: string;
 };
 
 const ConfirmationModal: FC<Props> = ({
@@ -17,6 +19,8 @@ const ConfirmationModal: FC<Props> = ({
   subTitle,
   negativeHandler,
   pozitiveHandler,
+  negativeLabel = "Cancel",
+  positiveLabel = "Confirm",
 }) => {
   return (
     <Modal isOpen={isOpen} handleClose={negativeHandler}>
@@ -28,10 +32,10 @@ const ConfirmationModal: FC<Props> = ({
         <p className="mt-4  text-center text-greyPrimary">{subTitle}</p>
         <div className="w-full mt-[76px] flex justify-between">
           <Button className="px-10" variant="resting" onClick={negativeHandler}>
-            Cancel
+            {negativeLabel}
           </Button>
           <Button className="px-10" variant="dark" onClick={pozitiveHandler}>
-            Confirm
+            {positiveLabel}
           </Button>
         </div>
       </div>

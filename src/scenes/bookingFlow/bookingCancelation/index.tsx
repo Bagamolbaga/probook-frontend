@@ -44,8 +44,8 @@ const BookingCancelation: FC<Props> = ({ token: tokenFromUrl }) => {
 
   const getBookingByTokenQuery = useGetBookingByTokenQuery({ token });
 
-  const {companyId} = useGetCompanyId()
-  
+  const { companyId } = useGetCompanyId();
+
   const getCompanyDetailsQuery = useGetCompanyDetailsQuery({ companyId });
 
   const [showCancelConfirmationModal, setShowCancelConfirmationModal] = useState(false);
@@ -109,7 +109,7 @@ const BookingCancelation: FC<Props> = ({ token: tokenFromUrl }) => {
 
     if (
       bookingIsCanceled ||
-      getBookingByTokenQuery.data?.status === "OFF" ||
+      getBookingByTokenQuery.data?.status === "CANCELLED" ||
       getBookingByTokenQuery.data?.status === "BLOCKED"
     ) {
       return null;
@@ -126,7 +126,7 @@ const BookingCancelation: FC<Props> = ({ token: tokenFromUrl }) => {
   if (
     typeof hoursBeforeStartBooking === "number" &&
     hoursBeforeStartBooking < HORS_BEFORE_UPDATE_LINK_IS_OVERDUE &&
-    getBookingByTokenQuery.data?.status !== "OFF" &&
+    getBookingByTokenQuery.data?.status !== "CANCELLED" &&
     getBookingByTokenQuery.data?.status !== "BLOCKED"
   ) {
     return <UpdateLinkIsOverdue />;
@@ -134,7 +134,7 @@ const BookingCancelation: FC<Props> = ({ token: tokenFromUrl }) => {
 
   if (
     bookingIsCanceled ||
-    bookingData?.status === "OFF" ||
+    bookingData?.status === "CANCELLED" ||
     bookingData?.status === "BLOCKED"
   ) {
     return (

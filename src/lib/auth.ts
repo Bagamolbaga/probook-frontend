@@ -11,6 +11,8 @@ export type AuthResponse = {
   tokenType: "Bearer";
   user: User;
 };
+type EmailOtpVerifyResponse =
+  AuthResponse | { requiresProfile: true; onboardingToken: string };
 
 type BackendAuthUser = NextAuthUser & {
   accessToken: string;
@@ -118,6 +120,55 @@ export const authOptions: AuthOptions = {
         }
       },
     }),
+    CredentialsProvider({
+      id: "email-otp",
+      name: "email-otp",
+      credentials: {
+        email: { type: "email" },
+        code: { type: "text" },
+        onboardingToken: { type: "text" },
+        firstName: { type: "text" },
+        lastName: { type: "text" },
+        phone: { type: "text" },
+      },
+      async authorize(credentials) {
+        try {
+          if (credentials?.onboardingToken) {
+            const { data } = await axios.post<AuthResponse>(
+              `${apiUrl}/auth/email-otp/complete-profile`,
+              {
+                onboardingToken: credentials.onboardingToken,
+                firstName: credentials.firstName,
+                lastName: credentials.lastName,
+                phone: credentials.phone || undefined,
+              }
+            );
+            return toBackendAuthUser(data);
+          }
+
+          if (!credentials?.email || !credentials.code) return null;
+          const { data } = await axios.post<EmailOtpVerifyResponse>(
+            `${apiUrl}/auth/email-otp/verify`,
+            {
+              email: credentials.email,
+              code: credentials.code,
+            }
+          );
+          if ("requiresProfile" in data) {
+            throw new Error(`EMAIL_OTP_PROFILE_REQUIRED:${data.onboardingToken}`);
+          }
+          return toBackendAuthUser(data);
+        } catch (error) {
+          if (
+            error instanceof Error &&
+            error.message.startsWith("EMAIL_OTP_PROFILE_REQUIRED:")
+          ) {
+            throw error;
+          }
+          return null;
+        }
+      },
+    }),
   ],
   cookies: {
     sessionToken: {
@@ -153,7 +204,9 @@ export const authOptions: AuthOptions = {
 
       if (
         user &&
-        (account?.provider === "credentials" || account?.provider === "google")
+        (account?.provider === "credentials" ||
+          account?.provider === "google" ||
+          account?.provider === "email-otp")
       ) {
         const backendUser = user as BackendAuthUser;
         return {

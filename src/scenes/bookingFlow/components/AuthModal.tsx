@@ -12,7 +12,7 @@ import CloseIcon from "@/components/ui/icons/Close";
 import TextField from "@/components/ui/inputs/TextField";
 import Modal from "@/components/ui/modal";
 import PersonIcon from "@/components/ui/icons/Person";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import GoogleIcon from "@/components/ui/icons/GoogleIcon";
 import { signIn } from "next-auth/react";
 import { Link, usePathname } from "@/i18n";
@@ -33,6 +33,7 @@ export type AuthForm = {
   last_name: string;
   phone: string;
   email: string;
+  preferredLocale: "en" | "ru";
 };
 
 type Props = {
@@ -57,6 +58,7 @@ const AuthModal: FC<Props> = ({
   handleClose,
 }) => {
   const t = useTranslations();
+  const currentLocale = useLocale() as "en" | "ru";
   const { data: session } = useAppSession();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -64,7 +66,7 @@ const AuthModal: FC<Props> = ({
   const storeId = searchParams.get("storeId");
 
   const { control, handleSubmit, register, setError, setValue, formState } =
-    useForm<AuthForm>();
+    useForm<AuthForm>({ defaultValues: { preferredLocale: currentLocale } });
   const email = useWatch({ control, name: "email", defaultValue: "" });
   const normalizedEmail = email.trim().toLowerCase();
   const debouncedEmail = useDebounce(normalizedEmail, 350);
@@ -105,22 +107,32 @@ const AuthModal: FC<Props> = ({
   useEffect(() => {
     if (selectedCustomerEmail && normalizedEmail !== selectedCustomerEmail) {
       setSelectedCustomerEmail("");
+      setValue("preferredLocale", currentLocale);
     }
-  }, [normalizedEmail, selectedCustomerEmail]);
+  }, [currentLocale, normalizedEmail, selectedCustomerEmail, setValue]);
 
   useEffect(() => {
     if (socialAuth === "google" || socialAuth === "facebook") {
       setValue("first_name", (session?.user as any)?.name || "");
       setValue("email", session?.user?.email || "");
+      setValue("preferredLocale", session?.user?.preferredLocale || currentLocale);
     }
-  }, [session?.user, setValue, socialAuth]);
+  }, [currentLocale, session?.user, setValue, socialAuth]);
 
   useEffect(() => {
     if (session?.user?.email && getUserCompanies(session.user).length === 0) {
       setValue("first_name", (session?.user as any)?.name || "");
       setValue("email", session?.user?.email || "");
+      setValue("preferredLocale", session.user.preferredLocale || currentLocale);
     }
-  }, [session, setValue]);
+  }, [currentLocale, session, setValue]);
+
+  const continueWithPreferredLocale = (formData: AuthForm) => {
+    handleContinue({
+      ...formData,
+      preferredLocale: formData.preferredLocale || currentLocale,
+    });
+  };
 
   const handleContinueWithPhone = (formData: AuthForm) => {
     if (!isPossiblePhoneNumber(formData.phone)) {
@@ -130,7 +142,7 @@ const AuthModal: FC<Props> = ({
       const phone = parsedPhone?.number.replace("+", "");
 
       if (phone) {
-        handleContinue({ ...formData, phone });
+        continueWithPreferredLocale({ ...formData, phone });
       }
     }
   };
@@ -141,6 +153,11 @@ const AuthModal: FC<Props> = ({
     setValue("last_name", customer.lastName || "", { shouldValidate: true });
     setValue("email", customer.email, { shouldValidate: true });
     setValue("phone", customer.phone || "", { shouldValidate: true });
+    setValue(
+      "preferredLocale",
+      customer.preferredLocale || currentLocale,
+      { shouldValidate: true }
+    );
     setSelectedCustomerEmail(customerEmail);
   };
 
@@ -186,7 +203,7 @@ const AuthModal: FC<Props> = ({
       if (formData.phone && formData.phone.length > 4) {
         handleContinueWithPhone(formData);
       } else {
-        handleContinue({ ...formData, phone: "" });
+        continueWithPreferredLocale({ ...formData, phone: "" });
       }
     } else {
       if (formData.phone && formData.phone.length > 4) {
@@ -200,7 +217,7 @@ const AuthModal: FC<Props> = ({
   };
 
   const handleSubmitWithEmailHandler = (formData: AuthForm) => {
-    handleContinue({ ...formData });
+    continueWithPreferredLocale(formData);
   };
 
   const authWithSocial = useMemo(() => {

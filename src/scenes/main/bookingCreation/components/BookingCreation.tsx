@@ -51,12 +51,7 @@ export type CreateBookingForm = {
   selectedAnyStaff?: TSpecialist;
   selectedDate: Date;
   selectedTime?: (typeof TIME_SLOTS)[0];
-  client?: {
-    first_name: string;
-    last_name: string;
-    phone: string;
-    email: string;
-  };
+  client?: AuthForm;
   isPhoneVerified: boolean;
 };
 
@@ -136,6 +131,7 @@ const BookingCreation = () => {
             first_name: formData.client.first_name,
             last_name: formData.client.last_name || "",
           },
+          customerLocale: formData.client.preferredLocale,
           date: formData.selectedDate,
           slots: [],
         };

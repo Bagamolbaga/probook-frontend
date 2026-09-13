@@ -140,8 +140,8 @@ const toBackendShiftPayload = (body: TCreateCompanyShift["body"]) => {
 };
 
 export class ApiClientCompanyShifts extends ApiClientCore {
-  constructor(token: string, currentUserId: number) {
-    super(token, currentUserId);
+  constructor(token: string, currentUserId: number, locale: "en" | "ru") {
+    super(token, currentUserId, locale);
   }
 
   getUrl = (companyId: string) => `/companies/${companyId}/shifts`;

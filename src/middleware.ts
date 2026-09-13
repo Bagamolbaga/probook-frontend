@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "next-auth/middleware";
 import createMiddleware from "next-intl/middleware";
 import i18nConfig from "@/i18n/config";
@@ -69,6 +69,26 @@ const authMiddleware = withAuth(
     const activeCompanyId = req.cookies.get("active_company_id")?.value;
     const activeCompany =
       companies.find((company) => company.id === activeCompanyId) || companies[0];
+    const isCustomerRoute = pathname === "/cabinet" || pathname.startsWith("/cabinet/");
+    const portalMode =
+      req.cookies.get("portal_mode")?.value || (activeCompany ? "business" : "customer");
+    const withPortalMode = (response: NextResponse) => {
+      if (!req.cookies.has("portal_mode")) {
+        response.cookies.set("portal_mode", portalMode, {
+          path: "/",
+          sameSite: "lax",
+        });
+      }
+      return response;
+    };
+
+    if (!activeCompany && !isCustomerRoute) {
+      const locale = req.nextUrl.pathname.split("/")[1] || i18nConfig.defaultLocale;
+      return withPortalMode(
+        NextResponse.redirect(new URL(`/${locale}/cabinet`, req.url))
+      );
+    }
+
     const hasOwnerMembership = Boolean(activeCompany?.roles.includes("OWNER"));
     const canReadAssignedCustomers = Boolean(
       activeCompany?.permissions.includes("customers:read:assigned")
@@ -81,7 +101,9 @@ const authMiddleware = withAuth(
       )
     ) {
       const locale = req.nextUrl.pathname.split("/")[1] || i18nConfig.defaultLocale;
-      return Response.redirect(new URL(`/${locale}/booking-management`, req.url));
+      return withPortalMode(
+        NextResponse.redirect(new URL(`/${locale}/booking-management`, req.url))
+      );
     }
 
     if (
@@ -90,10 +112,12 @@ const authMiddleware = withAuth(
       (pathname === "/customer-database" || pathname.startsWith("/customer-database/"))
     ) {
       const locale = req.nextUrl.pathname.split("/")[1] || i18nConfig.defaultLocale;
-      return Response.redirect(new URL(`/${locale}/booking-management`, req.url));
+      return withPortalMode(
+        NextResponse.redirect(new URL(`/${locale}/booking-management`, req.url))
+      );
     }
 
-    return intlMiddleware(req);
+    return withPortalMode(intlMiddleware(req));
   },
   {
     callbacks: {

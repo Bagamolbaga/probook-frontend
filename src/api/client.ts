@@ -9,6 +9,7 @@ import { ApiClientServices } from "./entities/services";
 import { ApiClientBusinessUser } from "./entities/user/business";
 import { ApiClientCustomerUser } from "./entities/user/customer";
 import { ApiClientInvitations } from "./entities/invitation";
+import { ApiClientCustomer } from "./entities/customer";
 
 export class ApiClient {
   businessUser: ApiClientBusinessUser;
@@ -20,16 +21,22 @@ export class ApiClient {
   shifts: ApiClientCompanyShifts;
   companySubscription: ApiClientCompanySubscription;
   invitations: ApiClientInvitations;
+  customer: ApiClientCustomer;
 
-  constructor(token: string, currentUserId: number) {
-    this.businessUser = new ApiClientBusinessUser(token, currentUserId);
-    this.customerUser = new ApiClientCustomerUser(token, currentUserId);
-    this.bookings = new ApiClientBookings(token, currentUserId);
-    this.services = new ApiClientServices(token, currentUserId);
-    this.company = new ApiClientCompany(token, currentUserId);
-    this.payments = new ApiClientPayments(token, currentUserId);
-    this.shifts = new ApiClientCompanyShifts(token, currentUserId);
-    this.companySubscription = new ApiClientCompanySubscription(token, currentUserId);
-    this.invitations = new ApiClientInvitations(token, currentUserId);
+  constructor(token: string, currentUserId: number, locale: "en" | "ru") {
+    this.businessUser = new ApiClientBusinessUser(token, currentUserId, locale);
+    this.customerUser = new ApiClientCustomerUser(token, currentUserId, locale);
+    this.bookings = new ApiClientBookings(token, currentUserId, locale);
+    this.services = new ApiClientServices(token, currentUserId, locale);
+    this.company = new ApiClientCompany(token, currentUserId, locale);
+    this.payments = new ApiClientPayments(token, currentUserId, locale);
+    this.shifts = new ApiClientCompanyShifts(token, currentUserId, locale);
+    this.companySubscription = new ApiClientCompanySubscription(
+      token,
+      currentUserId,
+      locale
+    );
+    this.invitations = new ApiClientInvitations(token, currentUserId, locale);
+    this.customer = new ApiClientCustomer(token, currentUserId, locale);
   }
 }

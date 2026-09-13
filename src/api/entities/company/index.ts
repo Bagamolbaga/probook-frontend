@@ -214,8 +214,8 @@ export type TGetCompanySalesAndCustomerStatRes = {
 };
 
 export class ApiClientCompany extends ApiClientCore {
-  constructor(token: string, currentUserId: number) {
-    super(token, currentUserId);
+  constructor(token: string, currentUserId: number, locale: "en" | "ru") {
+    super(token, currentUserId, locale);
   }
 
   async getCompanyDetails({ companyId }: TGetCompanyDetailsArgs) {

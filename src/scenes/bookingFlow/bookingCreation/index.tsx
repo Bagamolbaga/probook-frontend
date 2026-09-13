@@ -10,6 +10,7 @@ import { useSearchParams } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { useRouter, useTranslations } from "@/i18n";
+import { useLocale } from "next-intl";
 
 import { useCreateBookingQuery } from "@/api/queries/booking";
 import { useGetCompanyDetailsQuery } from "@/api/queries/company";
@@ -70,12 +71,7 @@ export type CreateBookingForm = {
   selectedAnyStaff?: TSpecialist;
   selectedDate: Date;
   selectedTime?: (typeof TIME_SLOTS)[0];
-  client?: {
-    first_name: string;
-    last_name: string;
-    phone: string;
-    email: string;
-  };
+  client?: AuthForm;
   isPhoneVerified: boolean;
 };
 
@@ -93,6 +89,7 @@ type DraftBookingDataInLocalStorage = {
 
 const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
   const t = useTranslations();
+  const locale = useLocale() as "en" | "ru";
   const { data: session } = useAppSession();
   const router = useRouter();
   const apiClient = useApiClient();
@@ -155,12 +152,16 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
       optionsStr
     ) {
       const options = optionsStr.split(",");
-      const services: TServiceAndSelectedOption[] = servicesStr
-        .split(",")
-        .map((id) => getCompanyServicesQuery.data.results.find((s) => s.id === id))
+      const requestedServiceIds = servicesStr.split(",");
+      const services: TServiceAndSelectedOption[] = requestedServiceIds
+        .map((id) =>
+          getCompanyServicesQuery.data.results.find((s) => String(s.id) === id)
+        )
         .filter((s) => !!s)
         .map((s, idx) => {
-          const selectedOption = s.options.find((so) => so.id === Number(options[idx]));
+          const selectedOption = s.options.find(
+            (option) => String(option._id || option.id) === options[idx]
+          );
 
           return {
             ...s,
@@ -170,6 +171,12 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
         .filter((s) => s.selectedOption) as TServiceAndSelectedOption[];
 
       form.setValue("selectedServices", services);
+      if (
+        searchParams.get("repeat") === "1" &&
+        services.length < requestedServiceIds.length
+      ) {
+        toaster.warn(t("booking.bookedSuccessStep.repeatUnavailable"));
+      }
     }
   }, [getCompanyServicesQuery.data?.results]);
 
@@ -233,6 +240,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
           first_name: (session?.user as any)?.name,
           last_name: (session?.user as any)?.name,
           phone: session.user.email,
+          preferredLocale: session.user.preferredLocale || locale,
         });
 
         if (showAuthModalParams) {
@@ -262,7 +270,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
         (s) => s.id === String(draftBookingInLS.staffId)
       );
       const servicesFromDraft = getCompanyServicesQuery.data?.results.filter((s) =>
-          draftBookingInLS.services.find((ds) => String(ds.id) === s.id)
+        draftBookingInLS.services.find((ds) => String(ds.id) === s.id)
       );
       const selectedServicesWithSelectedOption = servicesFromDraft
         .map((s) => {
@@ -359,6 +367,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
             last_name: formData.client.last_name,
             email: formData.client.email || "",
           },
+          customerLocale: formData.client.preferredLocale,
         };
 
         // if (formData.client.email) {

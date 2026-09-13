@@ -67,7 +67,7 @@ export const bookingManagement = {
       CONFIRMED: "Подтверждено",
       COMPLETED: "Завершено",
       BLOCKED: "Заблокировано",
-      OFF: "Отменено",
+      CANCELLED: "Отменено",
     },
   },
   detailModal: {
@@ -108,7 +108,7 @@ export const bookingManagement = {
         CONFIRMED: "Подтверждено",
         COMPLETED: "Завершено",
         BLOCKED: "Заблокировано",
-        OFF: "Отменено",
+        CANCELLED: "Отменено",
       },
       services: "Услуги",
       service: "Услуга",
@@ -144,7 +144,7 @@ export const bookingManagement = {
     CONFIRMED: "Подтверждено",
     COMPLETED: "Завершено",
     BLOCKED: "Заблокировано",
-    OFF: "Отменено",
+    CANCELLED: "Отменено",
   },
   form: {
     customerInformation: {

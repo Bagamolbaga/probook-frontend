@@ -65,7 +65,7 @@ export const bookingManagement = {
       CONFIRMED: "Confirmed",
       COMPLETED: "Completed",
       BLOCKED: "Blocked",
-      OFF: "Cancelled",
+      CANCELLED: "Cancelled",
     },
   },
   detailModal: {
@@ -106,7 +106,7 @@ export const bookingManagement = {
         CONFIRMED: "Confirmed",
         COMPLETED: "Completed",
         BLOCKED: "Blocked",
-        OFF: "Cancelled",
+        CANCELLED: "Cancelled",
       },
       services: "Services",
       service: "Service",
@@ -143,7 +143,7 @@ export const bookingManagement = {
     CONFIRMED: "Confirmed",
     COMPLETED: "Completed",
     BLOCKED: "Blocked",
-    OFF: "Cancelled",
+    CANCELLED: "Cancelled",
   },
   form: {
     customerInformation: {

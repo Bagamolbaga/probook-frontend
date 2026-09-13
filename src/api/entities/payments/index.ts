@@ -18,9 +18,9 @@ type TGetPaymentDetailsAndHistoryRes = {
 type TGetSubscriptionPlansRes = {
   plans: {
     id: string;
-    name: string
-    description: string
-    features: string[]
+    name: string;
+    description: string;
+    features: string[];
     amount: number;
     currency: string;
     interval: string;
@@ -28,8 +28,8 @@ type TGetSubscriptionPlansRes = {
 };
 
 export class ApiClientPayments extends ApiClientCore {
-  constructor(token: string, currentUserId: number) {
-    super(token, currentUserId);
+  constructor(token: string, currentUserId: number, locale: "en" | "ru") {
+    super(token, currentUserId, locale);
   }
 
   async createSubscriptionCheckoutLink({

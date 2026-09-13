@@ -12,8 +12,8 @@ export type TUpdateCompanySubscriptionArgs = {
 };
 
 export class ApiClientCompanySubscription extends ApiClientCore {
-  constructor(token: string, currentUserId: number) {
-    super(token, currentUserId);
+  constructor(token: string, currentUserId: number, locale: "en" | "ru") {
+    super(token, currentUserId, locale);
   }
 
   async getSubscription({ companyId }: TGetCompanySubscriptionArgs) {

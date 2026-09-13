@@ -43,6 +43,10 @@ export const bookedSuccessStep = {
   title: "Запись успешно создана",
   desc: "Мы отправим подтверждение через {authType}.",
   btn: "Перейти к поиску",
+  cabinetDescription: "Войдите по коду из письма, чтобы управлять этой записью.",
+  openCabinet: "Открыть мои записи",
+  repeatUnavailable:
+    "Некоторые ранее выбранные услуги больше недоступны. Выберите замену.",
 };
 
 export const booking = {

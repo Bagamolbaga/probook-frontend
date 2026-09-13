@@ -1,5 +1,5 @@
 type CalendarEventStatus = "booked" | "pending" | "completed" | "break" | "error" | "off";
-type BookingStatus = "BLOCKED" | "PENDING" | "COMPLETED" | "OFF" | "CONFIRMED";
+type BookingStatus = "BLOCKED" | "PENDING" | "COMPLETED" | "CANCELLED" | "CONFIRMED";
 
 type TApiBookingCustomer = {
   id: string;

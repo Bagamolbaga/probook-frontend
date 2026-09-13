@@ -3,14 +3,14 @@ export const BOOKING_STATUSES = [
   "CONFIRMED",
   "COMPLETED",
   "BLOCKED",
-  "OFF",
+  "CANCELLED",
 ] as const satisfies readonly TApiBooking["status"][];
 
 export const SPECIALIST_BOOKING_STATUS_TRANSITIONS: Partial<
   Record<TApiBooking["status"], readonly TApiBooking["status"][]>
 > = {
-  PENDING: ["CONFIRMED", "OFF"],
-  CONFIRMED: ["COMPLETED", "OFF"],
+  PENDING: ["CONFIRMED", "CANCELLED"],
+  CONFIRMED: ["COMPLETED", "CANCELLED"],
 };
 
 export const getSpecialistBookingStatusTransitions = (status: TApiBooking["status"]) =>
@@ -53,7 +53,7 @@ export const BOOKING_STATUS_STYLES = {
     borderClassName: "border-redPrimary",
     dotClassName: "bg-redPrimary",
   },
-  OFF: {
+  CANCELLED: {
     timelineClassName: "bg-greyPrimary/10 hover:bg-greyPrimary/20",
     textClassName: "text-greyPrimary",
     badgeClassName: "bg-greyBackgroundLight text-greyPrimary",

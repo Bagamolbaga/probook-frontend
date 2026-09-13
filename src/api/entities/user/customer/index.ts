@@ -34,7 +34,9 @@ export type TBookingCustomerListItem = {
 export type TCustomerLookupItem = Pick<
   TBookingCustomerListItem,
   "id" | "email" | "firstName" | "lastName" | "phone" | "avatar"
->;
+> & {
+  preferredLocale?: "en" | "ru" | null;
+};
 
 export type TLookupCustomersArgs = {
   companyId: string;
@@ -110,8 +112,8 @@ export type TCustomerBookingHistoryItem = {
 export type TGetCustomerBookingHistoryRes = TCustomerBookingHistoryItem[];
 
 export class ApiClientCustomerUser extends ApiClientCore {
-  constructor(token: string, currentUserId: number) {
-    super(token, currentUserId);
+  constructor(token: string, currentUserId: number, locale: "en" | "ru") {
+    super(token, currentUserId, locale);
   }
 
   async sendCreateBookingOTPCode({ bookingId, otp }: SendOTPCodeArgs) {

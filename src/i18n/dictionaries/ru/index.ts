@@ -8,6 +8,7 @@ import { services } from "./landing/services";
 import { bookingManagement } from "./main/bookingManagement";
 import { businessServices } from "./main/businessServices";
 import { customerDatabase } from "./main/customerDatabase";
+import { customerCabinet } from "./customerCabinet";
 import { dashboard } from "./main/dashboard";
 import { staffManagement } from "./main/staffManagement";
 import { metadata } from "./metadata";
@@ -28,6 +29,7 @@ const RU: IntlMessages = {
   staffManagement,
   businessServices,
   customerDatabase,
+  customerCabinet,
   ui,
   navigation,
 };
