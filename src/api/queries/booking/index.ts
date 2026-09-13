@@ -24,6 +24,7 @@ import {
   TGetCompanySalesAndCustomerStatRes,
 } from "@/api/entities/company";
 import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { invalidateCompanyBookingQueries } from "./cache";
 
 type TGetBookings<T = unknown> = {
   companyId: string | number;
@@ -235,18 +236,7 @@ export const useCreateBookingQuery = () => {
     mutationFn: (input: TCreateBookingArgs) => {
       return apiClient.bookings.createBooking(input);
     },
-    onSuccess: (_, args) =>
-      Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["all_bookings", args.companyId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["bookings", args.companyId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["bookings_min", args.companyId],
-        }),
-      ]),
+    onSuccess: (_, args) => invalidateCompanyBookingQueries(queryClient, args.companyId),
   });
 };
 
@@ -262,15 +252,7 @@ export const useUpdateApiBookingQuery = () => {
         response.data
       );
 
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["bookings", args.companyId] }),
-        queryClient.invalidateQueries({
-          queryKey: ["bookings_min", args.companyId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["all_bookings", args.companyId],
-        }),
-      ]);
+      await invalidateCompanyBookingQueries(queryClient, args.companyId, args.bookingId);
     },
   });
 };
@@ -287,11 +269,7 @@ export const useRescheduleOwnBookingMutation = () => {
         ["booking", args.companyId, args.bookingId],
         response.data
       );
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["bookings", args.companyId] }),
-        queryClient.invalidateQueries({ queryKey: ["bookings_min", args.companyId] }),
-        queryClient.invalidateQueries({ queryKey: ["all_bookings", args.companyId] }),
-      ]);
+      await invalidateCompanyBookingQueries(queryClient, args.companyId, args.bookingId);
     },
   });
 };
@@ -308,11 +286,7 @@ export const useUpdateOwnBookingStatusMutation = () => {
         ["booking", args.companyId, args.bookingId],
         response.data
       );
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["bookings", args.companyId] }),
-        queryClient.invalidateQueries({ queryKey: ["bookings_min", args.companyId] }),
-        queryClient.invalidateQueries({ queryKey: ["all_bookings", args.companyId] }),
-      ]);
+      await invalidateCompanyBookingQueries(queryClient, args.companyId, args.bookingId);
     },
   });
 };
@@ -357,11 +331,8 @@ export const useDeleteBookingQuery = () => {
     mutationFn: (input: TDeleteBookingsArgs) => {
       return apiClient.bookings.deleteBooking(input);
     },
-    onSuccess: (_, args) => {
-      return queryClient.invalidateQueries({
-        queryKey: ["bookings", args.companyId],
-      });
-    },
+    onSuccess: (_, args) =>
+      invalidateCompanyBookingQueries(queryClient, args.companyId, args.bookingId),
   });
 };
 
