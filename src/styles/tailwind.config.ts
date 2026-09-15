@@ -26,8 +26,8 @@ const config: Config = {
       blueExtraLight: "#40E1FA1A",
       redPrimary: "#F92718",
       redExtraLight: "#F927181A",
-      greenPrimary: "#4CCE18",
-      greenExtraLight: "#4CCE181A",
+      greenPrimary: "#7CE7AC",
+      greenExtraLight: "#7CE7AC1A",
       yellowPrimary: "#FCDA00",
       yellowExtraLight: "#FCDA001A",
       greyPrimary: "#8181A5",
@@ -49,7 +49,8 @@ const config: Config = {
       fontFamily: {
         main: ["Lato", "sans-serif"],
         secondary: ["Kaisei Decol", "sans-serif"],
-        zillaSlab: ["Zilla Slab"]
+        funnel: ["Funnel Sans Variable", "Funnel Sans", "Lato", "sans-serif"],
+        zillaSlab: ["Zilla Slab"],
       },
       maxWidth: {
         content: "1440px",
@@ -78,10 +79,12 @@ const config: Config = {
         toast: "0px 2px 6px 0px rgba(16, 24, 40, 0.08)",
       },
       backgroundImage: {
-        pinkCircleGradient: "radial-gradient(circle at center, #EF3FE820 10%, transparent 60%)",
-        purpleCircleGradient: "radial-gradient(circle at center, #603FEF20 10%, transparent 60%)",
-        fromTopLeftToBottomRight: "linear-gradient(150deg, #e8d5f1 0%, #923bc6 100%)"
-      }
+        pinkCircleGradient:
+          "radial-gradient(circle at center, #EF3FE820 10%, transparent 60%)",
+        purpleCircleGradient:
+          "radial-gradient(circle at center, #603FEF20 10%, transparent 60%)",
+        fromTopLeftToBottomRight: "linear-gradient(150deg, #e8d5f1 0%, #923bc6 100%)",
+      },
     },
   },
   plugins: [],

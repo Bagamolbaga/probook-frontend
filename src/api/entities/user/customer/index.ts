@@ -9,6 +9,11 @@ type ResendOTPCode = {
   bookingId: number;
 };
 
+type RequestEmailOtpArgs = {
+  email: string;
+  locale: "en" | "ru";
+};
+
 export type TGetCustomersArgs = {
   companyId: string;
   queryParams?: {
@@ -114,6 +119,13 @@ export type TGetCustomerBookingHistoryRes = TCustomerBookingHistoryItem[];
 export class ApiClientCustomerUser extends ApiClientCore {
   constructor(token: string, currentUserId: number, locale: "en" | "ru") {
     super(token, currentUserId, locale);
+  }
+
+  async requestEmailOtp(data: RequestEmailOtpArgs) {
+    return this.instanceWithoutAuth.post<{
+      accepted: true;
+      resendAfterSeconds: number;
+    }>("/auth/email-otp/request", data);
   }
 
   async sendCreateBookingOTPCode({ bookingId, otp }: SendOTPCodeArgs) {

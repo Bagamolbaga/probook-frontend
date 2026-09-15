@@ -155,7 +155,20 @@ export const authOptions: AuthOptions = {
             }
           );
           if ("requiresProfile" in data) {
-            throw new Error(`EMAIL_OTP_PROFILE_REQUIRED:${data.onboardingToken}`);
+            if (!credentials.firstName || !credentials.lastName) {
+              throw new Error(`EMAIL_OTP_PROFILE_REQUIRED:${data.onboardingToken}`);
+            }
+
+            const { data: authData } = await axios.post<AuthResponse>(
+              `${apiUrl}/auth/email-otp/complete-profile`,
+              {
+                onboardingToken: data.onboardingToken,
+                firstName: credentials.firstName,
+                lastName: credentials.lastName,
+                phone: credentials.phone || undefined,
+              }
+            );
+            return toBackendAuthUser(authData);
           }
           return toBackendAuthUser(data);
         } catch (error) {

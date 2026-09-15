@@ -1,4 +1,12 @@
 import { FC, ReactNode, useMemo, useState } from "react";
+import {
+  Activity,
+  Dumbbell,
+  HandHeart,
+  HeartPulse,
+  Sparkles,
+  Stethoscope,
+} from "lucide-react";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { useTranslations } from "next-intl";
 import RadioButton from "@/components/ui/inputs/RadioButton";
@@ -80,6 +88,28 @@ const ServicesList: FC<Props> = ({
 
     return false;
   }, [selectedService]);
+
+  const getServiceIcon = (service: TService, index: number) => {
+    const serviceName = service.name.toLowerCase();
+
+    if (serviceName.includes("диагност") || serviceName.includes("consult")) {
+      return Stethoscope;
+    }
+
+    if (serviceName.includes("массаж") || serviceName.includes("massage")) {
+      return HandHeart;
+    }
+
+    if (serviceName.includes("трениров") || serviceName.includes("training")) {
+      return Dumbbell;
+    }
+
+    if (serviceName.includes("восстанов") || serviceName.includes("recover")) {
+      return HeartPulse;
+    }
+
+    return [Activity, HeartPulse, HandHeart, Sparkles][index % 4];
+  };
 
   return (
     <>
@@ -167,49 +197,61 @@ const ServicesList: FC<Props> = ({
           <div key={type.id}>
             {renderTypeRow(type)}
             <div className="flex flex-col gap-2">
-              {services.map((s) => {
+              {services.map((s, index) => {
                 const isSelected = !!selectedServices.find((i) => i.id === s.id);
 
                 return (
-                  <div
+                  <button
                     key={s.id}
+                    type="button"
                     onClick={() => handleOpenDetailsModal(s)}
                     className={cn(
-                      "w-full p-5 flex items-center justify-start rounded-lg border border-greyOutlineSecondary transition-all cursor-pointer hover:border-greyPrimary",
+                      "flex min-h-[86px] w-full items-center gap-4 rounded-[14px] border p-4 text-left transition-all hover:border-purplePrimary",
                       {
-                        "bg-purpleExtraLight border-purplePrimary": isSelected,
+                        "border-2 border-purplePrimary bg-[#603FEF0A]": isSelected,
+                        "border-greyOutline bg-white": !isSelected,
                       }
                     )}
                   >
-                    <RadioButton
-                      className="!mr-5 pointer-events-none"
-                      checked={isSelected}
-                    />
-                    {/* <div className="w-[48px] h-[48px] mr-5 rounded-lg overflow-hidden bg-greyLight">
-              {s.image ? (
-                <Image
-                  className="w-full h-full object-cover"
-                  width={48}
-                  height={48}
-                  src={s.image}
-                  alt={s.name}
-                />
-              ) : (
-                <div className="w-[48px] h-[48px] rounded-lg bg-greyLight"></div>
-              )}
-            </div> */}
-                    <div className="flex-1 flex flex-col gap-1">
-                      <p className="text-sm font-bold">{s.name}</p>
-                      <p className="text-sm text-greyPrimary">
+                    <span
+                      className={cn(
+                        "flex size-11 shrink-0 items-center justify-center rounded-xl",
+                        isSelected ? "bg-purpleExtraLight" : "bg-greyBackgroundLight"
+                      )}
+                    >
+                      {(() => {
+                        const Icon = getServiceIcon(s, index);
+                        return (
+                          <Icon
+                            className={cn(
+                              "size-[19px]",
+                              isSelected ? "stroke-purplePrimary" : "stroke-greyPrimary"
+                            )}
+                          />
+                        );
+                      })()}
+                    </span>
+                    <span className="flex min-w-0 flex-1 flex-col gap-[5px]">
+                      <span className="truncate text-[13px] font-bold text-darkPrimary">
+                        {s.name}
+                      </span>
+                      <span className="text-[10px] text-greyPrimary">
                         {s.options[0]?.duration} {t("booking.servicesStep.mins")}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="font-bold">
-                        {s.options.length && formatCurrency(s.options[0].price)}
-                      </p>
-                    </div>
-                  </div>
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-[13px] font-bold text-darkPrimary">
+                      {s.options.length && formatCurrency(s.options[0].price)}
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        "flex size-5 shrink-0 items-center justify-center rounded-full border-2 bg-white",
+                        isSelected
+                          ? "border-[6px] border-purplePrimary"
+                          : "border-greyLight"
+                      )}
+                    />
+                  </button>
                 );
               })}
             </div>

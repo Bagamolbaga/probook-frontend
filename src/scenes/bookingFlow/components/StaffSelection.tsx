@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { Sparkles, Star } from "lucide-react";
 import { cn } from "@/utils/cn";
 import CustomScrollbar from "@/styles/scrollbar.module.sass";
 import SpecialistList from "./ui/SpecialistList";
@@ -13,6 +14,7 @@ type Props = {
   selectedSpecialist?: TSpecialist | "ANY";
   selectSpecialistHandler: (st?: TSpecialist | "ANY") => void;
   selectTimeHandler: (time?: TTimeSlot) => void;
+  variant?: "default" | "booking";
 };
 
 const StaffSelection: FC<Props> = ({
@@ -21,6 +23,7 @@ const StaffSelection: FC<Props> = ({
   selectedSpecialist,
   selectSpecialistHandler,
   selectTimeHandler,
+  variant = "default",
 }) => {
   const t = useTranslations();
   const selectStaffHandler = (staff: TSpecialist | "ANY") => {
@@ -41,6 +44,116 @@ const StaffSelection: FC<Props> = ({
 
     selectTimeHandler(undefined);
   };
+
+  if (variant === "booking") {
+    return (
+      <div className="flex min-h-[590px] h-[calc(100vh-124px-100px-52px)] w-2/3 flex-col gap-6 border-r border-greyOutlineSecondary pr-6 sm:w-full sm:border-none sm:pr-0 sm:pb-[40px]">
+        <div className="flex flex-col gap-2">
+          <p className="text-[10px] font-bold tracking-[0.5px] text-purplePrimary">
+            {t("booking.professionalStep.stepLabel" as any)}
+          </p>
+          <h2 className="font-funnel text-[32px] font-bold leading-tight text-darkPrimary sm:text-[26px]">
+            {t("booking.professionalStep.title" as any)}
+          </h2>
+          <p className="text-[13px] text-greyPrimary">
+            {t("booking.professionalStep.description" as any)}
+          </p>
+        </div>
+
+        <div
+          className={cn(
+            "grid w-full grid-cols-6 gap-3 overflow-y-auto pr-2",
+            CustomScrollbar.CustomScrollbar
+          )}
+        >
+          {!isHideAny && (
+            <button
+              type="button"
+              onClick={() => selectStaffHandler("ANY")}
+              className={cn(
+                "col-span-6 flex min-h-[84px] w-full items-center gap-4 rounded-[14px] border bg-white p-[18px] text-left transition-all hover:border-purplePrimary",
+                selectedSpecialist === "ANY"
+                  ? "border-2 border-purplePrimary bg-[#603FEF0A]"
+                  : "border-greyOutline"
+              )}
+            >
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-purpleExtraLight">
+                <Sparkles className="size-5 stroke-purplePrimary" />
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="text-sm font-bold text-darkPrimary">
+                  {t("booking.professionalStep.anyFree" as any)}
+                </span>
+                <span className="truncate text-[11px] text-greyPrimary">
+                  {t("booking.professionalStep.anyFreeDescription" as any)}
+                </span>
+              </span>
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "flex size-5 shrink-0 items-center justify-center rounded-full border-2 bg-white",
+                  selectedSpecialist === "ANY"
+                    ? "border-[6px] border-purplePrimary"
+                    : "border-greyLight"
+                )}
+              />
+            </button>
+          )}
+
+          {specialists.map((specialist) => {
+            const isSelected =
+              selectedSpecialist !== "ANY" && selectedSpecialist?.id === specialist.id;
+
+            return (
+              <button
+                key={specialist.id}
+                type="button"
+                onClick={() => selectStaffHandler(specialist)}
+                className={cn(
+                  "col-span-2 flex h-[230px] flex-col items-center gap-[11px] rounded-[14px] border p-4 text-center transition-all hover:border-purplePrimary md:col-span-3 sm:col-span-3",
+                  isSelected
+                    ? "border-2 border-purplePrimary bg-[#603FEF0A]"
+                    : "border-greyOutline bg-white"
+                )}
+              >
+                <span className="flex size-[72px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-greyBackgroundLight">
+                  {specialist.avatar ? (
+                    <Image
+                      className="h-full w-full object-cover"
+                      width={72}
+                      height={72}
+                      src={specialist.avatar}
+                      alt={specialist.fullName}
+                    />
+                  ) : (
+                    <Image
+                      width={72}
+                      height={72}
+                      src={AvatarPlaceholder}
+                      alt={specialist.fullName}
+                    />
+                  )}
+                </span>
+                <span className="max-w-full truncate text-sm font-bold text-darkPrimary">
+                  {specialist.fullName}
+                </span>
+                <span className="max-w-full truncate text-[10px] text-greyPrimary">
+                  {specialist.specialties?.[0] || specialist.role}
+                </span>
+                <span className="flex items-center gap-[5px] text-[11px] font-semibold text-darkPrimary">
+                  <Star className="size-[14px] fill-yellowPrimary stroke-yellowPrimary" />
+                  {specialist.rating ?? "—"}
+                </span>
+                <span className="truncate text-[11px] font-semibold text-purplePrimary">
+                  {t("booking.professionalStep.available" as any)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-2/3 min-h-[590px] h-[calc(100vh-124px-100px-52px)] pr-6 flex flex-col gap-6 border-r border-greyOutlineSecondary sm:w-full sm:border-none sm:pr-0 sm:pb-[40px]">

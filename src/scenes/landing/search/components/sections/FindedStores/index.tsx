@@ -18,6 +18,7 @@ import HeartIcon from "@/components/ui/icons/Heart";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { FAVORITE_STORES } from "@/constants/keys";
 import Spinner from "@/components/ui/loaders/Spinner";
+import { TSearchCompany } from "@/api/entities/company";
 
 type NonNullablePos = {
   lat: NonNullable<TCompany["pos"]["lat"]>;
@@ -28,7 +29,7 @@ type Props = {
   isOpen?: boolean;
   isLoading?: boolean;
   title?: string;
-  findedStores: TCompany[];
+  findedStores: TSearchCompany[];
   loadMoreIsActive?: boolean;
   handleLoadMore: () => void;
 };
@@ -47,7 +48,7 @@ const FindedStores: FC<Props> = ({
   const [centerOfMap, setCenterOfMap] = useState<NonNullablePos | undefined>();
   const [hoveredStoreMarker, setHoveredStoreMarker] = useState<number>();
   const [hoveredStoreCard, setHoveredStoreCard] = useState<number>();
-  const [selectedStore, setSelectedStore] = useState<TCompany>();
+  const [selectedStore, setSelectedStore] = useState<TSearchCompany>();
 
   const [favoriteStores, setFavoriteStores] = useLocalStorage<TCompany[]>(
     FAVORITE_STORES,
@@ -112,7 +113,7 @@ const FindedStores: FC<Props> = ({
     }
   };
 
-  const handleSelectStore = (s: TCompany) => {
+  const handleSelectStore = (s: TSearchCompany) => {
     if (selectedStore?.id === s.id) {
       handleCloseSelectedStoreWidget();
       return;
@@ -123,7 +124,7 @@ const FindedStores: FC<Props> = ({
     setHoveredStoreCard(s.id);
   };
 
-  const handleAddStoreToFavorit = (s: TCompany) => {
+  const handleAddStoreToFavorit = (s: TSearchCompany) => {
     if (favoriteStores.find((fs) => fs.id === s.id)) {
       setFavoriteStores(favoriteStores.filter((fs) => fs.id !== s.id));
     } else {
@@ -202,7 +203,7 @@ const FindedStores: FC<Props> = ({
               {findedStores.map((s) => (
                 <StoreCard
                   key={s.id}
-                  company={s as TCompany<{ price_from: string; price_to: string }>}
+                  company={s}
                   isDark={hoveredStoreMarker === s.id || selectedStore?.id === s.id}
                   setHover={(id) => {
                     setHoveredStoreCard(id);
@@ -233,7 +234,7 @@ const FindedStores: FC<Props> = ({
                 mapContainerStyle={{ width: "100%", height: "100%" }}
                 onLoad={() => console.log("Map Component Loaded...")}
               >
-                {(findedStores as TCompany<{ price_from: string; price_to: string }>[]).map((c, idx) => (
+                {findedStores.map((c, idx) => (
                   <OverlayView
                     key={idx}
                     position={getStorePosition(c.pos)}
@@ -308,7 +309,11 @@ const FindedStores: FC<Props> = ({
                           <h5 className="text-lg font-bold">{c.name}</h5>
                           <div className="pb-3 flex items-center justify-between border-b border-greyOutlineSecondary">
                             <p className="text-sm font-normal text-greyPrimary">Price</p>
-                            <p className="text-sm font-normal">{c.price_from && c.price_to ? `From ฿${Number(c.price_from)} - To ฿${Number(c.price_to)}` : "No info"}</p>
+                            <p className="text-sm font-normal">
+                              {c.price_from && c.price_to
+                                ? `From ฿${Number(c.price_from)} - To ฿${Number(c.price_to)}`
+                                : "No info"}
+                            </p>
                           </div>
                           <div className="pt-3 flex items-center justify-between">
                             <p className="text-sm font-normal text-greyPrimary">

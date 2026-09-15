@@ -130,6 +130,7 @@ const BookingCreation = () => {
             email: formData.client.email,
             first_name: formData.client.first_name,
             last_name: formData.client.last_name || "",
+            phone: formData.client.phone,
           },
           customerLocale: formData.client.preferredLocale,
           date: formData.selectedDate,
@@ -406,6 +407,7 @@ const BookingCreation = () => {
           )}
           {form.watch("_stepId") === "time" && (
             <TimeSelection
+              compact
               companyId={companyId}
               selectedServices={form.watch("selectedServices")}
               selectedSpecialist={form.watch("selectedStaff")}

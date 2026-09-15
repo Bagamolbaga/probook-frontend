@@ -12,9 +12,10 @@ import Providers from "@/components/providers";
 import getDictionary, { NextIntlClientProvider, getTranslations } from "@/i18n";
 import { authOptions } from "@/lib/auth";
 import { cn } from "@/utils/cn";
-import Sentry from "@sentry/nextjs"
+import Sentry from "@sentry/nextjs";
 
 import "line-awesome/dist/line-awesome/css/line-awesome.min.css";
+import "@fontsource-variable/funnel-sans";
 import "react-toastify/dist/ReactToastify.css";
 import "@/styles/globals.sass";
 

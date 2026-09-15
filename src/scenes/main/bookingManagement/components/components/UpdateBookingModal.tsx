@@ -28,6 +28,8 @@ import {
   isSpecialistMembership,
   SPECIALIST_PERMISSIONS,
 } from "@/utils/permissions";
+import Image from "next/image";
+import { Phone } from "lucide-react";
 
 type Props = {
   isOpen: boolean;
@@ -100,10 +102,21 @@ const Detail = ({ icon, label, value }: DetailProps) => (
   </div>
 );
 
-const Initials = ({ firstName, lastName }: { firstName: string; lastName: string }) => (
-  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-purpleExtraLight text-xs font-bold uppercase text-purplePrimary">
-    {firstName.charAt(0)}
-    {lastName.charAt(0)}
+const AvatarOrInitials = ({
+  avatar,
+  firstName,
+  lastName,
+}: {
+  avatar?: string | null;
+  firstName: string;
+  lastName: string;
+}) => (
+  <div className="flex size-10 shrink-0 items-center justify-center rounded-full overflow-hidden bg-purpleExtraLight text-xs font-bold uppercase text-purplePrimary">
+    {avatar ? (
+      <Image alt={`${firstName} ${lastName}`} src={avatar} width={40} height={40} />
+    ) : (
+      `${firstName.charAt(0)}${lastName.charAt(0)}`
+    )}
   </div>
 );
 
@@ -251,7 +264,8 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
                 title={t("bookingManagement.detailModal.customer")}
               >
                 <div className="flex items-center gap-3">
-                  <Initials
+                  <AvatarOrInitials
+                    avatar={booking.customer.avatar}
                     firstName={booking.customer.firstName}
                     lastName={booking.customer.lastName}
                   />
@@ -264,6 +278,11 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
                       {booking.customer.email ||
                         t("bookingManagement.detailModal.emailNotProvided")}
                     </p>
+                    <p className="mt-1 flex items-center gap-2 truncate text-sm text-greyPrimary">
+                      <Phone className="size-4 shrink-0 stroke-greyPrimary" />
+                      {booking.customer.phone ||
+                        t("bookingManagement.detailModal.emailNotProvided")}
+                    </p>
                   </div>
                 </div>
               </Section>
@@ -274,7 +293,8 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
               >
                 {booking.assignee ? (
                   <div className="flex items-center gap-3">
-                    <Initials
+                    <AvatarOrInitials
+                      avatar={booking.assignee.avatar}
                       firstName={booking.assignee.firstName}
                       lastName={booking.assignee.lastName}
                     />

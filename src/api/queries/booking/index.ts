@@ -150,8 +150,34 @@ export const useGetBookingAvailabilityQuery = (
         })
       ).data,
     staleTime: 1000 * 30,
-    enabled: Boolean(companyId && bookingId && specialistId && date),
+    enabled: Boolean(companyId && specialistId && date),
     ...queryOptions,
+  });
+};
+
+export const useGetBookingAvailabilitiesQuery = (
+  options: Array<Options<TGetBookingAvailabilityArgs, TBookingAvailability>>
+) => {
+  const apiClient = useApiClient();
+
+  return useQueries({
+    queries: options.map(
+      ({ companyId, bookingId, specialistId, date, queryOptions }) => ({
+        queryKey: ["booking_availability", companyId, specialistId, date, bookingId],
+        queryFn: async () =>
+          (
+            await apiClient.bookings.getBookingAvailability({
+              companyId,
+              bookingId,
+              specialistId,
+              date,
+            })
+          ).data,
+        staleTime: 1000 * 15,
+        enabled: Boolean(companyId && specialistId && date),
+        ...queryOptions,
+      })
+    ),
   });
 };
 

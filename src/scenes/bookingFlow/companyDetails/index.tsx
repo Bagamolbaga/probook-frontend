@@ -1,324 +1,417 @@
 "use client";
 
-import { FC, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n";
 
 import { useGetCompanyDetailsQuery } from "@/api/queries/company";
 import { useGetCompanyServicesQuery } from "@/api/queries/company/services";
-import { useGetCompanyServicesTypesQuery } from "@/api/queries/company/serviceTypes";
 import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
-
-import ServiceSelection from "../components/ServiceSelection";
-import Tabs, { Tab } from "./components/Tabs";
-import Map from "./components/Map";
+import { TServiceAndSelectedOption } from "@/scenes/main/bookingCreation/components/BookingCreation";
 import ImagesSwiper from "./components/ImagesSwiper";
-import { TimeManager } from "@/utils/timeManager";
+import Tabs, { Tab } from "./components/Tabs";
 import { toSlug } from "@/utils/toSlug";
-import { cn } from "@/utils/cn";
-
-import Modal from "@/components/ui/modal";
+import { formatCurrency } from "@/utils/formatCurrency";
 import Button from "@/components/ui/button";
-import SpecialistList from "../components/ui/SpecialistList";
 import LocationIcon from "@/components/ui/icons/Location";
-import CloseIcon from "@/components/ui/icons/Close";
-import { toaster } from "@/components/ui/toaster";
-import CopyIcon from "@/components/ui/icons/Copy";
 import ShareIcon from "@/components/ui/icons/Share";
+import CopyIcon from "@/components/ui/icons/Copy";
+import Modal from "@/components/ui/modal";
+import { toaster } from "@/components/ui/toaster";
+import { cn } from "@/utils/cn";
+import RadioButton from "@/components/ui/inputs/RadioButton";
+import { TimeManager } from "@/utils/timeManager";
+import { getYandexMapsUrl, getYandexMapsWidgetUrl } from "@/utils/getYandexMapsUrl";
 
-const tabs = [
-  {
-    id: "our-service",
-    text: "Our Service",
-  },
-  {
-    id: "team",
-    text: "Team",
-  },
-  {
-    id: "working-hours",
-    text: "Working Hours",
-  },
+const tabs: Tab[] = [
+  { id: "our-service", text: "Услуги" },
+  { id: "team", text: "Команда" },
+  { id: "working-hours", text: "Часы работы" },
 ];
-
-type TServiceData = {
-  type: TServiceType_new;
-  services: TService[];
-};
 
 type Props = {
   companyId: string;
 };
 
+const formatDuration = (duration?: number) => (duration ? `${duration} минут` : "—");
+
+const workingHoursTimeManager = new TimeManager();
+
+const weekDayLabels: Partial<Record<WorkingScheduleWeekDays, string>> = {
+  Monday: "Понедельник",
+  Tuesday: "Вторник",
+  Wednesday: "Среда",
+  Thursday: "Четверг",
+  Friday: "Пятница",
+  Saturday: "Суббота",
+  Sunday: "Воскресенье",
+};
+
+const formatWorkingHours = (workingSlots: number[]) => {
+  const slots = workingHoursTimeManager.getFullSlots(workingSlots);
+
+  if (!slots.length) return "Закрыто";
+
+  return `${slots[0].label}–${slots.at(-1)?.label}`;
+};
+
+export const PublicCompanyFooter = () => (
+  <footer className="w-full bg-darkPrimary text-white">
+    <div className="mx-auto flex min-h-[132px] max-w-content items-end justify-between px-layoutLeftRight py-8 md:px-layoutLeftRight_md sm:flex-col sm:items-start sm:gap-8 sm:px-layoutLeftRight_sm">
+      <div className="flex gap-10 text-base font-bold sm:flex-col sm:gap-4">
+        <Link href="/support">Поддержка</Link>
+        <Link href="/terms-of-use">Условия использования</Link>
+      </div>
+      <div className="flex items-center gap-2 font-funnel text-xl font-bold">
+        <span className="flex size-[34px] items-center justify-center rounded-[11px] bg-purplePrimary text-sm">
+          PB
+        </span>
+        ProBook
+      </div>
+    </div>
+  </footer>
+);
+
 const CompanyDetailsScene: FC<Props> = ({ companyId }) => {
+  const [selectedTab, setSelectedTab] = useState(tabs[2]);
   const [isOpenShareModal, setIsOpenShareModal] = useState(false);
-  const [selectedTab, setSelectedTab] = useState<Tab>(tabs[0]);
   const [selectedServices, setSelectedServices] = useState<TServiceAndSelectedOption[]>(
     []
   );
+  const workingHoursRef = useRef<HTMLDivElement>(null);
+  const servicesRef = useRef<HTMLElement>(null);
+  const teamRef = useRef<HTMLElement>(null);
 
-  const getCompanyDetailsQuery = useGetCompanyDetailsQuery({ companyId });
+  const companyQuery = useGetCompanyDetailsQuery({ companyId });
+  const servicesQuery = useGetCompanyServicesQuery({ companyId });
+  const specialistsQuery = useGetCompanySpecialistsQuery({ companyId });
+  const company = companyQuery.data;
+  const services = servicesQuery.data?.results || [];
+  const specialists = specialistsQuery.data?.results || [];
 
-  const getCompanyServicesTypesQuery = useGetCompanyServicesTypesQuery({ companyId });
-  const getCompanyServicesQuery = useGetCompanyServicesQuery({ companyId });
-  const getCompanySpecialistsQuery = useGetCompanySpecialistsQuery({ companyId });
-
-  console.log({
-    getCompanyDetailsQuery,
-    getCompanyServicesTypesQuery,
-    getCompanyServicesQuery,
-    getCompanySpecialistsQuery,
-  });
-
-  const serviceTypes = useMemo(() => {
-    if (getCompanyServicesTypesQuery.data?.results) {
-      return getCompanyServicesTypesQuery.data.results;
-    }
-
-    return [];
-  }, [getCompanyServicesTypesQuery.data]);
-
-  const location = useMemo(() => {
-    const arr = [];
-
-    if (getCompanyDetailsQuery.data?.city) {
-      arr.push(getCompanyDetailsQuery.data?.city);
-    }
-
-    if (getCompanyDetailsQuery.data?.country?.name) {
-      arr.push(getCompanyDetailsQuery.data?.country?.name);
-    }
-
-    return arr.join(", ");
-  }, [getCompanyDetailsQuery.data]);
-
-  const getOpeningTime = (times: string[]) => {
-    if (!times.length) return "Closed";
-
-    if (times.length) {
-      return times.join(", ");
-    }
-  };
-
-  const store = useMemo(
-    () => getCompanyDetailsQuery?.data,
-    [getCompanyDetailsQuery?.data]
+  const location = useMemo(
+    () => [company?.city, company?.country?.name].filter(Boolean).join(", "),
+    [company?.city, company?.country?.name]
   );
 
-  const getShareLink = () => {
-    return (
-      window?.location?.href ||
-      `${process.env.NEXT_PUBLIC_FRONTEND_URL}/company/${toSlug(getCompanyDetailsQuery.data?.name)}?storeId=${getCompanyDetailsQuery.data?.id}`
-    );
-  };
+  const images = company?.images?.map((image) => image.image) || [];
+  const companyHref = `/company/${toSlug(company?.name)}?storeId=${company?.id}`;
+  const yandexMapsWidgetUrl = getYandexMapsWidgetUrl({
+    lat: company?.pos?.lat ?? null,
+    lng: company?.pos?.lng ?? null,
+  });
+  const bookingHref = `/company/${toSlug(company?.name)}/booking-creation?storeId=${company?.id}${selectedServices.length ? `&services=${selectedServices.map((service) => service.id).join(",")}&options=${selectedServices.map((service) => service.selectedOption.id).join(",")}` : ""}`;
+
+  const shareLink = () => window.location.href || companyHref;
 
   const handleCopyShareLink = () => {
-    void navigator.clipboard.writeText(getShareLink());
-    toaster.success("Share link copied to clipboard!");
+    void navigator.clipboard.writeText(shareLink());
+    toaster.success("Ссылка скопирована");
   };
 
+  const handleSelectService = (service: TService) => {
+    const selected = selectedServices.find((item) => item.id === service.id);
+
+    if (selected) {
+      setSelectedServices(selectedServices.filter((item) => item.id !== service.id));
+      return;
+    }
+
+    if (service.options[0]) {
+      setSelectedServices([{ ...service, selectedOption: service.options[0] }]);
+    }
+  };
+
+  const handleSelectTab = (tab: Tab) => {
+    setSelectedTab(tab);
+
+    const target = {
+      "our-service": servicesRef.current,
+      team: teamRef.current,
+      "working-hours": workingHoursRef.current,
+    }[tab.id];
+
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  useEffect(() => {
+    const sections = [
+      ["working-hours", workingHoursRef.current],
+      ["our-service", servicesRef.current],
+      ["team", teamRef.current],
+    ] as const;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const activeEntry = entries.find((entry) => entry.isIntersecting);
+        const activeTab = tabs.find((tab) => tab.id === activeEntry?.target.id);
+
+        if (activeTab) setSelectedTab(activeTab);
+      },
+      { rootMargin: "-20% 0px -65%" }
+    );
+
+    sections.forEach(([, section]) => section && observer.observe(section));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <>
+    <div className="w-full bg-white text-darkPrimary">
       <Modal isOpen={isOpenShareModal} handleClose={() => setIsOpenShareModal(false)}>
-        <div className="w-[450px] max-h-[calc(100vh-80px)] p-6 flex flex-col gap-8">
+        <div className="w-[450px] p-6 sm:w-full">
           <div className="flex items-center justify-between">
-            <h5 className="text-[26px] leading-[38px] font-bold">Share this place</h5>
-            <div className="flex items-center gap-4">
-              <Button
-                className="w-9 h-9 p-0"
-                variant="resting-active"
-                onClick={() => setIsOpenShareModal(false)}
-              >
-                <CloseIcon className="w-5 h-5 stroke-greyPrimary" />
-              </Button>
-            </div>
+            <h2 className="text-xl font-bold">Поделиться</h2>
+            <Button
+              variant="resting-active"
+              className="size-9 !rounded-full p-0"
+              onClick={() => setIsOpenShareModal(false)}
+            >
+              ×
+            </Button>
           </div>
-
-          <div className="w-full flex flex-col">
-            <div className="flex items-center gap-[14px]">
-              <div className="relative size-20 rounded-[16px] overflow-hidden border border-greyOutlineSecondary">
-                {store?.logo && (
-                  <Image
-                    fill
-                    className="object-cover"
-                    src={store.logo}
-                    alt={`${store.name} - Bowers`}
-                  />
-                )}
-              </div>
-              <div className="flex-1">
-                <h6 className="text-base font-bold">{store?.name}</h6>
-                <div className="mt-2 flex items-center">
-                  <p className="pr-4 flex items-center gap-1 text-sm text-greyPrimary border-r border-greyOutlineSecondary">
-                    <LocationIcon className="w-4 h-4" />
-                    {location}
-                  </p>
-                   <p className="pl-4 text-sm">{store?.business_type?.split(",")[0]}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <p className="text-sm">Share link</p>
-            <div className="w-full mt-2 px-3 py-2 flex items-center gap-2 rounded-xl border border-greyOutlineSecondary">
-              {getShareLink()}
-
-              <Button
-                variant="transparent"
-                className="!rounded-full !px-6 !py-3"
-                iconLeft={<CopyIcon className="w-6 h-6 fill-purplePrimary" />}
-                onClick={handleCopyShareLink}
-              ></Button>
-            </div>
-          </div>
+          <p className="mt-6 break-all rounded-xl border border-greyOutlineSecondary p-3 text-sm">
+            {shareLink()}
+          </p>
+          <Button
+            variant="primary"
+            className="mt-4 w-full !rounded-full"
+            iconLeft={<CopyIcon className="size-5 fill-white" />}
+            onClick={handleCopyShareLink}
+          >
+            Скопировать ссылку
+          </Button>
         </div>
       </Modal>
 
-      <div className="w-full h-[calc(100vh-78px-80px)] -mt-[35px] flex gap-10 sm:flex-col sm:h-auto sm:mt-10 bg-[#FDFDFD]">
-        <div className="relative w-3/5 sm:w-full sm:h-[300px]">
-          <div className="absolute z-10 top-4 right-4 flex items-center gap-3">
-            {store?.business_type?.split(",").map((type: string) => (
+      <section className="flex w-full gap-10 py-10 md:gap-6 sm:flex-col">
+        <div className="relative h-[736px] w-[736px] shrink-0 overflow-hidden rounded-2xl bg-greyBackgroundLight md:w-[58%] sm:h-[420px] sm:w-full">
+          {images.length ? (
+            <ImagesSwiper images={images} />
+          ) : company?.logo ? (
+            <Image fill src={company.logo} alt={company.name} className="object-cover" />
+          ) : (
+            <div className="flex h-full items-center justify-center text-sm text-greyPrimary">
+              Фото компании пока нет
+            </div>
+          )}
+          <div className="absolute right-4 top-4 z-10 flex flex-wrap justify-end gap-3">
+            {company?.business_type?.split(",").map((type) => (
               <span
                 key={type}
-                className="px-4 py-3 rounded-full text-sm font-bold bg-white"
+                className="rounded-full bg-white px-4 py-3 text-sm font-bold"
               >
-                {type}
+                {type.trim()}
               </span>
             ))}
-            <Button
-              variant="transparent"
-              className="!rounded-full !px-6 !py-3 flex items-center gap-2 bg-white"
-              iconLeft={<ShareIcon className="stroke-darkPrimary" />}
-              onClick={() => setIsOpenShareModal(true)}
-            >
-              Share
-            </Button>
           </div>
-
-          <ImagesSwiper images={(store?.images || []).map((image) => image.image)} />
         </div>
-        <div className="w-2/5 flex flex-col gap-6 sm:w-full">
-          <div className="flex items-center gap-3">
-            <div className="relative size-20 rounded-[16px] overflow-hidden border border-greyOutlineSecondary">
-              {store?.logo && (
-                <Image
-                  fill
-                  className="object-cover"
-                  src={store.logo}
-                  alt={`${store.name} - Bowers`}
-                />
-              )}
-            </div>
-            <div>
-              <h2 className="text-[26px] leading-[38px] font-bold">{store?.name}</h2>
-              <div className="mt-2 flex items-center">
-                <p className="pr-4 flex items-center gap-1 text-sm text-greyPrimary border-r border-greyOutlineSecondary">
-                  <LocationIcon className="w-4 h-4" />
-                  {location}
-                </p>
 
+        <div className="flex h-[736px] w-[464px] flex-1 flex-col gap-6 sm:h-auto sm:w-full">
+          <div>
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="max-w-[464px] font-funnel text-[26px] font-bold leading-[38px] sm:text-2xl">
+                {company?.name || "Компания"}
+              </h1>
+              <Button
+                variant="transparent"
+                className="shrink-0 !rounded-full !px-4 !py-3"
+                iconLeft={<ShareIcon className="stroke-darkPrimary" />}
+                onClick={() => setIsOpenShareModal(true)}
+              >
+                Поделиться
+              </Button>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-greyPrimary">
+              <p className="flex items-center gap-1">
+                <LocationIcon className="size-4" />
+                {location || "Адрес не указан"}
+              </p>
+              {company?.pos.lat && (
                 <Link
                   target="_blank"
-                  href={`https://www.google.com/maps/dir/?api=1&destination=${store?.pos.lat},${store?.pos.lng}`}
-                  className="pl-4 text-sm font-bold text-purplePrimary"
+                  href={getYandexMapsUrl(company.pos) || ""}
+                  className="font-bold text-purplePrimary"
                 >
-                  Get direction
+                  Построить маршрут
                 </Link>
-              </div>
+              )}
             </div>
           </div>
 
-          <Tabs
-            tabs={tabs}
-            activelTab={selectedTab}
-            handleSelect={(tab) => setSelectedTab(tab)}
-          />
+          <p className="max-w-[464px] text-sm leading-6 text-greyPrimary">
+            {company?.address || company?.address1 || "Описание компании появится здесь."}
+          </p>
 
-          {selectedTab.id === "our-service" && (
-            <ServiceSelection
-              hideTitle
-              className="w-full min-h-0 h-[calc(100vh-124px-100px-92px)] pr-0 border-none"
-              serviceTypes={serviceTypes}
-              services={getCompanyServicesQuery?.data?.results || []}
-              selectedServices={selectedServices}
-              selectServiceHandler={(s) => {
-                setSelectedServices(s);
-              }}
-            />
-          )}
+          <Tabs tabs={tabs} activelTab={selectedTab} handleSelect={handleSelectTab} />
 
-          {selectedTab.id === "team" && (
-            <div className="grid grid-cols-3 gap-3">
-              <SpecialistList
-                className="col-span-1"
-                specialists={getCompanySpecialistsQuery.data?.results || []}
+          <div
+            ref={workingHoursRef}
+            id="working-hours"
+            className="min-h-[180px] scroll-mt-10 overflow-hidden rounded-xl border border-greyOutlineSecondary bg-[#F5F5FA]"
+          >
+            {yandexMapsWidgetUrl ? (
+              <iframe
+                title={`Карта: ${company?.name || "компания"}`}
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                src={yandexMapsWidgetUrl}
+                loading="lazy"
+                className="block h-[280px] w-full border-0"
               />
-            </div>
-          )}
-
-          {selectedTab.id === "working-hours" && (
-            <>
-              <div className="w-full aspect-video">
-                <Map centerOfMap={store?.pos} />
+            ) : (
+              <div className="flex min-h-[180px] flex-col items-center justify-center px-6 text-center">
+                <div className="flex size-10 items-center justify-center rounded-full bg-white text-purplePrimary">
+                  <LocationIcon className="size-5" />
+                </div>
+                <p className="mt-3 text-sm font-bold">Координаты компании не указаны</p>
               </div>
-              <div className="w-full mt-2 flex flex-col gap-2 justify-between md:w-1/2 sm:w-full">
-                {Object.entries(getCompanyDetailsQuery.data?.workingSchedule || {}).map(
-                  ([weekDay, value]) => (
-                    <div
-                      key={weekDay}
-                      className="w-full flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={cn("w-2 h-2 rounded-full bg-greyLight", {
-                             "bg-greenPrimary": value.workingSlots.length,
-                          })}
-                        ></div>
-                        <p
-                          className={cn("text-sm", {
-                             "text-greyPrimary": !value.workingSlots.length,
-                          })}
-                        >
-                          {weekDay}
-                        </p>
-                      </div>
-                      <div className="flex items-center">
-                        <p
-                          className={cn("text-sm", {
-                             "text-greyPrimary": !value.workingSlots.length,
-                          })}
-                        >
-                           {getOpeningTime(value.workingSlots.map(String))}
-                        </p>
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
-            </>
-          )}
+            )}
+          </div>
 
-          <div className="w-full flex items-center justify-between">
-            <p
-              className={cn("text-sm text-grey-800", {
-                visible: selectedServices.length > 0,
-                invisible: !selectedServices.length,
-              })}
-            >
-              {selectedServices.length} service selected
-            </p>
-            <Link
-              href={`/company/${toSlug(getCompanyDetailsQuery.data?.name)}/booking-creation?storeId=${store?.id}${selectedServices.length ? `&services=${selectedServices.map((s) => s.id).join(",")}&options=${selectedServices.map((s) => s.selectedOption.id).join(",")}` : ""}`}
-            >
-              <Button variant="primary" className={cn("px-8 !rounded-full")}>
-                Book Now
+          <div className="flex flex-col gap-2">
+            {Object.entries(company?.workingSchedule || {}).map(([day, schedule]) => (
+              <div key={day} className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-2">
+                  <span
+                    className={cn("size-2 rounded-full", {
+                      "bg-greenPrimary": schedule.workingSlots.length,
+                      "bg-greyLight": !schedule.workingSlots.length,
+                    })}
+                  />
+                  <span
+                    className={cn({ "text-greyPrimary": !schedule.workingSlots.length })}
+                  >
+                    {weekDayLabels[day as WorkingScheduleWeekDays] || day}
+                  </span>
+                </span>
+                <span
+                  className={cn({ "text-greyPrimary": !schedule.workingSlots.length })}
+                >
+                  {formatWorkingHours(schedule.workingSlots)}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-auto flex items-center justify-between gap-4 border-t border-greyOutlineSecondary pt-6">
+            <span className="text-sm text-greyPrimary">
+              {selectedServices.length
+                ? `${selectedServices.length} услуга выбрана`
+                : "Выберите услугу ниже"}
+            </span>
+            <Link href={bookingHref}>
+              <Button variant="primary" className="!rounded-full px-8">
+                Записаться
               </Button>
             </Link>
           </div>
         </div>
-      </div>
-    </>
+      </section>
+
+      <section
+        ref={servicesRef}
+        id="our-service"
+        className="w-full scroll-mt-10 bg-greyBackgroundLight py-14"
+      >
+        <div className="w-full">
+          <p className="text-[10px] font-bold tracking-[1px] text-purplePrimary">
+            УСЛУГИ И ЦЕНЫ
+          </p>
+          <div className="mt-2 flex items-end justify-between gap-6 sm:flex-col sm:items-start">
+            <div>
+              <h2 className="font-funnel text-[30px] font-bold leading-10">
+                Выберите подходящую программу
+              </h2>
+              <p className="mt-2 text-xs text-greyPrimary">
+                Каждая запись включает выбранный вариант, продолжительность и
+                фиксированную стоимость.
+              </p>
+            </div>
+            <div className="rounded-full border border-greyOutlineSecondary bg-white px-4 py-3 text-sm font-semibold">
+              Все направления
+            </div>
+          </div>
+          <div className="mt-6 flex flex-col gap-2">
+            {services.map((service) => {
+              const option = service.options[0];
+              const isSelected = selectedServices.some((item) => item.id === service.id);
+
+              return (
+                <button
+                  key={service.id}
+                  type="button"
+                  onClick={() => handleSelectService(service)}
+                  className={cn(
+                    "flex min-h-20 w-full items-center gap-5 rounded-xl border border-greyOutlineSecondary bg-white px-4 py-3 text-left transition-colors hover:border-purplePrimary",
+                    { "border-purplePrimary bg-purpleExtraLight": isSelected }
+                  )}
+                >
+                  <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-greyBackgroundLight">
+                    {service.image ? (
+                      <Image
+                        width={48}
+                        height={48}
+                        src={service.image}
+                        alt=""
+                        className="size-full object-cover"
+                      />
+                    ) : null}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold">{service.name}</p>
+                    <p className="mt-1 text-xs text-greyPrimary">
+                      {formatDuration(option?.duration)}
+                    </p>
+                  </div>
+                  <p className="shrink-0 text-sm font-bold">
+                    {option ? formatCurrency(option.price) : "—"}
+                  </p>
+                  <RadioButton checked={isSelected} className="pointer-events-none" />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section ref={teamRef} id="team" className="w-full scroll-mt-10 py-14">
+        <p className="text-[10px] font-bold tracking-[1px] text-purplePrimary">КОМАНДА</p>
+        <h2 className="mt-2 font-funnel text-[30px] font-bold leading-10">
+          Специалисты, которым доверяют
+        </h2>
+        <p className="mt-2 text-xs text-greyPrimary">
+          Показаны только активные специалисты, доступные для выбранных услуг.
+        </p>
+        <div className="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-2">
+          {specialists.map((specialist) => (
+            <div
+              key={specialist.id}
+              className="min-h-[196px] rounded-xl border border-greyOutlineSecondary bg-white p-3 text-center"
+            >
+              <div className="mx-auto size-16 overflow-hidden rounded-lg bg-greyLight">
+                {specialist.avatar ? (
+                  <Image
+                    width={64}
+                    height={64}
+                    src={specialist.avatar}
+                    alt={specialist.fullName}
+                    className="size-full object-cover"
+                  />
+                ) : null}
+              </div>
+              <p className="mt-3 text-base font-bold">{specialist.fullName}</p>
+              <p className="mt-1 truncate text-sm text-greyPrimary">
+                {specialist.specialties?.[0] || specialist.role}
+              </p>
+              <div className="mt-3 flex justify-between text-sm text-greyPrimary">
+                <span>★ {specialist.rating || "—"}</span>
+                <span>от {formatCurrency(0)}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
   );
 };
 

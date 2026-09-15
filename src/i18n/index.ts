@@ -4,13 +4,13 @@ import { getRequestConfig } from "next-intl/server";
 import { createSharedPathnamesNavigation } from "next-intl/navigation";
 import i18nConfig from "./config";
 import { AbstractIntlMessages } from "next-intl";
-import { enUS, ru, th } from "date-fns/locale";
+import { Locale, enUS, ru } from "date-fns/locale";
 
 export { NextIntlClientProvider, useTranslations, useLocale } from "next-intl";
 
 export { getTranslations } from "next-intl/server";
 
-export const DATE_FNS_LOCALES = {
+export const DATE_FNS_LOCALES: Record<string, Locale> = {
   en: enUS,
   ru,
 };

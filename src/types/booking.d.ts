@@ -5,6 +5,7 @@ type TApiBookingCustomer = {
   id: string;
   _id?: string;
   email: string;
+  phone: string;
   firstName: string;
   lastName: string;
   avatar?: string | null;

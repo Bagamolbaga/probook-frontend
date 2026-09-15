@@ -6,8 +6,9 @@
 "use client";
 
 import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { isAxiosError } from "axios";
 import { useSearchParams } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { useRouter, useTranslations } from "@/i18n";
 import { useLocale } from "next-intl";
@@ -25,14 +26,16 @@ import ServiceSelection from "../components/ServiceSelection";
 import StaffSelection from "../components/StaffSelection";
 import TimeSelection from "../components/TimeSelection";
 import PhoneVerifyModal, { PhoneVerifyForm } from "../components/PhoneVerifyModal";
+import BookingOtpVerification from "./components/BookingOtpVerification";
 import AuthModal, { AuthForm } from "../components/AuthModal";
+import CustomerDetailsSelection from "../components/CustomerDetailsSelection";
 import MobileBottomCart from "../components/MobileBottomCart";
 import Button from "@/components/ui/button";
 import Spinner from "@/components/ui/loaders/Spinner";
-import Stepper from "@/components/ui/stepper";
-import CompanyCartWidget from "@/components/ui/widgets/companyCart";
+import Stepper, { TStep } from "@/components/ui/stepper";
 import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
 import CalendarIcon from "@/components/ui/icons/Calendar";
+import ClockIcon from "@/components/ui/icons/Clock";
 import NoteIcon from "@/components/ui/icons/Note";
 import PersonIcon from "@/components/ui/icons/Person";
 import { toaster } from "@/components/ui/toaster";
@@ -41,19 +44,15 @@ import { TIME_SLOTS, TTimeSlot } from "@/constants/timeSlots";
 import { PREVIOUSLY_BOOKED_SERVICES } from "@/constants/keys";
 import { useAppSession } from "@/hooks/useAppSession";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { getUserCompanies } from "@/utils/permissions";
 import DraftModal from "./components/DraftModal";
-import {
-  DateSection,
-  PriceSection,
-  ServicesSection,
-  StaffSection,
-  TimeSection,
-} from "@/components/ui/widgets/companyCart/components";
 import { Player } from "@lottiefiles/react-lottie-player";
 import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
 import { cn } from "@/utils/cn";
+import { formatCurrency } from "@/utils/formatCurrency";
 import Image from "next/image";
 import LocationIcon from "@/components/ui/icons/Location";
+import { Lock } from "lucide-react";
 
 const STEPS = [
   { id: "services", text: "Services", icon: NoteIcon },
@@ -87,10 +86,131 @@ type DraftBookingDataInLocalStorage = {
   time: TTimeSlot;
 };
 
+type BookingSummaryCardProps = {
+  avatar?: string;
+  name: string;
+  surname: string;
+  location: string;
+  selectedServices: TServiceAndSelectedOption[];
+  selectedStaff?: TSpecialist | "ANY";
+  selectedDate?: Date;
+  selectedTime?: TTimeSlot;
+};
+
+const SummaryRow = ({
+  icon,
+  children,
+}: {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) => (
+  <div className="flex items-center gap-3 text-sm text-darkPrimary">
+    {icon}
+    {children}
+  </div>
+);
+
+const BookingSummaryCard: FC<BookingSummaryCardProps> = ({
+  avatar,
+  name,
+  surname,
+  location,
+  selectedServices,
+  selectedStaff,
+  selectedDate,
+  selectedTime,
+}) => {
+  const selectedService = selectedServices[0];
+  const selectedOption = selectedService?.selectedOption;
+  const total = selectedServices.reduce(
+    (sum, service) => sum + Number(service.selectedOption.price),
+    0
+  );
+  const durationSlots = selectedServices.reduce(
+    (sum, service) => sum + Math.ceil(service.selectedOption.duration / 15),
+    0
+  );
+  const endTime = selectedTime && TIME_SLOTS[selectedTime.slot + durationSlots];
+  const formattedDate = selectedDate
+    ? new Intl.DateTimeFormat("ru-RU", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(selectedDate)
+    : null;
+
+  return (
+    <div className="w-full rounded-[14px] border border-greyOutlineSecondary bg-white p-5 shadow-primary">
+      <div className="flex items-center gap-3">
+        <div className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-purplePrimary">
+          {avatar ? (
+            <Image fill src={avatar} alt="" className="object-cover" />
+          ) : (
+            <span className="text-xs font-bold text-white">PB</span>
+          )}
+        </div>
+        <div className="min-w-0">
+          <h3 className="truncate font-funnel text-base font-bold">{name}</h3>
+          <p className="text-xs text-greyPrimary">{surname}</p>
+        </div>
+      </div>
+
+      <p className="mt-7 text-[10px] font-bold tracking-[0.5px] text-purplePrimary">
+        ПРОВЕРЬТЕ ДЕТАЛИ
+      </p>
+
+      <div className="mt-4 flex flex-col gap-4">
+        {selectedService && (
+          <SummaryRow icon={<NoteIcon className="size-4 stroke-purplePrimary" />}>
+            <span className="min-w-0 flex-1 truncate font-bold">
+              {selectedOption?.name || selectedService.name}
+            </span>
+          </SummaryRow>
+        )}
+        {selectedStaff && (
+          <SummaryRow icon={<PersonIcon className="size-4 stroke-purplePrimary" />}>
+            <span className="truncate">
+              {selectedStaff === "ANY" ? "Любой специалист" : selectedStaff.fullName}
+            </span>
+          </SummaryRow>
+        )}
+        {selectedDate && (
+          <SummaryRow icon={<CalendarIcon className="size-4 stroke-purplePrimary" />}>
+            {formattedDate}
+          </SummaryRow>
+        )}
+        {selectedTime && (
+          <SummaryRow icon={<ClockIcon className="size-4 stroke-purplePrimary" />}>
+            {selectedTime.label}
+            {endTime ? `–${endTime.label}` : ""}
+          </SummaryRow>
+        )}
+        {location && (
+          <SummaryRow icon={<LocationIcon className="size-4 stroke-purplePrimary" />}>
+            <span className="truncate">{location}</span>
+          </SummaryRow>
+        )}
+      </div>
+
+      {selectedService && (
+        <div className="mt-6 flex items-center justify-between border-t border-greyOutlineSecondary pt-5">
+          <span className="text-xs text-greyPrimary">К оплате на месте</span>
+          <span className="font-funnel text-base font-bold">{formatCurrency(total)}</span>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2 mt-5 px-3 py-2 rounded-xl bg-purpleExtraLight text-[10px] text-grey-800">
+        <Lock className="size-3 stroke-purplePrimary" /> Данные защищены и не передаются
+        третьим лицам
+      </div>
+    </div>
+  );
+};
+
 const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
   const t = useTranslations();
   const locale = useLocale() as "en" | "ru";
-  const { data: session } = useAppSession();
+  const { data: session, update: updateSession } = useAppSession();
   const router = useRouter();
   const apiClient = useApiClient();
   const rightPanelRef = useRef<HTMLDivElement>(null);
@@ -120,6 +240,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
     useState(false);
   const [isOpenAuthModal, setIsOpenAuthModal] = useState(false);
   const [isOpenPhoneVerifyModal, setIsOpenPhoneVerifyModal] = useState(false);
+  const [createdClientEmail, setCreatedClientEmail] = useState("");
   const [isSuccessBooked, setIsSuccessBooked] = useState(false);
   const [isCreateBookingLoading, setIsCreateBookingLoading] = useState(false);
 
@@ -140,6 +261,21 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
       selectedDate: new Date(),
     },
   });
+
+  const authenticatedClient = useMemo<AuthForm | undefined>(() => {
+    const user = session?.user;
+    if (!user || getUserCompanies(user).length) return undefined;
+
+    const fullNameParts = user.fullName?.trim().split(/\s+/) ?? [];
+
+    return {
+      first_name: user.firstName || fullNameParts[0] || "",
+      last_name: user.lastName || fullNameParts.slice(1).join(" "),
+      phone: user.phone || "",
+      email: user.email || "",
+      preferredLocale: user.preferredLocale || locale,
+    };
+  }, [locale, session?.user]);
 
   useEffect(() => {
     const servicesStr = searchParams.get("services");
@@ -325,73 +461,82 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
   };
 
   const afterCreatedBookingWithPhoneOrEmail = (otp_sent?: boolean) => {
-    if (form.watch("client.email")) {
-      setIsSuccessBooked(true);
+    const client = form.getValues("client");
+    setCreatedClientEmail(client?.email || "");
+
+    if (otp_sent || client?.email) {
+      setIsOpenPhoneVerifyModal(true);
     } else {
-      if (otp_sent) {
-        setIsOpenPhoneVerifyModal(true);
-      } else {
-        setIsSuccessBooked(true);
-      }
+      setIsSuccessBooked(true);
     }
 
     setDraftBookingInLS(null);
   };
 
+  const getCreateBookingData = (): TCreateBookingArgs["data"] | undefined => {
+    const formData = form.getValues();
+    if (
+      !formData.selectedServices.length ||
+      !formData.selectedStaff ||
+      !formData.selectedDate ||
+      !formData.selectedTime ||
+      !formData.client
+    ) {
+      return;
+    }
+
+    const selectedTimeIdx = TIME_SLOTS.findIndex(
+      (slot) => slot.slot === formData.selectedTime!.slot
+    );
+    if (selectedTimeIdx < 0) return;
+
+    const durationInSlots = Math.ceil(
+      formData.selectedServices.reduce(
+        (total, service) => total + service.selectedOption.duration,
+        0
+      ) / 15
+    );
+
+    return {
+      services: formData.selectedServices.map((service) => ({
+        serviceId: service.id,
+        optionId: String(service.selectedOption._id || service.selectedOption.id),
+      })),
+      specialist:
+        formData.selectedStaff === "ANY"
+          ? formData.selectedAnyStaff!.id
+          : formData.selectedStaff.id,
+      date: formData.selectedDate,
+      slots: TIME_SLOTS.slice(selectedTimeIdx, selectedTimeIdx + durationInSlots).map(
+        (slot) => slot.slot
+      ),
+      customer: {
+        first_name: formData.client.first_name,
+        last_name: formData.client.last_name,
+        email: formData.client.email || "",
+        phone: formData.client.phone,
+      },
+      customerLocale: formData.client.preferredLocale,
+    };
+  };
+
+  const showBookingError = (error: unknown, fallback: string) => {
+    const responseMessage = isAxiosError(error) ? error.response?.data?.message : null;
+    const message = Array.isArray(responseMessage)
+      ? responseMessage.join(". ")
+      : typeof responseMessage === "string"
+        ? responseMessage
+        : fallback;
+    toaster.error(message);
+  };
+
   const createBookingHandler = async () => {
     try {
       const formData = form.getValues();
-      if (
-        formData.selectedServices.length &&
-        formData.selectedStaff &&
-        formData.selectedDate &&
-        formData.selectedTime &&
-        formData.client
-      ) {
+      const data = getCreateBookingData();
+      if (data) {
         toaster("Booking creating please wait");
         setIsCreateBookingLoading(true);
-
-        const data: TCreateBookingArgs["data"] = {
-          services: formData.selectedServices.map((service) => ({
-            serviceId: service.id,
-            optionId: String(service.selectedOption._id || service.selectedOption.id),
-          })),
-          specialist:
-            formData.selectedStaff === "ANY"
-              ? formData.selectedAnyStaff!.id
-              : formData.selectedStaff.id,
-          date: formData.selectedDate,
-          slots: [],
-          customer: {
-            first_name: formData.client.first_name,
-            last_name: formData.client.last_name,
-            email: formData.client.email || "",
-          },
-          customerLocale: formData.client.preferredLocale,
-        };
-
-        // if (formData.client.email) {
-        //   data.email = formData.client.email;
-        //   socialAuth && (data.auth = socialAuth);
-        // } else {
-        //   data.phone = formData.client.phone;
-        //   data.auth = "sms";
-        // }
-
-        const timeSlots = [...TIME_SLOTS];
-        const selectedTimeIdx = timeSlots.findIndex(
-          (s) => s.slot === formData.selectedTime!.slot
-        );
-        const allTimeDurationInSlotsCount =
-          formData.selectedServices.reduce(
-            (acc, c) => (acc += c.selectedOption.duration),
-            0
-          ) / 15;
-        const slots = timeSlots
-          .splice(selectedTimeIdx, allTimeDurationInSlotsCount + 1)
-          .map((s) => s.slot);
-
-        data.slots = slots;
 
         const res = await createBooking({ companyId, data });
 
@@ -418,7 +563,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
         }
       }
     } catch (error) {
-      toaster.error("Something went wrong");
+      showBookingError(error, t("booking.errors.createFailed" as any));
     } finally {
       setIsCreateBookingLoading(false);
     }
@@ -472,7 +617,11 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
 
     if (form.watch("_stepId") === "time") {
       saveDraftBookingInLocalStorage();
-      setIsOpenAuthModal(true);
+      form.setValue("_stepId", "data");
+      return;
+    }
+
+    if (form.watch("_stepId") === "data") {
       return;
     }
 
@@ -531,62 +680,80 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
   const authModalContinueHandler = async (authModalFormData: AuthForm) => {
     try {
       form.setValue("client", authModalFormData);
-      if (!createdBooking) {
-        setIsGlobalLoading(true);
+      setIsGlobalLoading(true);
 
-        const booking = await createBookingHandler();
+      const bookingData = getCreateBookingData();
+      if (!bookingData) throw new Error("Incomplete booking data");
 
-        if (socialAuth) {
-          afterCreatedBookingWithSocialAuth();
-        } else {
-          afterCreatedBookingWithPhoneOrEmail(booking?.otp_sent);
-        }
+      await apiClient.bookings.validateBooking({ companyId, data: bookingData });
 
-        form.reset();
+      await apiClient.customerUser.requestEmailOtp({
+        email: authModalFormData.email,
+        locale: authModalFormData.preferredLocale,
+      });
 
-        setIsGlobalLoading(false);
-        closeAuthModalHandler();
-      } else {
-        closeAuthModalHandler();
-      }
+      setCreatedClientEmail(authModalFormData.email);
+      setIsOpenPhoneVerifyModal(true);
+      closeAuthModalHandler();
     } catch (error) {
-      toaster.error("Something went wrong");
+      showBookingError(error, t("booking.otp.requestFailed" as any));
+    } finally {
+      setIsGlobalLoading(false);
     }
   };
 
-  const phoneVerifyContinueHandler = (phoneVerifyFormData: PhoneVerifyForm) => {
-    setIsSuccessBooked(true);
+  const phoneVerifyContinueHandler = async (phoneVerifyFormData: PhoneVerifyForm) => {
+    void phoneVerifyFormData;
+    if (!session?.accessToken) {
+      toaster.error(t("booking.otp.authFailed" as any));
+      return;
+    }
 
+    const booking = await createBookingHandler();
+    if (!booking) return;
+
+    setIsSuccessBooked(true);
+    setDraftBookingInLS(null);
     closePhoneVerifyHandler();
   };
 
   const codeVerifyHandler = async ({ code }: { code: string }) => {
-    if (createdBooking) {
-      await apiClient.customerUser.sendCreateBookingOTPCode({
-        otp: Number(code),
-        bookingId: Number(createdBooking.id),
+    const client = form.getValues("client");
+    if (!client?.email) return false;
+
+    try {
+      const result = await signIn("email-otp", {
+        email: client.email,
+        code,
+        firstName: client.first_name,
+        lastName: client.last_name,
+        phone: client.phone,
+        redirect: false,
       });
 
+      if (!result?.ok) {
+        toaster.error(t("booking.otp.invalidCode" as any));
+        return false;
+      }
+
+      await updateSession();
       form.setValue("isPhoneVerified", true);
-
       return true;
+    } catch {
+      toaster.error(t("booking.otp.invalidCode" as any));
+      return false;
     }
-
-    return false;
   };
 
   const resendVerifyCodeHandler = async () => {
-    if (createdBooking) {
-      const res = await apiClient.customerUser.resendBookingOTPCode({
-        bookingId: Number(createdBooking.id),
-      });
+    const client = form.getValues("client");
+    if (!client?.email) return false;
 
-      if (res.status === 204) {
-        return true;
-      }
-    }
-
-    return false;
+    await apiClient.customerUser.requestEmailOtp({
+      email: client.email,
+      locale: client.preferredLocale,
+    });
+    return true;
   };
 
   const selectedStaff = form.watch("selectedStaff");
@@ -623,8 +790,8 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
       arr.push(getCompanyDetailsQuery.data?.city);
     }
 
-    if (getCompanyDetailsQuery.data?.address1) {
-      arr.push(getCompanyDetailsQuery.data?.address1);
+    if (getCompanyDetailsQuery.data?.address) {
+      arr.push(getCompanyDetailsQuery.data?.address);
     }
 
     return arr.join(", ");
@@ -669,10 +836,50 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
     return [];
   }, [getCompanySpecialistsQuery.data, form.watch("selectedServices")]);
 
-  const STEPS_i18n = useMemo(
-    () => STEPS.map((s) => ({ ...s, text: t(`booking.steps.${s.id}` as any) })),
+  const PROGRESS_STEPS = useMemo<TStep[]>(
+    () => [
+      { id: "services", text: t("booking.steps.services" as any) },
+      { id: "staffs", text: t("booking.steps.staffs" as any) },
+      { id: "time", text: t("booking.steps.dateTime" as any) },
+      { id: "data", text: t("booking.steps.data" as any) },
+      { id: "code", text: t("booking.steps.code" as any) },
+      { id: "done", text: t("booking.steps.done" as any) },
+    ],
     []
   );
+
+  const progressStepId = isOpenPhoneVerifyModal
+    ? "code"
+    : isOpenAuthModal
+      ? "data"
+      : form.watch("_stepId");
+
+  const progressStepIndex = PROGRESS_STEPS.findIndex(
+    (step) => step.id === progressStepId
+  );
+  const clickableProgressSteps = PROGRESS_STEPS.map((step, index) => ({
+    ...step,
+    disabled: index > progressStepIndex,
+  }));
+
+  const handleProgressStepSelect = (step: TStep) => {
+    closeAuthModalHandler();
+    closePhoneVerifyHandler();
+
+    if (step.id === "services" || step.id === "staffs" || step.id === "time") {
+      form.setValue("_stepId", step.id);
+      return;
+    }
+
+    if (step.id === "data" && !createdBooking) {
+      setIsOpenAuthModal(true);
+      return;
+    }
+
+    if (step.id === "code" && createdBooking) {
+      setIsOpenPhoneVerifyModal(true);
+    }
+  };
 
   const renderLeftPanel = () => {
     if (isGlobalLoading) {
@@ -681,24 +888,38 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
 
     return (
       <>
-        {form.watch("_stepId") === "services" && (
+        {isOpenPhoneVerifyModal && (
+          <BookingOtpVerification
+            email={createdClientEmail}
+            handleCodeVerify={codeVerifyHandler}
+            handleResend={resendVerifyCodeHandler}
+            handleEdit={() => {
+              closePhoneVerifyHandler();
+              form.setValue("_stepId", "data");
+            }}
+            handleComplete={() => void phoneVerifyContinueHandler({ code: "" })}
+          />
+        )}
+        {!isOpenPhoneVerifyModal && form.watch("_stepId") === "services" && (
           <ServiceSelection
             rightPanelHeight={rightPanelRef.current?.clientHeight}
             serviceTypes={companyServicesTypes}
             services={servicesCanSelect}
             selectedServices={form.watch("selectedServices")}
             selectServiceHandler={selectServiceHandler}
+            variant="booking"
           />
         )}
-        {form.watch("_stepId") === "staffs" && (
+        {!isOpenPhoneVerifyModal && form.watch("_stepId") === "staffs" && (
           <StaffSelection
             specialists={specialistForOnlySelectedServices}
             selectedSpecialist={form.watch("selectedStaff")}
             selectSpecialistHandler={selectSpecialistHandler}
             selectTimeHandler={selectTimeHandler}
+            variant="booking"
           />
         )}
-        {form.watch("_stepId") === "time" && (
+        {!isOpenPhoneVerifyModal && form.watch("_stepId") === "time" && (
           <TimeSelection
             companyId={companyId}
             selectedServices={form.watch("selectedServices")}
@@ -708,6 +929,13 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
             selectDateHandler={selectDateHandler}
             selectTimeHandler={selectTimeHandler}
             selectSpecialistHandler={selectAnySpecialistHandler}
+          />
+        )}
+        {!isOpenPhoneVerifyModal && form.watch("_stepId") === "data" && (
+          <CustomerDetailsSelection
+            key={authenticatedClient?.email || "guest"}
+            initialClient={authenticatedClient}
+            onSubmit={authModalContinueHandler}
           />
         )}
       </>
@@ -745,7 +973,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
       />
       <PhoneVerifyModal
         phone={form.watch("client.phone")}
-        isOpen={isOpenPhoneVerifyModal}
+        isOpen={false}
         handleCodeVerify={codeVerifyHandler}
         handleClose={closePhoneVerifyHandler}
         handleContinue={phoneVerifyContinueHandler}
@@ -785,16 +1013,21 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
               {getCompanyDetailsQuery?.data?.name}
             </h5>
             <p className="mt-1 flex items-start gap-1 text-sm text-greyPrimary">
-              {getCompanyDetailsQuery?.data?.address1 && (
+              {getCompanyDetailsQuery?.data?.address && (
                 <LocationIcon className="min-w-4 min-h-4" />
               )}
-              {getCompanyDetailsQuery?.data?.address1}
             </p>
           </div>
         </div>
 
-        <div className="w-full pb-9">
-          <Stepper activeStepId={form.watch("_stepId")} steps={STEPS_i18n} />
+        <div className="w-full border-b border-b-greyOutlineSecondary bg-white">
+          <Stepper
+            activeStepId={progressStepId}
+            steps={clickableProgressSteps}
+            canSelectStep
+            selectStepHandler={handleProgressStepSelect}
+            variant="booking-progress"
+          />
         </div>
 
         <div className={cn("w-full mt-6 flex items-stretch justify-center", {})}>
@@ -804,6 +1037,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
             className={cn("w-1/3 h-fit pl-6", {
               "pl-0 sm:w-full": form.watch("_stepId") === "confirm",
               "sm:hidden": form.watch("_stepId") !== "confirm",
+              hidden: isOpenPhoneVerifyModal,
             })}
           >
             {getCompanyDetailsQuery.isPending || isGlobalLoading ? (
@@ -811,38 +1045,34 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
                 <Spinner />
               </div>
             ) : (
-              <CompanyCartWidget
-                avatar={getCompanyDetailsQuery.data?.logo ?? undefined}
-                name={getCompanyDetailsQuery.data?.name || ""}
-                location={companyLocation}
-                bottomContent={
-                  <>
-                    {form.watch("selectedDate") && (
-                      <DateSection date={form.watch("selectedDate")} />
-                    )}
-                    {form.watch("selectedTime") && (
-                      <TimeSection
-                        slot={form.watch("selectedTime")!}
-                        selectedServices={form.watch("selectedServices")}
-                      />
-                    )}
-                    {!!form.watch("selectedServices").length && (
-                      <div className="flex flex-col">
-                        <ServicesSection services={form.watch("selectedServices")} />
-                        {selectedStaff && <StaffSection staff={selectedStaff} />}
-                        <PriceSection services={form.watch("selectedServices")} />
-                        {isShowContinueButton && (
-                          <Button variant="dark" onClick={handleNextStep}>
-                            {form.watch("_stepId") === "confirm"
-                              ? t("booking.steps.confirm")
-                              : t("booking.bookingCard.continueBtn")}
-                          </Button>
-                        )}
-                      </div>
-                    )}
-                  </>
-                }
-              />
+              <>
+                <BookingSummaryCard
+                  avatar={getCompanyDetailsQuery.data?.logo ?? undefined}
+                  name={getCompanyDetailsQuery.data?.name || ""}
+                  surname={getCompanyDetailsQuery.data?.businessType || ""}
+                  location={companyLocation}
+                  selectedServices={form.watch("selectedServices")}
+                  selectedStaff={selectedStaff}
+                  selectedDate={form.watch("selectedDate")}
+                  selectedTime={form.watch("selectedTime")}
+                />
+                <Button
+                  className="mt-4 w-full"
+                  variant="dark"
+                  disabled={!isShowContinueButton}
+                  type={form.watch("_stepId") === "data" ? "submit" : "button"}
+                  form={
+                    form.watch("_stepId") === "data" ? "booking-contact-form" : undefined
+                  }
+                  onClick={form.watch("_stepId") === "data" ? undefined : handleNextStep}
+                >
+                  {form.watch("_stepId") === "data"
+                    ? t("booking.clientInformationStep.confirmBtn" as any)
+                    : form.watch("_stepId") === "confirm"
+                      ? t("booking.steps.confirm")
+                      : t("booking.bookingCard.continueBtn")}
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -858,11 +1088,15 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
           <Button
             variant={isShowContinueButton ? "dark" : "primary"}
             disabled={!isShowContinueButton}
-            onClick={handleNextStep}
+            type={form.watch("_stepId") === "data" ? "submit" : "button"}
+            form={form.watch("_stepId") === "data" ? "booking-contact-form" : undefined}
+            onClick={form.watch("_stepId") === "data" ? undefined : handleNextStep}
           >
-            {form.watch("_stepId") === "confirm"
-              ? t("booking.steps.confirm")
-              : t("booking.bookingCard.continueBtn")}
+            {form.watch("_stepId") === "data"
+              ? t("booking.clientInformationStep.confirmBtn" as any)
+              : form.watch("_stepId") === "confirm"
+                ? t("booking.steps.confirm")
+                : t("booking.bookingCard.continueBtn")}
           </Button>
         }
       />

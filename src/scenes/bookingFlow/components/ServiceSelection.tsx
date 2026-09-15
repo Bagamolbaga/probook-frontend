@@ -4,7 +4,6 @@ import { useInView } from "react-intersection-observer";
 
 import ServicesList from "./ui/ServicesList";
 import { TServiceAndSelectedOption } from "@/scenes/main/bookingCreation/components/BookingCreation";
-import HorizontalList from "@/components/ui/horizontalList";
 import CustomScrollbar from "@/styles/scrollbar.module.sass";
 import { cn } from "@/utils/cn";
 
@@ -27,6 +26,7 @@ type Props = {
   services: TService[];
   selectedServices: TServiceAndSelectedOption[];
   selectServiceHandler: (services: TServiceAndSelectedOption[]) => void;
+  variant?: "default" | "booking";
 };
 
 const TypeRow = ({
@@ -69,6 +69,7 @@ const ServiceSelection: FC<Props> = ({
   services,
   selectedServices,
   selectServiceHandler,
+  variant = "default",
 }) => {
   const t = useTranslations();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -81,6 +82,14 @@ const ServiceSelection: FC<Props> = ({
     const fullServiceType = servicesTabs.find((st) => st.id === tab.id);
 
     if (fullServiceType) {
+      if (tab.id === "all") {
+        setIsSmoothScrolling(true);
+        scrollableListRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+        setServiceType(fullServiceType);
+        setTimeout(() => setIsSmoothScrolling(false), 500);
+        return;
+      }
+
       const el = document.getElementById(`type-${tab.id}`) as Element | undefined;
 
       if (el) {
@@ -123,8 +132,15 @@ const ServiceSelection: FC<Props> = ({
       })
     );
 
-    return serviceTypesThatHaveServices.map((st) => ({ ...st, text: st.name }));
-  }, [serviceTypes, services]);
+    return [
+      {
+        id: "all",
+        name: t("booking.servicesStep.allDirections" as any),
+        text: t("booking.servicesStep.allDirections" as any),
+      },
+      ...serviceTypesThatHaveServices.map((st) => ({ ...st, text: st.name })),
+    ];
+  }, [serviceTypes, services, t]);
 
   useEffect(() => {
     setServiceType(
@@ -133,7 +149,7 @@ const ServiceSelection: FC<Props> = ({
   }, [servicesTabs]);
 
   const serviceData: TServiceData[] = useMemo(() => {
-    if (!servicesTabs.length) {
+    if (serviceType?.id === "all") {
       return [{ type: { id: "all", name: "All", text: "All" }, services }];
     }
 
@@ -146,7 +162,7 @@ const ServiceSelection: FC<Props> = ({
         return categoryId === String(serviceType.id);
       }),
     }));
-  }, [servicesTabs, services]);
+  }, [servicesTabs, services, serviceType?.id]);
 
   return (
     <div
@@ -157,18 +173,48 @@ const ServiceSelection: FC<Props> = ({
         className
       )}
     >
-      {!hideTitle && (
+      {!hideTitle && variant === "default" && (
         <p className="text-sm font-bold text-greyPrimary">
           {t("booking.servicesStep.selectServices")}
         </p>
       )}
-      <HorizontalList
-        activelTabId={serviceType?.id}
-        tabs={servicesTabs}
-        onSelect={selectServiceTypeLocalHandler}
-      />
+      {variant === "booking" && (
+        <div className="flex flex-col gap-2">
+          <p className="text-[10px] font-bold tracking-[0.5px] text-purplePrimary">
+            {t("booking.servicesStep.stepLabel" as any)}
+          </p>
+          <h2 className="font-funnel text-[32px] font-bold leading-tight text-darkPrimary sm:text-[26px]">
+            {t("booking.servicesStep.title" as any)}
+          </h2>
+          <p className="text-[13px] text-greyPrimary">
+            {t("booking.servicesStep.description" as any)}
+          </p>
+        </div>
+      )}
 
-      <SelectedTypeRow name={serviceType?.name} />
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        {servicesTabs.map((tab) => {
+          const isActive = serviceType?.id === tab.id;
+
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => selectServiceTypeLocalHandler(tab)}
+              className={cn(
+                "shrink-0 rounded-[17px] border px-[14px] py-2 text-[10px] font-semibold transition-colors",
+                isActive
+                  ? "border-purplePrimary bg-purplePrimary text-white"
+                  : "border-greyOutline bg-white text-grey-800 hover:border-purplePrimary hover:text-purplePrimary"
+              )}
+            >
+              {tab.text}
+            </button>
+          );
+        })}
+      </div>
+
+      {variant === "default" && <SelectedTypeRow name={serviceType?.name} />}
 
       <div
         ref={scrollableListRef}
@@ -181,19 +227,21 @@ const ServiceSelection: FC<Props> = ({
           services={serviceData}
           selectedServices={selectedServices}
           selectServiceHandler={selectServiceHandlerLocal}
-          renderTypeRow={(type) => (
-            <TypeRow
-              rootElement={scrollableListRef.current}
-              disableChangeType={Boolean(
-                isSmoothScrolling ||
-                (scrollableListRef.current &&
-                  scrollableListRef.current.scrollHeight <=
-                    scrollableListRef.current.clientHeight) //disable change type when dont have scroll
-              )}
-              type={type}
-              setServiceType={setServiceType}
-            />
-          )}
+          renderTypeRow={(type) =>
+            type.id !== "all" && (
+              <TypeRow
+                rootElement={scrollableListRef.current}
+                disableChangeType={Boolean(
+                  isSmoothScrolling ||
+                  (scrollableListRef.current &&
+                    scrollableListRef.current.scrollHeight <=
+                      scrollableListRef.current.clientHeight)
+                )}
+                type={type}
+                setServiceType={setServiceType}
+              />
+            )
+          }
         />
       </div>
     </div>

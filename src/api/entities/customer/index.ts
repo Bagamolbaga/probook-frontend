@@ -25,6 +25,7 @@ export type CustomerBooking = {
     address?: string;
     zipCode?: string;
     city?: string;
+    pos: TCompany["pos"]
     logo?: string;
     timezone: string;
     currency: string;

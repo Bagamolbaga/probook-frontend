@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo, useRef, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   addWeeks,
   differenceInWeeks,
@@ -13,7 +13,7 @@ import {
 } from "date-fns";
 import { useTranslations } from "next-intl";
 
-import { useGetBookingsMinQuery } from "@/api/queries/booking";
+import { useGetBookingAvailabilitiesQuery } from "@/api/queries/booking";
 import { useGetCompanyDetailsQuery } from "@/api/queries/company";
 import { useGetCompanyShiftsQuery } from "@/api/queries/company/shift";
 import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
@@ -27,10 +27,9 @@ import { cn } from "@/utils/cn";
 import { TimeManager } from "@/utils/timeManager";
 import DaysOfWeekList from "./ui/DaysOfWeekList";
 import TimeSlots from "./ui/TimeSlots";
+import { DATE_FNS_LOCALES, useLocale } from "@/i18n";
 
 const WEEK_STARTS_ON = 1;
-const BUSY_BOOKING_STATUSES = new Set(["BLOCKED", "PENDING", "CONFIRMED"]);
-
 type Props = {
   companyId: string;
   selectedServices: TServiceAndSelectedOption[];
@@ -40,10 +39,32 @@ type Props = {
   selectDateHandler: (date: Date) => void;
   selectTimeHandler: (time?: TTimeSlot) => void;
   selectSpecialistHandler: (staff?: TSpecialist) => void;
+  availabilityBookingId?: string;
+  compact?: boolean;
 };
 
 const getSpecialistId = (specialist: string | { id: string }) =>
   typeof specialist === "string" ? specialist : specialist.id;
+
+const getTimeZoneLabel = (timeZone: string) => {
+  const city = timeZone.split("/").at(-1)?.replaceAll("_", " ") || timeZone;
+  const localizedCity = city === "Moscow" ? "Москва" : city;
+
+  try {
+    const offset = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      timeZoneName: "longOffset",
+    })
+      .formatToParts(new Date())
+      .find((part) => part.type === "timeZoneName")
+      ?.value.replace("GMT", "UTC")
+      .replace(":00", "");
+
+    return offset ? `${localizedCity} (${offset})` : localizedCity;
+  } catch {
+    return timeZone;
+  }
+};
 
 const TimeSelection: FC<Props> = ({
   companyId,
@@ -54,13 +75,20 @@ const TimeSelection: FC<Props> = ({
   selectDateHandler,
   selectTimeHandler,
   selectSpecialistHandler,
+  availabilityBookingId,
+  compact = false,
 }) => {
   const t = useTranslations();
+  const locale = useLocale();
   const [firstDayOnWeek, setFirstDayOnWeek] = useState(
-    startOfWeek(new Date(), { weekStartsOn: WEEK_STARTS_ON })
+    startOfWeek(selectedDate, { weekStartsOn: WEEK_STARTS_ON })
   );
   const dayPickerContainerRef = useRef<HTMLDivElement>(null);
   const [isShowDatePicker, setIsShowDatePicker] = useState(false);
+
+  useEffect(() => {
+    setFirstDayOnWeek(startOfWeek(selectedDate, { weekStartsOn: WEEK_STARTS_ON }));
+  }, [selectedDate]);
 
   const week = useMemo(() => {
     const startOfWeekDate = startOfWeek(firstDayOnWeek, {
@@ -78,21 +106,11 @@ const TimeSelection: FC<Props> = ({
   }, [firstDayOnWeek]);
 
   const companyQuery = useGetCompanyDetailsQuery({ companyId });
+  const companyTimeZone = companyQuery.data?.timezone || "Europe/Moscow";
+  const timeZoneLabel = getTimeZoneLabel(companyTimeZone);
   const specialistsQuery = useGetCompanySpecialistsQuery({ companyId });
   const shiftsQuery = useGetCompanyShiftsQuery({ companyId });
-  const bookingsQuery = useGetBookingsMinQuery({
-    companyId,
-    queryParams: {
-      start_date: week.startOfWeekDate,
-      end_date: week.endOfWeekDate,
-    },
-  });
-
   const shifts = useMemo(() => shiftsQuery.data?.results || [], [shiftsQuery.data]);
-  const activeBookings = useMemo(
-    () => bookingsQuery.data?.results || [],
-    [bookingsQuery.data]
-  );
 
   const eligibleSpecialistIds = useMemo(() => {
     if (!selectedServices.length) return [];
@@ -165,6 +183,30 @@ const TimeSelection: FC<Props> = ({
     return eligibleSpecialistIds;
   }, [eligibleSpecialistIds, selectedSpecialist]);
 
+  const availabilityQueries = useGetBookingAvailabilitiesQuery(
+    specialistIdsToCheck.map((specialistId) => ({
+      companyId,
+      bookingId: availabilityBookingId,
+      specialistId,
+      date: format(selectedDate, "yyyy-MM-dd"),
+      queryOptions: {
+        refetchInterval: 1000 * 60,
+        refetchOnWindowFocus: true,
+      },
+    }))
+  );
+
+  const availabilityBySpecialist = useMemo(
+    () =>
+      new Map(
+        specialistIdsToCheck.flatMap((specialistId, index) => {
+          const availability = availabilityQueries[index]?.data;
+          return availability ? [[specialistId, availability] as const] : [];
+        })
+      ),
+    [availabilityQueries, specialistIdsToCheck]
+  );
+
   const slotsForSelectedDate = useMemo(() => {
     const timeManager = new TimeManager();
     const slotsNeeded = Math.ceil(timeManager.getSlotsCountForServices(selectedServices));
@@ -172,30 +214,24 @@ const TimeSelection: FC<Props> = ({
     const workingSlots = new Set<number>();
 
     specialistIdsToCheck.forEach((specialistId) => {
-      const schedule = getWorkingDay(specialistId, selectedDate);
-      schedule.workingSlots.forEach((slot) => workingSlots.add(slot));
+      const availability = availabilityBySpecialist.get(specialistId);
+      if (!availability) return;
 
-      const busySlots = timeManager.getAlreadyUsedSlotsInBookings({
-        bookings: activeBookings.filter((booking) =>
-          BUSY_BOOKING_STATUSES.has(booking.status)
-        ),
-        date: selectedDate,
-        staffId: specialistId,
-      });
+      availability.slots.forEach(({ slot }) => workingSlots.add(slot));
+      const availableSlots = new Set(availability.availableSlots);
 
-      timeManager
-        .getAvailableStartSlots({
-          workingSlots: schedule.workingSlots,
-          breakSlots: schedule.breakSlots,
-          busySlots,
-          slotsNeeded,
-        })
-        .forEach((slot) => {
+      availability.availableSlots.forEach((slot) => {
+        const hasFullDuration = Array.from(
+          { length: slotsNeeded },
+          (_, index) => slot + index
+        ).every((value) => availableSlots.has(value));
+        if (hasFullDuration) {
           specialistsByStartSlot.set(slot, [
             ...(specialistsByStartSlot.get(slot) || []),
             specialistId,
           ]);
-        });
+        }
+      });
     });
 
     return {
@@ -203,38 +239,71 @@ const TimeSelection: FC<Props> = ({
       workingSlots: Array.from(workingSlots),
       slotsNeeded,
     };
-  }, [
-    activeBookings,
-    getWorkingDay,
-    selectedDate,
-    selectedServices,
-    specialistIdsToCheck,
-  ]);
+  }, [availabilityBySpecialist, selectedServices, specialistIdsToCheck]);
 
   const renderedSlots = useMemo(() => {
     if (!slotsForSelectedDate.workingSlots.length) return [];
 
     const firstSlot = Math.min(...slotsForSelectedDate.workingSlots);
-    const lastSlot = Math.max(...slotsForSelectedDate.workingSlots);
+    const lastSlot = Math.max(...slotsForSelectedDate.workingSlots) + 1;
 
     return TIME_SLOTS.filter(
-      (slot) =>
-        slot.slot >= firstSlot &&
-        slot.slot <= lastSlot &&
-        (slot.minute === 0 || slot.minute === 30)
-    ).map((slot) => ({
-      ...slot,
-      staffIds: slotsForSelectedDate.specialistsByStartSlot.get(slot.slot) || [],
-      isDisabled:
-        !slotsForSelectedDate.specialistsByStartSlot.has(slot.slot) ||
-        isBefore(setHours(selectedDate, slot.hour).setMinutes(slot.minute), new Date()),
-      isColorHighlight: Boolean(
-        selectedTime &&
-        slot.slot >= selectedTime.slot &&
-        slot.slot <= selectedTime.slot + slotsForSelectedDate.slotsNeeded
-      ),
-    }));
-  }, [selectedDate, selectedTime, slotsForSelectedDate]);
+      (slot) => slot.slot >= firstSlot && slot.slot <= lastSlot
+    ).map((slot) => {
+      const staffIds = slotsForSelectedDate.specialistsByStartSlot.get(slot.slot) || [];
+      const statuses = specialistIdsToCheck.flatMap((specialistId) => {
+        const availability = availabilityBySpecialist.get(specialistId);
+        const status = availability?.slots.find(
+          (item) => item.slot === slot.slot
+        )?.status;
+        return status ? [status] : [];
+      });
+      const unavailableReason: "busy" | "break" | "not_enough_time" | undefined =
+        !staffIds.length
+          ? !statuses.length
+            ? "not_enough_time"
+            : statuses.every((status) => status === "break")
+              ? "break"
+              : statuses.every((status) => status === "busy")
+                ? "busy"
+                : "not_enough_time"
+          : undefined;
+
+      return {
+        ...slot,
+        staffIds,
+        unavailableReason,
+        isDisabled:
+          !staffIds.length ||
+          isBefore(setHours(selectedDate, slot.hour).setMinutes(slot.minute), new Date()),
+        isColorHighlight: Boolean(
+          selectedTime &&
+          slot.slot >= selectedTime.slot &&
+          slot.slot <= selectedTime.slot + slotsForSelectedDate.slotsNeeded
+        ),
+      };
+    });
+  }, [
+    availabilityBySpecialist,
+    selectedDate,
+    selectedTime,
+    slotsForSelectedDate,
+    specialistIdsToCheck,
+  ]);
+
+  useEffect(() => {
+    if (
+      !selectedTime ||
+      availabilityQueries.some((query) => query.isPending) ||
+      !availabilityQueries.length
+    ) {
+      return;
+    }
+
+    if (!slotsForSelectedDate.specialistsByStartSlot.has(selectedTime.slot)) {
+      selectTimeHandler(undefined);
+    }
+  }, [availabilityQueries, selectTimeHandler, selectedTime, slotsForSelectedDate]);
 
   const dateStringBySelectedWeek = useMemo(() => {
     const firstDay = week.daysOfWeek.at(0);
@@ -242,9 +311,9 @@ const TimeSelection: FC<Props> = ({
     if (!firstDay || !lastDay) return "";
 
     return getMonth(firstDay) === getMonth(lastDay)
-      ? `${format(firstDay, "MMMM d")} - ${format(lastDay, "d, yyyy")}`
-      : `${format(firstDay, "MMMM d")} - ${format(lastDay, "MMMM d, yyyy")}`;
-  }, [week.daysOfWeek]);
+      ? `${format(firstDay, "d", {locale: DATE_FNS_LOCALES[locale]})} - ${format(lastDay, "d, MMMM yyyy", {locale: DATE_FNS_LOCALES[locale]})}`
+      : `${format(firstDay, "d MMMM", {locale: DATE_FNS_LOCALES[locale]})} - ${format(lastDay, "d MMMM, yyyy", {locale: DATE_FNS_LOCALES[locale]})}`;
+  }, [locale, week.daysOfWeek]);
 
   const isWorkingDay = useCallback(
     (date: Date) =>
@@ -290,15 +359,34 @@ const TimeSelection: FC<Props> = ({
     startOfWeek(new Date(), { weekStartsOn: WEEK_STARTS_ON })
   );
   const isLoading =
-    bookingsQuery.isPending || shiftsQuery.isPending || specialistsQuery.isPending;
+    shiftsQuery.isPending ||
+    specialistsQuery.isPending ||
+    availabilityQueries.some((query) => query.isPending);
 
   return (
-    <div className="w-2/3 min-h-[590px] h-[calc(100vh-124px-100px-52px)] pr-6 flex flex-col gap-6 border-r border-greyOutlineSecondary sm:w-full sm:border-none sm:pr-0 1sm:pb-[40px]">
-      <p className="text-sm font-bold text-greyPrimary">
-        {t("booking.timeStep.selectTime")}
-      </p>
+    <div
+      className={cn(
+        "flex flex-col gap-6",
+        compact
+          ? "w-full min-h-0 h-auto border-none p-0 gap-4"
+          : "w-2/3 min-h-[590px] h-[calc(100vh-124px-100px-52px)] border-r border-greyOutlineSecondary pr-6 sm:w-full sm:border-none sm:pr-0 1sm:pb-[40px]"
+      )}
+    >
+      {!compact && (<div className="flex flex-col gap-2">
+        <p className="text-[10px] font-bold tracking-[0.5px] text-purplePrimary">
+          {t("booking.timeStep.stepLabel" as any)}
+        </p>
+        <h2 className="font-funnel text-[32px] font-bold leading-tight text-darkPrimary sm:text-[26px]">
+          {t("booking.timeStep.title" as any)}
+        </h2>
+        <p className="text-[13px] text-greyPrimary">
+          {t("booking.timeStep.description" as any, { timezone: timeZoneLabel })}
+        </p>
+      </div>)}
       <div className="w-full flex items-center">
-        <p className="ml-2 flex-1 text-base font-bold">{dateStringBySelectedWeek}</p>
+        <p className={cn("ml-2 flex-1 text-base font-bold", {
+          "text-sm": compact
+        })}>{dateStringBySelectedWeek}</p>
         <div className="relative flex items-center gap-1">
           <Button
             variant="resting-active"
@@ -324,16 +412,17 @@ const TimeSelection: FC<Props> = ({
           )}
         </div>
       </div>
-      <div className={cn("w-full flex justify-between gap-2")}>
+      <div className={cn("w-full flex items-center justify-between gap-2")}>
         <Button
           disabled={isCurrentWeek}
           variant="resting-active"
-          className="!p-0 !rounded !border-none"
+          className="!p-0 !rounded !border-none !size-7"
           onClick={() => setFirstDayOnWeek((current) => addWeeks(current, -1))}
         >
           <ArrowSecondaryDownIcon className="rotate-90" />
         </Button>
         <DaysOfWeekList
+          compact={compact}
           selectedDate={selectedDate}
           days={week.daysOfWeek}
           isWorkingDay={isWorkingDay}
@@ -341,7 +430,7 @@ const TimeSelection: FC<Props> = ({
         />
         <Button
           variant="resting-active"
-          className="!p-0 !rounded !border-none"
+          className="!p-0 !rounded !border-none !size-7"
           onClick={() => setFirstDayOnWeek((current) => addWeeks(current, 1))}
         >
           <ArrowSecondaryDownIcon className="-rotate-90" />
@@ -360,6 +449,7 @@ const TimeSelection: FC<Props> = ({
       ) : (
         <div className="w-full max-h-[520px] flex flex-col gap-2 overflow-auto">
           <TimeSlots
+            compact={compact}
             selectedSlot={selectedTime}
             slots={renderedSlots}
             selectTimeHandler={handleTimeSelect}

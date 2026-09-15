@@ -84,7 +84,12 @@ const TopServiceProviders = () => {
             <p className="font-medium">{idx + 1}</p>
             <div className="relative min-w-20 size-20 flex items-center justify-center rounded-xl overflow-hidden border border-[#ECECF2]">
               {c.logo ? (
-                <Image className="object-cover" fill src={c.logo} alt={`${c.name} - Bowers`} />
+                <Image
+                  className="object-cover"
+                  fill
+                  src={c.logo}
+                  alt={`${c.name} - Bowers`}
+                />
               ) : (
                 <LogoIcon className="!size-14" />
               )}

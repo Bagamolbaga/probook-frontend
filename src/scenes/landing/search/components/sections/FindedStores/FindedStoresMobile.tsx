@@ -21,6 +21,7 @@ import { UseFormReturn } from "react-hook-form";
 import { SearchForm } from "../../..";
 import { format } from "date-fns";
 import Spinner from "@/components/ui/loaders/Spinner";
+import { TSearchCompany } from "@/api/entities/company";
 
 type NonNullablePos = {
   lat: NonNullable<TCompany["pos"]["lat"]>;
@@ -31,7 +32,7 @@ type Props = {
   isOpen?: boolean;
   isLoading?: boolean;
   title?: string;
-  findedStores: TCompany[];
+  findedStores: TSearchCompany[];
   form: UseFormReturn<SearchForm>;
   loadMoreIsActive?: boolean;
   handleClose: () => void;
@@ -53,7 +54,7 @@ const FindedStoresMobile: FC<Props> = ({
   const [zoom, setZoom] = useState(10);
   const [centerOfMap, setCenterOfMap] = useState<NonNullablePos | undefined>();
 
-  const [selectedStore, setSelectedStore] = useState<TCompany>();
+  const [selectedStore, setSelectedStore] = useState<TSearchCompany>();
 
   const [isOpenSearchForm, setIsOpenSearchForm] = useState(false);
 
@@ -236,10 +237,7 @@ const FindedStoresMobile: FC<Props> = ({
               </div>
 
               {selectedStore && (
-                <StoreWidget
-                  store={selectedStore as TCompany<{ price_from: string, price_to: string }>}
-                  handleClose={handleCloseStoreWidget}
-                />
+                <StoreWidget store={selectedStore} handleClose={handleCloseStoreWidget} />
               )}
 
               <StoreList
@@ -263,7 +261,7 @@ const StoreList = ({
   handleLoadMore,
 }: {
   isLoading?: boolean;
-  stores: TCompany[];
+  stores: TSearchCompany[];
   loadMoreIsActive?: boolean;
   handleLoadMore: () => void;
 }) => {
@@ -316,11 +314,7 @@ const StoreList = ({
 
       <div className="w-full pr-3 flex flex-col gap-4 overflow-y-auto">
         {stores.map((s) => (
-          <StoreCard
-            key={s.id}
-            company={s as TCompany<{ price_from: string, price_to: string }>}
-            setHover={() => {}}
-          />
+          <StoreCard key={s.id} company={s} setHover={() => {}} />
         ))}
         <div className="w-full mt-4 flex justify-center">
           <Button
@@ -329,7 +323,7 @@ const StoreList = ({
             disabled={!loadMoreIsActive}
             onClick={handleLoadMore}
           >
-            {isLoading ? <Spinner className="size-5"/> : "Load more"}
+            {isLoading ? <Spinner className="size-5" /> : "Load more"}
           </Button>
         </div>
       </div>
@@ -341,7 +335,7 @@ const StoreWidget = ({
   store,
   handleClose,
 }: {
-  store: TCompany<{ price_from: string, price_to: string }>;
+  store: TSearchCompany;
   handleClose: () => void;
 }) => {
   const [favoriteStores, setFavoriteStores] = useLocalStorage<TCompany[]>(
@@ -396,7 +390,9 @@ const StoreWidget = ({
           <div className="mt-3 pb-2 flex items-center justify-between border-b border-greyOutlineSecondary">
             <p className="text-sm text-greyPrimary">Price</p>
             <p className="text-sm font-semibold">
-              {store.price_from && store.price_to ? `From ฿${Number(store.price_from)} - To ฿${Number(store.price_to)}` : "No info"}
+              {store.price_from && store.price_to
+                ? `From ฿${Number(store.price_from)} - To ฿${Number(store.price_to)}`
+                : "No info"}
             </p>
           </div>
           <div className="mt-2 flex items-center justify-between">

@@ -1,4 +1,6 @@
-import CompanyDetailsScene from "@/scenes/bookingFlow/companyDetails";
+import CompanyDetailsScene, {
+  PublicCompanyFooter,
+} from "@/scenes/bookingFlow/companyDetails";
 import { notFound } from "next/navigation";
 import React from "react";
 import { Metadata } from "next";
@@ -6,7 +8,6 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "@/i18n";
 import BookingFlowLayout from "@/components/layouts/booking-flow";
 import { BaseHeader } from "@/components/headers/landing";
-import LandingFooter from "@/components/footers/landing";
 
 export async function generateMetadata({
   params,
@@ -55,7 +56,7 @@ const CompanyDetailsPage = async ({
   return (
     <BookingFlowLayout
       header={<BaseHeader color="white" withLanguageSwitcher />}
-      footer={<LandingFooter />}
+      footer={<PublicCompanyFooter />}
     >
       <CompanyDetailsScene companyId={storeId as string} />
     </BookingFlowLayout>

@@ -21,6 +21,7 @@ import {
   useSearchCompaniesQuery,
   useSearchServicesAndStoresQuery,
 } from "@/api/queries/company";
+import { TSearchCompany } from "@/api/entities/company";
 import Slider from "./components/Slider";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { PREVIOUSLY_BOOKED_SERVICES } from "@/constants/keys";
@@ -293,7 +294,7 @@ const SearchPageScene = () => {
     }
   };
 
-  const [localCachedStores, setLocalCachedStores] = useState<TCompany[]>([]);
+  const [localCachedStores, setLocalCachedStores] = useState<TSearchCompany[]>([]);
 
   useEffect(() => {
     if (!searchServicesAndStoresQuery.isPending) {

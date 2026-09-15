@@ -1,12 +1,25 @@
 "use client";
 
 import axios from "axios";
+import {
+  Activity,
+  ArrowLeft,
+  CalendarPlus,
+  Clock3,
+  HeartPulse,
+  Info,
+  Languages,
+  Mail,
+  MapPin,
+  Phone,
+  Star,
+  TriangleAlert,
+  WalletCards,
+} from "lucide-react";
 import { useState } from "react";
-import { useGetBookingAvailabilityQuery } from "@/api/queries/booking";
 import {
   useCancelCustomerBookingMutation,
   useCustomerBookingQuery,
-  useRescheduleCustomerBookingMutation,
 } from "@/api/queries/customer";
 import Button from "@/components/ui/button";
 import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
@@ -14,6 +27,9 @@ import { toaster } from "@/components/ui/toaster";
 import { Link, useLocale, useRouter, useTranslations } from "@/i18n";
 import { formatBookingTime } from "./components/BookingCard";
 import QueryState from "./components/QueryState";
+import Image from "next/image";
+import { getYandexMapsUrl } from "@/utils/getYandexMapsUrl";
+import RescheduleModal from "./components/RescheduleModal";
 
 const timeFromSlot = (slot: number) => {
   const minutes = slot * 15;
@@ -22,24 +38,22 @@ const timeFromSlot = (slot: number) => {
     .padStart(2, "0")}:${(minutes % 60).toString().padStart(2, "0")}`;
 };
 
+const statusStyles = {
+  PENDING: "bg-yellowPrimary text-white",
+  CONFIRMED: "bg-greenPrimary text-white",
+  COMPLETED: "bg-purplePrimary text-white",
+  CANCELLED: "bg-[#D800271A] text-[#D80027]",
+} as const;
+
 export default function CustomerBookingDetailScene({ bookingId }: { bookingId: string }) {
   const t = useTranslations("customerCabinet");
   const locale = useLocale();
   const router = useRouter();
   const query = useCustomerBookingQuery(bookingId);
   const cancelMutation = useCancelCustomerBookingMutation();
-  const rescheduleMutation = useRescheduleCustomerBookingMutation();
   const [cancelOpen, setCancelOpen] = useState(false);
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
-  const [date, setDate] = useState("");
-  const [slots, setSlots] = useState<number[]>([]);
   const booking = query.data;
-  const availability = useGetBookingAvailabilityQuery({
-    companyId: booking?.company._id || "",
-    bookingId,
-    specialistId: booking?.specialist._id || "",
-    date,
-  });
 
   if (query.isLoading || query.isError || !booking) {
     return (
@@ -56,19 +70,34 @@ export default function CustomerBookingDetailScene({ bookingId }: { bookingId: s
     currency: booking.company.currency,
   });
   const formattedDate = new Intl.DateTimeFormat(locale, {
-    weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
   }).format(new Date(`${booking.date}T12:00:00`));
-  const durationSlots = Math.max(1, booking.slots.length);
-
-  const selectStart = (slot: number) => {
-    const selected = Array.from({ length: durationSlots }, (_, index) => slot + index);
-    if (selected.every((value) => availability.data?.availableSlots.includes(value))) {
-      setSlots(selected);
-    }
-  };
+  const createdAt = new Intl.DateTimeFormat(locale, {
+    minute: "2-digit",
+    hour: "2-digit",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(booking.createdAt));
+  const updatedAt = new Intl.DateTimeFormat(locale, {
+    minute: "2-digit",
+    hour: "2-digit",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(booking.updatedAt));
+  const duration = booking.services.reduce(
+    (total, service) => total + service.selectedOption.duration,
+    0
+  );
+  const reference = booking.id.slice(-8).toUpperCase();
+  const specialistInitials = booking.specialist.fullName
+    .split(" ")
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("");
 
   const mutationError = (error: unknown) => {
     const status = axios.isAxiosError(error) ? error.response?.status : undefined;
@@ -91,221 +120,336 @@ export default function CustomerBookingDetailScene({ bookingId }: { bookingId: s
     }
   };
 
-  const reschedule = async () => {
-    try {
-      await rescheduleMutation.mutateAsync({ bookingId, date, slots });
-      setRescheduleOpen(false);
-      setSlots([]);
-    } catch (error) {
-      mutationError(error);
-    }
+  const openReschedule = () => {
+    setRescheduleOpen(true);
   };
 
-  return (
-    <div className="space-y-7">
-      <Link
-        href="/cabinet/bookings"
-        className="inline-flex rounded-md text-sm font-bold text-purplePrimary outline-none underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-purplePrimary"
-      >
-        {t("detail.back")}
-      </Link>
+  const closeReschedule = () => {
+    setRescheduleOpen(false);
+  };
 
-      <article className="overflow-hidden rounded-[26px] border border-greyOutlineSecondary bg-white">
-        <div className="grid grid-cols-[240px_1fr] border-b border-greyOutlineSecondary sm:grid-cols-1">
-          <div className="flex flex-col justify-between border-r border-dashed border-purplePrimary/25 bg-purpleExtraLight p-7 sm:border-b sm:border-r-0">
-            <p className="font-[Georgia,serif] text-[28px] leading-tight text-darkPrimary">
-              {formattedDate}
-            </p>
-            <p className="mt-8 text-xl font-bold tabular-nums text-purplePrimary">
-              {formatBookingTime(booking)}
-            </p>
-          </div>
-          <div className="flex min-h-[220px] flex-col p-8 sm:min-h-0 sm:p-6">
-            <span className="w-fit rounded-full bg-purpleExtraLight px-3 py-1 text-xs font-bold text-purplePrimary">
-              {t(`status.${booking.status}`)}
-            </span>
-            <h1 className="mt-5 max-w-[720px] font-[Georgia,serif] text-[44px] font-normal leading-[1.08] tracking-[-0.02em] text-darkPrimary sm:text-[34px]">
-              {booking.company.name}
+  const repeatHref = `/company/${booking.company._id}/booking-creation?services=${booking.services
+    .map((service) => service.id)
+    .join(",")}&options=${booking.services
+    .map((service) => service.selectedOption.id)
+    .join(",")}&repeat=1`;
+
+  return (
+    <div className="flex min-h-full flex-col gap-6 sm:gap-3">
+      <header className="flex items-center justify-between gap-5 sm:gap-2">
+        <div className="flex min-w-0 items-center gap-3 sm:gap-2">
+          <Link
+            href="/cabinet/bookings"
+            className="flex size-[42px] shrink-0 items-center justify-center rounded-full border border-greyOutline bg-white text-lg outline-none hover:border-purplePrimary focus-visible:ring-2 focus-visible:ring-purplePrimary sm:size-[38px]"
+            aria-label={t("detail.back")}
+          >
+            <ArrowLeft className="size-[18px]" />
+          </Link>
+          <div className="min-w-0">
+            <h1 className="font-funnel truncate text-[29px] font-bold leading-tight tracking-[-0.02em] sm:text-lg">
+              {t("detail.title")}
             </h1>
-            <p className="mt-auto pt-5 text-greyPrimary">
-              {booking.company.address || booking.company.city}
+            <p className="mt-1 text-[11px] text-greyPrimary sm:mt-0.5 sm:text-[9px]">
+              {t("detail.reference", { reference })}
             </p>
           </div>
         </div>
+        <span
+          className={`shrink-0 rounded-full px-5 py-2 text-sm font-bold sm:px-3 sm:text-[10px] ${statusStyles[booking.status]}`}
+        >
+          <span className="sm:hidden">{t(`status.${booking.status}`)}</span>
+          <span className="hidden sm:inline">{t(`statusCompact.${booking.status}`)}</span>
+        </span>
+      </header>
 
-        <div className="grid grid-cols-2 gap-x-12 gap-y-10 p-8 sm:grid-cols-1 sm:p-6">
-          <section>
-            <h2 className="text-sm font-bold text-greyPrimary">{t("detail.dateTime")}</h2>
-            <p className="mt-3 text-lg font-bold">
-              {formattedDate}, {formatBookingTime(booking)}
-            </p>
-            <p className="mt-1 text-sm text-greyPrimary">
-              {t("detail.timezone", { timezone: booking.company.timezone })}
-            </p>
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_330px] gap-6 md:grid-cols-1">
+        <div className="flex min-w-0 flex-col gap-[18px]">
+          <section className="flex h-44 min-h-[176px] flex-col justify-between rounded-[18px] bg-[#1C1D21] p-6 sm:h-[135px] sm:min-h-[135px] sm:rounded-2xl sm:p-4">
+            <div className="flex items-start justify-between gap-6 sm:gap-3">
+              <div className="min-w-0">
+                <h2 className="font-funnel truncate text-[31px] font-bold leading-none text-white sm:text-[23px]">
+                  {formattedDate}
+                </h2>
+                <p className="mt-1 text-[13px] font-medium text-[#8181A5] sm:text-[10px] sm:font-normal">
+                  {formatBookingTime(booking)} · {booking.company.timezone}
+                </p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-[9px] font-bold uppercase tracking-[0.8px] text-[#8181A5]">
+                  {t("detail.total")}
+                </p>
+                <p className="font-funnel mt-1 text-[22px] font-bold leading-none text-white sm:mt-0 sm:text-[15px]">
+                  {currency.format(booking.totalPrice)}
+                </p>
+              </div>
+            </div>
+            <div className="flex min-w-0 items-center gap-[11px] sm:gap-2">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#603FEF] text-white sm:size-8 sm:rounded-[10px]">
+                {booking.company.logo ? (
+                  <Image
+                    alt={booking.company.name}
+                    src={booking.company.logo}
+                    width={40}
+                    height={40}
+                  />
+                ) : (
+                  <Activity className="size-[19px]" />
+                )}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-[13px] font-bold leading-none text-white sm:text-[11px]">
+                  {booking.company.name}
+                </p>
+                <p className="mt-[3px] truncate text-[10px] leading-none text-[#8181A5] sm:text-[8px]">
+                  {booking.company.address || booking.company.city}
+                </p>
+              </div>
+            </div>
           </section>
-          <section>
-            <h2 className="text-sm font-bold text-greyPrimary">
-              {t("detail.specialist")}
-            </h2>
-            <p className="mt-3 text-lg font-bold">{booking.specialist.fullName}</p>
-            <p className="mt-1 text-sm text-greyPrimary">
-              {booking.specialist.specialties.join(", ")}
-            </p>
-          </section>
-          <section className="col-span-2 sm:col-span-1">
-            <h2 className="text-sm font-bold text-greyPrimary">{t("detail.services")}</h2>
-            <div className="mt-3 divide-y divide-greyOutlineSecondary border-y border-greyOutlineSecondary">
+
+          <section className="rounded-2xl border border-greyOutline bg-white p-5 sm:rounded-[14px] sm:p-[13px]">
+            <div className="flex items-center justify-between">
+              <h2 className="font-funnel text-lg font-bold sm:text-[15px]">
+                {t("detail.services")}
+              </h2>
+              <span className="hidden text-[11px] font-bold sm:block">
+                {currency.format(booking.totalPrice)}
+              </span>
+              <span className="text-[10px] text-greyPrimary sm:hidden">
+                {t("detail.serviceCount", { count: booking.services.length })}
+              </span>
+            </div>
+            <div className="mt-4 space-y-4 sm:mt-2 sm:space-y-3">
               {booking.services.map((service) => (
-                <div key={service._id} className="flex justify-between gap-4 py-4">
-                  <div>
-                    <p className="font-bold">{service.name}</p>
-                    {service.selectedOption.name ? (
-                      <p className="mt-1 text-sm text-greyPrimary">
-                        {service.selectedOption.name} · {service.selectedOption.duration}{" "}
-                        min
-                      </p>
-                    ) : null}
+                <div
+                  key={service._id}
+                  className="flex items-center gap-3.5 sm:flex-wrap sm:gap-1"
+                >
+                  <span className="flex size-12 shrink-0 items-center justify-center rounded-[13px] overflow-hidden bg-purpleExtraLight text-lg text-purplePrimary sm:hidden">
+                    {service.image ? (
+                      <Image
+                        alt={service.name}
+                        src={service.image}
+                        width={48}
+                        height={48}
+                      />
+                    ) : (
+                      <HeartPulse className="size-5" />
+                    )}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold sm:whitespace-normal sm:text-[11px] sm:leading-[1.25]">
+                      {service.name}
+                    </p>
+                    <p className="mt-1 text-[11px] text-greyPrimary sm:text-[9px]">
+                      {service.selectedOption.name || t("detail.serviceOption")} ·{" "}
+                      {service.selectedOption.duration} {t("detail.minutes")}
+                    </p>
                   </div>
-                  <p className="shrink-0 font-bold tabular-nums">
+                  <span className="shrink-0 text-[13px] font-bold sm:hidden">
                     {currency.format(service.selectedOption.price)}
-                  </p>
+                  </span>
                 </div>
               ))}
             </div>
-            <div className="mt-5 flex justify-between gap-4">
-              <span className="font-bold">{t("detail.total")}</span>
-              <span className="font-[Georgia,serif] text-[28px] leading-none tabular-nums">
-                {currency.format(booking.totalPrice)}
-              </span>
-            </div>
           </section>
-          <section className="col-span-2 sm:col-span-1">
-            <h2 className="text-sm font-bold text-greyPrimary">{t("detail.company")}</h2>
-            <div className="mt-3 flex flex-wrap gap-x-7 gap-y-2 text-sm">
-              {booking.company.phone ? (
+
+          <section className="flex items-center gap-4 rounded-2xl border border-greyOutline bg-white p-5 sm:h-[62px] sm:gap-2.5 sm:rounded-[14px] sm:px-[13px] sm:py-0">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-full overflow-hidden bg-purpleExtraLight text-sm font-bold text-purplePrimary sm:size-[38px] sm:text-[11px]">
+              {booking.specialist.avatar ? (
+                <Image
+                  alt={booking.specialist.fullName}
+                  src={booking.specialist.avatar}
+                  width={48}
+                  height={48}
+                />
+              ) : (
+                specialistInitials
+              )}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[9px] font-bold uppercase tracking-[0.08em] text-greyPrimary">
+                {t("detail.specialist")}
+              </p>
+              <p className="mt-1 text-sm font-bold sm:mt-0.5 sm:text-[11px]">
+                {booking.specialist.fullName}
+              </p>
+              <p className="mt-1 truncate text-[10px] text-greyPrimary sm:hidden">
+                {booking.specialist.specialties.join(", ")}
+              </p>
+            </div>
+            <div className="flex gap-2 sm:gap-1.5">
+              {booking.company.phone && (
                 <a
-                  className="rounded-sm font-bold outline-none hover:text-purplePrimary focus-visible:ring-2 focus-visible:ring-purplePrimary"
                   href={`tel:${booking.company.phone}`}
+                  className="flex size-[38px] items-center justify-center rounded-full border border-greyOutline outline-none hover:border-purplePrimary focus-visible:ring-2 focus-visible:ring-purplePrimary sm:size-[34px] sm:border-0 sm:bg-greyOutline"
+                  aria-label={booking.company.phone}
                 >
-                  {booking.company.phone}
+                  <Phone className="size-[18px]" />
                 </a>
-              ) : null}
+              )}
               <a
-                className="rounded-sm font-bold text-purplePrimary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-purplePrimary"
                 href={`mailto:${booking.company.contactEmail}`}
+                className="flex size-[38px] items-center justify-center rounded-full border border-greyOutline outline-none hover:border-purplePrimary focus-visible:ring-2 focus-visible:ring-purplePrimary sm:hidden"
+                aria-label={booking.company.contactEmail}
               >
-                {booking.company.contactEmail}
+                <Mail className="size-[18px]" />
               </a>
+              {booking.company.pos && (
+                <a
+                  href={getYandexMapsUrl(booking.company.pos)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex size-[38px] items-center justify-center rounded-full border border-greyOutline outline-none hover:border-purplePrimary focus-visible:ring-2 focus-visible:ring-purplePrimary sm:size-[34px] sm:border-0 sm:bg-greyOutline"
+                  aria-label={t("detail.openMap")}
+                >
+                  <MapPin className="size-[18px]" />
+                </a>
+              )}
             </div>
           </section>
         </div>
-      </article>
 
-      <div className="flex flex-wrap gap-3">
-        {booking.allowedActions.reschedule ? (
-          <Button
-            className="min-w-[140px]"
-            variant="primary"
-            onClick={() => setRescheduleOpen((open) => !open)}
-          >
-            {t("detail.reschedule")}
-          </Button>
-        ) : null}
-        {booking.allowedActions.cancel ? (
-          <Button variant="red-outline" onClick={() => setCancelOpen(true)}>
-            {t("detail.cancel")}
-          </Button>
-        ) : null}
-        {booking.allowedActions.repeat ? (
-          <Link
-            className="inline-flex items-center rounded-lg border border-purplePrimary bg-white px-[14px] py-[14px] text-sm font-bold text-purplePrimary outline-none transition-colors hover:bg-purpleExtraLight focus-visible:ring-2 focus-visible:ring-purplePrimary sm:px-2 sm:py-2"
-            href={`/company/${booking.company._id}/booking-creation?services=${booking.services
-              .map((service) => service.id)
-              .join(",")}&options=${booking.services
-              .map((service) => service.selectedOption.id)
-              .join(",")}&repeat=1`}
-          >
-            {t("detail.repeat")}
-          </Link>
-        ) : null}
-      </div>
-
-      {!booking.allowedActions.cancel && !booking.allowedActions.reschedule ? (
-        <p className="rounded-xl border border-purplePrimary/20 bg-purpleExtraLight p-4 text-sm">
-          {t("common.contactCompany")}
-        </p>
-      ) : null}
-
-      {rescheduleOpen ? (
-        <section
-          className="rounded-[24px] border border-greyOutlineSecondary bg-white p-8 sm:p-6"
-          aria-labelledby="reschedule-heading"
-        >
-          <h2
-            id="reschedule-heading"
-            className="font-[Georgia,serif] text-[30px] font-normal leading-tight"
-          >
-            {t("detail.reschedule")}
-          </h2>
-          <label className="mt-6 block max-w-xs text-sm font-bold">
-            {t("detail.newDate")}
-            <input
-              className="mt-2 block w-full rounded-xl border border-greyOutlineSecondary px-4 py-3 outline-none focus:border-purplePrimary focus:ring-2 focus:ring-purpleExtraLight"
-              type="date"
-              min={new Date().toISOString().slice(0, 10)}
-              value={date}
-              onChange={(event) => {
-                setDate(event.target.value);
-                setSlots([]);
-              }}
-            />
-          </label>
-          {date && availability.isLoading ? <QueryState loading /> : null}
-          {availability.data ? (
-            <div
-              className="mt-6 grid grid-cols-8 gap-2 md:grid-cols-5 sm:grid-cols-3"
-              aria-label={t("detail.slots")}
-            >
-              {availability.data.availableSlots.map((slot) => {
-                const selected = slots[0] === slot;
-                const fullDurationAvailable = Array.from(
-                  { length: durationSlots },
-                  (_, index) => slot + index
-                ).every((value) => availability.data.availableSlots.includes(value));
-
-                return (
+        <aside className="flex flex-col gap-[18px] sm:gap-3">
+          {booking.status === "COMPLETED" ? (
+            <section className="rounded-2xl border border-greyOutline bg-white p-5">
+              <span className="flex size-12 items-center justify-center rounded-[14px] bg-purpleExtraLight text-purplePrimary">
+                <Star className="size-[22px]" />
+              </span>
+              <h2 className="font-funnel mt-3.5 text-[19px] font-bold">
+                {t("review.entryTitle")}
+              </h2>
+              <p className="mt-2 text-[11px] leading-[1.45] text-greyPrimary">
+                {t("review.entryDescription")}
+              </p>
+              <Link
+                href={`/cabinet/bookings/${booking.id}/review`}
+                className="mt-3.5 block w-full rounded-xl bg-purplePrimary px-4 py-3 text-center text-[13px] font-bold text-white outline-none hover:bg-purplePrimary_hover focus-visible:ring-2 focus-visible:ring-purplePrimary"
+              >
+                {t("review.leave")}
+              </Link>
+              <p className="mt-2 text-center text-[9px] text-greyPrimary">
+                {t("review.linkedToBooking")}
+              </p>
+              <div className="mt-3 flex items-center gap-2 rounded-[10px] bg-yellowExtraLight px-2.5 py-2 text-[8px] text-grey-800">
+                <TriangleAlert className="size-3.5 shrink-0" />
+                {t("review.contractGap")}
+              </div>
+            </section>
+          ) : (
+            <section className="rounded-2xl border border-greyOutline bg-white p-5 sm:border-0 sm:bg-transparent sm:p-0">
+              <h2 className="font-funnel text-lg font-bold sm:text-[15px]">
+                {t("detail.management")}
+              </h2>
+              <p className="mt-2 text-[11px] leading-4 text-greyPrimary sm:hidden">
+                {t("detail.managementDescription")}
+              </p>
+              <div className="mt-4 space-y-2.5 sm:grid sm:grid-cols-2 sm:gap-2 sm:space-y-0">
+                {booking.allowedActions.reschedule && (
                   <button
-                    key={slot}
                     type="button"
-                    disabled={!fullDurationAvailable}
-                    aria-pressed={selected}
-                    className={`rounded-xl border px-2 py-2.5 text-sm tabular-nums outline-none transition-colors focus-visible:ring-2 focus-visible:ring-purplePrimary ${
-                      selected
-                        ? "border-purplePrimary bg-purplePrimary font-bold text-white"
-                        : "border-greyOutlineSecondary bg-white hover:border-purplePrimary disabled:pointer-events-none disabled:opacity-30"
-                    }`}
-                    onClick={() => selectStart(slot)}
+                    onClick={rescheduleOpen ? closeReschedule : openReschedule}
+                    className="w-full rounded-xl bg-purplePrimary px-4 py-3 text-sm font-bold text-white hover:bg-purplePrimary_hover sm:order-1 sm:px-3 sm:py-[11px]"
                   >
-                    {timeFromSlot(slot)}
+                    {t("detail.reschedule")}
                   </button>
-                );
-              })}
-            </div>
-          ) : null}
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Button
-              variant="primary"
-              disabled={!date || slots.length === 0 || rescheduleMutation.isPending}
-              onClick={() => void reschedule()}
-            >
-              {t("detail.save")}
-            </Button>
-            <Button variant="resting" onClick={() => setRescheduleOpen(false)}>
-              {t("detail.back")}
-            </Button>
-          </div>
-        </section>
-      ) : null}
+                )}
+                {booking.allowedActions.cancel && (
+                  <button
+                    type="button"
+                    onClick={() => setCancelOpen(true)}
+                    className="w-full rounded-xl border border-[#D80027] px-4 py-3 text-sm font-bold text-[#D80027] hover:bg-[#D800271A] sm:order-3 sm:col-span-2 sm:px-3 sm:py-[11px]"
+                  >
+                    {t("detail.cancel")}
+                  </button>
+                )}
+                {booking.allowedActions.repeat && (
+                  <Link
+                    href={repeatHref}
+                    className="block w-full rounded-xl bg-greyOutline px-4 py-3 text-center text-sm font-bold hover:bg-greyBackground sm:order-2 sm:px-3 sm:py-[11px]"
+                  >
+                    {t("detail.repeat")}
+                  </Link>
+                )}
+              </div>
+            </section>
+          )}
+
+          <section className="rounded-[14px] bg-purpleExtraLight p-4 sm:order-last sm:rounded-xl sm:px-[11px] sm:py-[9px]">
+            <h2 className="flex items-center gap-2 text-xs font-bold text-darkPrimary sm:hidden">
+              <Info className="size-4 text-purplePrimary" />
+              <span>{t("detail.changeTerms")}</span>
+            </h2>
+            <p className="mt-2 text-[10px] leading-[1.45] text-grey-800 sm:mt-0 sm:flex sm:items-center sm:gap-2 sm:text-[8px] sm:leading-[1.3]">
+              <Info className="hidden size-3.5 shrink-0 text-purplePrimary sm:block" />
+              {t("detail.cutoff")}
+            </p>
+          </section>
+
+          <section className="rounded-2xl border border-greyOutline bg-white p-5 sm:hidden">
+            <h2 className="font-funnel text-[17px] font-bold">{t("detail.details")}</h2>
+            <dl className="mt-4 space-y-4 text-xs">
+              <div className="flex gap-3">
+                <span className="flex size-8 items-center justify-center rounded-[10px] bg-greyOutline">
+                  <CalendarPlus className="size-4" />
+                </span>
+                <div>
+                  <dt className="text-[9px] text-greyPrimary">{t("detail.created")}</dt>
+                  <dd className="mt-0.5 font-bold">{createdAt}</dd>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <span className="flex size-8 items-center justify-center rounded-[10px] bg-greyOutline">
+                  <CalendarPlus className="size-4" />
+                </span>
+                <div>
+                  <dt className="text-[9px] text-greyPrimary">{t("detail.updated")}</dt>
+                  <dd className="mt-0.5 font-bold">{updatedAt}</dd>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <span className="flex size-8 items-center justify-center rounded-[10px] bg-greyOutline">
+                  <Languages className="size-4" />
+                </span>
+                <div>
+                  <dt className="text-[9px] text-greyPrimary">
+                    {t("detail.notificationLanguage")}
+                  </dt>
+                  <dd className="mt-0.5 font-bold">
+                    {booking.customerLocale.toUpperCase()}
+                  </dd>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <span className="flex size-8 items-center justify-center rounded-[10px] bg-greyOutline">
+                  <WalletCards className="size-4" />
+                </span>
+                <div>
+                  <dt className="text-[9px] text-greyPrimary">{t("detail.payment")}</dt>
+                  <dd className="mt-0.5 font-bold">{t("detail.paymentAtCompany")}</dd>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <span className="flex size-8 items-center justify-center rounded-[10px] bg-greyOutline">
+                  <Clock3 className="size-4" />
+                </span>
+                <div>
+                  <dt className="text-[9px] text-greyPrimary">{t("detail.duration")}</dt>
+                  <dd className="mt-0.5 font-bold">
+                    {duration} {t("detail.minutes")}
+                  </dd>
+                </div>
+              </div>
+            </dl>
+          </section>
+
+          {!booking.allowedActions.cancel && !booking.allowedActions.reschedule && (
+            <p className="rounded-xl border border-purplePrimary/20 bg-purpleExtraLight p-4 text-sm">
+              {t("common.contactCompany")}
+            </p>
+          )}
+        </aside>
+      </div>
 
       <ConfirmationModal
         isOpen={cancelOpen}
@@ -315,6 +459,12 @@ export default function CustomerBookingDetailScene({ bookingId }: { bookingId: s
         positiveLabel={t("detail.cancel")}
         negativeHandler={() => setCancelOpen(false)}
         pozitiveHandler={() => void cancel()}
+      />
+
+      <RescheduleModal
+        booking={booking}
+        isOpen={rescheduleOpen}
+        onClose={closeReschedule}
       />
     </div>
   );

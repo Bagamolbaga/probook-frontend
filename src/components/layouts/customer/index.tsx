@@ -1,13 +1,14 @@
 "use client";
 
 import { signOut } from "next-auth/react";
+import { Bell, Search } from "lucide-react";
 import type { PropsWithChildren } from "react";
 import CalendarIcon from "@/components/ui/icons/Calendar";
 import GridIcon from "@/components/ui/icons/Grid";
-import PersonIcon from "@/components/ui/icons/Person";
 import LogoFullIcon from "@/components/ui/icons/LogoFull";
-import { Link, usePathname, useRouter, useTranslations } from "@/i18n";
+import PersonIcon from "@/components/ui/icons/Person";
 import { useAppSession } from "@/hooks/useAppSession";
+import { Link, usePathname, useRouter, useTranslations } from "@/i18n";
 
 const routes = [
   { href: "/cabinet", key: "dashboard", icon: GridIcon },
@@ -23,7 +24,8 @@ export default function CustomerLayout({ children }: PropsWithChildren) {
   const activeMembership = session?.user?.memberships?.find(
     (membership) => membership.status === "ACTIVE"
   );
-  const displayName = session?.user?.firstName || session?.user?.email;
+  const displayName =
+    session?.user?.firstName || session?.user?.email || t("navigation.customerPortal");
 
   const switchToBusiness = () => {
     document.cookie = "portal_mode=business; Path=/; SameSite=Lax";
@@ -35,7 +37,7 @@ export default function CustomerLayout({ children }: PropsWithChildren) {
   const navigation = (
     <nav
       aria-label={t("navigation.label")}
-      className="flex items-center gap-1 lg:flex-col lg:items-stretch"
+      className="flex items-center justify-around gap-1 lg:flex-col lg:items-stretch lg:justify-start lg:gap-2"
     >
       {routes.map((route) => {
         const active =
@@ -43,99 +45,110 @@ export default function CustomerLayout({ children }: PropsWithChildren) {
             ? pathname === route.href
             : pathname.startsWith(route.href);
         const Icon = route.icon;
-
         return (
           <Link
             key={route.href}
             href={route.href}
             aria-current={active ? "page" : undefined}
-            className={`group relative flex min-w-0 flex-1 items-center justify-center gap-3 rounded-[18px] px-3 py-2.5 text-sm font-bold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-purplePrimary focus-visible:ring-offset-2 lg:flex-none lg:justify-start lg:px-4 lg:py-3.5 sm:flex-col sm:gap-1 sm:px-1 sm:py-1.5 sm:text-[11px] ${
-              active
-                ? "bg-darkPrimary text-white"
-                : "text-greyPrimary hover:bg-greyBackground hover:text-darkPrimary"
-            }`}
+            className={`flex h-[54px] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-3 text-[9px] font-bold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-purplePrimary lg:h-12 lg:flex-none lg:flex-row lg:justify-start lg:gap-3 lg:py-3 lg:text-sm ${active ? "bg-greyOutline text-darkPrimary" : "text-greyPrimary hover:bg-greyBackground hover:text-darkPrimary"}`}
           >
             <span
-              className={`flex size-8 shrink-0 items-center justify-center rounded-full transition-colors lg:size-9 ${
-                active
-                  ? "bg-purplePrimary text-white"
-                  : "bg-greyBackground text-greyPrimary group-hover:bg-white group-hover:text-purplePrimary"
-              }`}
+              className={`flex size-5 shrink-0 items-center justify-center ${active ? "text-purplePrimary" : "text-greyPrimary"}`}
             >
-              <Icon className={active ? "stroke-white" : "stroke-current"} />
+              <Icon className={active ? "stroke-purplePrimary" : "stroke-greyPrimary"} />
             </span>
-            <span className="max-w-full truncate">{t(`navigation.${route.key}`)}</span>
+            <span className="truncate">{t(`navigation.${route.key}`)}</span>
           </Link>
         );
       })}
+      <Link
+        href="/search"
+        className="flex h-[54px] min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-3 text-[9px] font-bold text-greyPrimary outline-none hover:bg-greyBackground hover:text-darkPrimary focus-visible:ring-2 focus-visible:ring-purplePrimary lg:hidden"
+      >
+        <Search className="size-5" />
+        <span>{t("navigation.find")}</span>
+      </Link>
     </nav>
   );
 
   return (
-    <div className="min-h-screen bg-[#F6F6FB] pb-[calc(82px+env(safe-area-inset-bottom))] text-darkPrimary lg:pb-0">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[276px] flex-col border-r border-greyOutlineSecondary bg-white px-5 py-7 lg:flex">
+    <div className="min-h-screen bg-greyBackgroundLight text-darkPrimary lg:grid lg:h-dvh lg:overflow-hidden lg:grid-cols-[244px_minmax(0,1fr)]">
+      <aside className="sticky top-0 hidden h-screen flex-col border-r border-greyOutline bg-white px-5 py-[30px] lg:flex">
         <Link
           href="/cabinet"
-          className="mb-10 inline-flex w-fit rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-purplePrimary focus-visible:ring-offset-4"
+          className="mb-[34px] inline-flex w-fit rounded-lg px-2 outline-none focus-visible:ring-2 focus-visible:ring-purplePrimary"
         >
-          <LogoFullIcon className="max-w-[154px]" />
+          <LogoFullIcon className="max-w-[136px]" />
         </Link>
-
         {navigation}
-
-        <div className="mt-auto border-t border-greyOutlineSecondary pt-5">
-          <p className="truncate px-3 text-sm font-bold">{displayName}</p>
-          <p className="mt-1 px-3 text-xs text-greyPrimary">
-            {t("navigation.customerPortal")}
-          </p>
-          {activeMembership ? (
+        <Link
+          href="/search"
+          className="mt-6 flex h-12 items-center justify-center rounded-full bg-purplePrimary px-4 text-sm font-bold text-white outline-none hover:bg-purplePrimary_hover focus-visible:ring-2 focus-visible:ring-purplePrimary focus-visible:ring-offset-2"
+        >
+          {t("common.findService")}
+        </Link>
+        <div className="mt-auto space-y-3">
+          {activeMembership && (
             <button
               type="button"
-              className="mt-4 w-full rounded-xl border border-greyOutlineSecondary px-3 py-2.5 text-left text-sm font-bold outline-none transition-colors hover:border-purplePrimary hover:text-purplePrimary focus-visible:ring-2 focus-visible:ring-purplePrimary"
               onClick={switchToBusiness}
+              className="w-full rounded-xl bg-greyBackgroundLight p-3 text-left outline-none hover:bg-greyOutline focus-visible:ring-2 focus-visible:ring-purplePrimary"
             >
-              {t("navigation.businessPortal")}
+              <span className="block text-[10px] font-bold uppercase tracking-[0.07em] text-greyPrimary">
+                {t("navigation.companyAccess")}
+              </span>
+              <span className="mt-1 block text-sm font-bold">
+                {t("navigation.businessPortal")} →
+              </span>
             </button>
-          ) : null}
-          <button
-            type="button"
-            className="mt-1 w-full rounded-xl px-3 py-2.5 text-left text-sm text-greyPrimary outline-none transition-colors hover:bg-greyBackground hover:text-darkPrimary focus-visible:ring-2 focus-visible:ring-purplePrimary"
-            onClick={() => void signOut({ callbackUrl: "/sign-in" })}
-          >
-            {t("navigation.signOut")}
-          </button>
+          )}
+          <div className="flex items-center gap-2 px-1">
+            <span className="flex size-[38px] shrink-0 items-center justify-center rounded-full bg-purpleExtraLight font-bold text-purplePrimary">
+              {displayName.slice(0, 1).toUpperCase()}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-bold">{displayName}</span>
+              <span className="block text-xs text-greyPrimary">
+                {t("navigation.customerPortal")}
+              </span>
+            </span>
+            <button
+              type="button"
+              onClick={() => void signOut({ callbackUrl: "/sign-in" })}
+              className="rounded-md px-1 text-greyPrimary outline-none hover:text-redPrimary focus-visible:ring-2 focus-visible:ring-purplePrimary"
+              aria-label={t("navigation.signOut")}
+            >
+              ↗
+            </button>
+          </div>
         </div>
       </aside>
 
-      <header className="sticky top-0 z-20 flex h-[70px] items-center border-b border-greyOutlineSecondary bg-white/95 px-5 backdrop-blur lg:hidden">
-        <Link
-          href="/cabinet"
-          className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-purplePrimary lg:hidden"
-        >
-          <LogoFullIcon className="max-w-[124px]" />
+      <header className="sticky top-0 z-20 flex h-[68px] items-center border-b border-greyOutline bg-white px-[18px] lg:hidden">
+        <Link href="/cabinet">
+          <LogoFullIcon className="max-w-[108px]" />
         </Link>
-        <div className="ml-auto flex items-center gap-3">
-          <div className="text-right lg:hidden">
-            <p className="max-w-[150px] truncate text-sm font-bold">{displayName}</p>
-            <p className="text-xs text-greyPrimary">{t("navigation.customerPortal")}</p>
-          </div>
-          {activeMembership ? (
-            <button
-              type="button"
-              className="hidden rounded-xl border border-greyOutlineSecondary bg-white px-3 py-2 text-sm font-bold outline-none transition-colors hover:border-purplePrimary hover:text-purplePrimary focus-visible:ring-2 focus-visible:ring-purplePrimary md:block lg:hidden"
-              onClick={switchToBusiness}
-            >
-              {t("navigation.businessPortal")}
-            </button>
-          ) : null}
+        <div className="ml-auto flex gap-2">
+          <Link
+            href="/search"
+            aria-label={t("common.findService")}
+            className="flex size-[38px] items-center justify-center rounded-full bg-greyBackgroundLight outline-none focus-visible:ring-2 focus-visible:ring-purplePrimary"
+          >
+            <Search className="size-[17px]" />
+          </Link>
+          <button
+            type="button"
+            aria-label={t("navigation.notifications")}
+            className="flex size-[38px] items-center justify-center rounded-full bg-greyBackgroundLight outline-none focus-visible:ring-2 focus-visible:ring-purplePrimary"
+          >
+            <Bell className="size-[17px]" />
+          </button>
         </div>
       </header>
-
-      <main className="mx-auto max-w-[1240px] px-8 py-10 lg:ml-[276px] lg:px-12 lg:py-12 sm:px-4 sm:py-7">
+      <main className="min-w-0 px-11 py-7 lg:min-h-0 lg:overflow-hidden md:px-7 sm:px-4 sm:pb-[90px] sm:pt-4">
         {children}
       </main>
-
-      <div className="fixed inset-x-3 bottom-3 z-30 rounded-[22px] border border-greyOutlineSecondary bg-white/95 p-1.5 shadow-[0_14px_40px_rgba(28,29,33,0.14)] backdrop-blur lg:hidden sm:bottom-[calc(10px+env(safe-area-inset-bottom))]">
+      <div className="fixed inset-x-0 bottom-0 z-30 h-[76px] border-t border-greyOutline bg-white px-3 pb-2.5 pt-2 lg:hidden">
         {navigation}
       </div>
     </div>

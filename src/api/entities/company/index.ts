@@ -134,7 +134,12 @@ export type TSearchCompanysArgs = {
   };
 };
 
-export type TSearchCompanysRes = (TCompany & { price_from: string; price_to: string })[];
+export type TSearchCompany = TCompany & {
+  price_from?: string | number | null;
+  price_to?: string | number | null;
+};
+
+export type TSearchCompanysRes = TSearchCompany[];
 
 export type TCreateCompanyServiceArgs = {
   data: {

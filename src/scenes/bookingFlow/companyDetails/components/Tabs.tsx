@@ -14,10 +14,13 @@ type Props = {
 
 const Tabs: FC<Props> = ({ tabs, activelTab, handleSelect }) => {
   return (
-    <div className="w-full flex items-center justify-between">
+    <div role="tablist" className="w-full flex items-center justify-between">
       {tabs.map((tab) => (
-        <span
+        <button
+          type="button"
+          role="tab"
           key={tab.id}
+          aria-selected={activelTab.id === tab.id}
           className="relative flex-1 py-2 text-sm font-bold text-center cursor-pointer border-b border-greyOutlineSecondary"
           onClick={() => handleSelect(tab)}
         >
@@ -28,7 +31,7 @@ const Tabs: FC<Props> = ({ tabs, activelTab, handleSelect }) => {
               className="absolute bottom-0 left-0 right-0 h-[2px] bg-darkPrimary"
             ></motion.div>
           )}
-        </span>
+        </button>
       ))}
     </div>
   );

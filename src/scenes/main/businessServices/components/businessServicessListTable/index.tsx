@@ -248,29 +248,29 @@ const BusinessServicesListTable = () => {
         return;
       }
 
-      const initData = getCompanyServicesQuery.data?.results.find(
-        (s) => s._id === formData._serviceId
-      );
-      if (initData) {
-        const { data } = await updateCompanyServiceQuery.mutateAsync({
-          serviceId: formData._serviceId!,
-          data: {
-            companyId,
-            categoryId: formData.category.id,
-            name: formData.name,
-            description: formData.description,
-            specialistIds: formData.specialists.map((s) => s.id),
-            options: formData.options.map((so) => ({
-              name: so.name || "",
-              duration: so.duration,
-              price: Number(so.price),
-            })),
-          },
-        });
-        if (data) {
-          hideUpdateModalHandler();
-          toaster.success("Service updated");
-        }
+      if (!formData._serviceId) {
+        toaster.error(t("ui.errors.wentWrong"));
+        return;
+      }
+
+      const { data } = await updateCompanyServiceQuery.mutateAsync({
+        serviceId: formData._serviceId,
+        data: {
+          companyId,
+          categoryId: formData.category.id,
+          name: formData.name,
+          description: formData.description,
+          specialistIds: formData.specialists.map((s) => s.id),
+          options: formData.options.map((so) => ({
+            name: so.name || "",
+            duration: so.duration,
+            price: Number(so.price),
+          })),
+        },
+      });
+      if (data) {
+        hideUpdateModalHandler();
+        toaster.success("Service updated");
       }
     } catch (error) {
       console.error({ error });
@@ -450,6 +450,8 @@ const BusinessServicesListTable = () => {
   );
   const createBtnIsActive = formIsReady && !createCompanyServiceQuery.isPending;
   const updateBtnIsActive = formIsReady && !updateCompanyServiceQuery.isPending;
+
+  console.log([rows]);
 
   if (firstLoading) {
     return (

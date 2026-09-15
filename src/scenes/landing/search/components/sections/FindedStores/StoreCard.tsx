@@ -1,22 +1,38 @@
 import { FC } from "react";
 import Image from "next/image";
-import { Link, useTranslations } from "@/i18n";
+import { Link, useRouter, useTranslations } from "@/i18n";
 import Button from "@/components/ui/button";
 import { cn } from "@/utils/cn";
 import { toSlug } from "@/utils/toSlug";
+import { getYandexMapsUrl } from "@/utils/getYandexMapsUrl";
+import { TSearchCompany } from "@/api/entities/company";
 
 type Props = {
-  company: TCompany<{price_from: string, price_to: string}>;
+  company: TSearchCompany;
   isDark?: boolean;
   setHover?: (val?: number) => void;
 };
 
 const StoreCard: FC<Props> = ({ company, isDark, setHover }) => {
   const t = useTranslations();
+  const router = useRouter();
+  const companyHref = `/company/${toSlug(company.name)}?storeId=${company.id}`;
+  const yandexMapsUrl = getYandexMapsUrl(company.pos);
+
   return (
-    <Link
+    <div
       id={`store_cart_id-${company.id}`}
-      href={`/company/${toSlug(company.name)}?storeId=${company.id}`}
+      role="link"
+      tabIndex={0}
+      onClick={() => {
+        router.push(companyHref);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          router.push(companyHref);
+        }
+      }}
       className={cn(
         "flex flex-col rounded-[14px] transition-all border border-[#ECECF2] hover:border-purplePrimary bg-white",
         {
@@ -56,7 +72,9 @@ const StoreCard: FC<Props> = ({ company, isDark, setHover }) => {
             <div className="py-3 flex items-center justify-between">
               <p className={cn("text-sm text-greyPrimary", {})}>Price</p>
               <p className={cn("text-sm font-semibold text-darkPrimary", {})}>
-                {company.price_from && company.price_to ? `From ฿${Number(company.price_from)} - To ฿${Number(company.price_to)}` : "No info"}
+                {company.price_from && company.price_to
+                  ? `From ฿${Number(company.price_from)} - To ฿${Number(company.price_to)}`
+                  : "No info"}
               </p>
             </div>
             <div className="py-3 flex items-center justify-between border-t border-greyOutlineSecondary">
@@ -66,8 +84,25 @@ const StoreCard: FC<Props> = ({ company, isDark, setHover }) => {
               </p>
             </div>
           </div>
-          <div className="w-full flex mt-1">
+          <div className="w-full flex flex-col gap-2 mt-1">
+            {yandexMapsUrl && (
+              <a
+                href={yandexMapsUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(event) => event.stopPropagation()}
+                className="w-full"
+              >
+                <Button
+                  variant="resting-active"
+                  className="w-full !py-3 font-bold !rounded-full"
+                >
+                  Open in Yandex Maps
+                </Button>
+              </a>
+            )}
             <Link
+              onClick={(event) => event.stopPropagation()}
               href={`/company/${toSlug(company.name)}/booking-creation?storeId=${company.id}`}
               className="w-full"
             >
@@ -81,7 +116,7 @@ const StoreCard: FC<Props> = ({ company, isDark, setHover }) => {
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 

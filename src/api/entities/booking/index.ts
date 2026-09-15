@@ -21,7 +21,8 @@ export type TGetBookingArgs = {
   bookingId: string;
 };
 
-export type TGetBookingAvailabilityArgs = TGetBookingArgs & {
+export type TGetBookingAvailabilityArgs = Omit<TGetBookingArgs, "bookingId"> & {
+  bookingId?: string;
   specialistId: string;
   date: string;
 };
@@ -39,6 +40,7 @@ export type TBookingAvailability = {
   slots: Array<{
     slot: number;
     available: boolean;
+    status: "free" | "busy" | "break";
     reason?: "outside_shift" | "break" | "busy" | "not_enough_time";
   }>;
 };
@@ -76,6 +78,7 @@ export type TCreateBookingArgs = {
       email: string;
       first_name: string;
       last_name: string;
+      phone: string;
     };
     customerLocale: "en" | "ru";
     date: Date;
@@ -207,10 +210,8 @@ export class ApiClientBookings extends ApiClientCore {
     specialistId,
     date,
   }: TGetBookingAvailabilityArgs) {
-    const params = new URLSearchParams({
-      date,
-      excludeBookingId: bookingId,
-    });
+    const params = new URLSearchParams({ date });
+    if (bookingId) params.set("excludeBookingId", bookingId);
 
     return this.instanceWithoutAuth.get<TBookingAvailability>(
       `/companies/${companyId}/specialists/${specialistId}/availability?${params.toString()}`
@@ -254,6 +255,13 @@ export class ApiClientBookings extends ApiClientCore {
 
     const instance = this.isAuth ? this.instance : this.instanceWithoutAuth;
     return instance.post<TApiBooking>(`/companies/${companyId}/bookings`, formattedDate);
+  }
+
+  async validateBooking({ companyId, data }: TCreateBookingArgs) {
+    return this.instanceWithoutAuth.post<{ valid: true }>(
+      `/companies/${companyId}/bookings/validate`,
+      { ...data, date: format(data.date, "yyyy-MM-dd") }
+    );
   }
 
   async updateBookingByToken({ token, data }: TUpdateBookingByTokenArgs) {

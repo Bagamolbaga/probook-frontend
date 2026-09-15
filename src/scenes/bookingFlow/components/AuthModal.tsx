@@ -139,7 +139,7 @@ const AuthModal: FC<Props> = ({
       setError("phone", { type: "validate", message: "Phone is not valid" });
     } else {
       const parsedPhone = parsePhoneNumber(formData.phone);
-      const phone = parsedPhone?.number.replace("+", "");
+      const phone = parsedPhone?.number;
 
       if (phone) {
         continueWithPreferredLocale({ ...formData, phone });
@@ -153,11 +153,9 @@ const AuthModal: FC<Props> = ({
     setValue("last_name", customer.lastName || "", { shouldValidate: true });
     setValue("email", customer.email, { shouldValidate: true });
     setValue("phone", customer.phone || "", { shouldValidate: true });
-    setValue(
-      "preferredLocale",
-      customer.preferredLocale || currentLocale,
-      { shouldValidate: true }
-    );
+    setValue("preferredLocale", customer.preferredLocale || currentLocale, {
+      shouldValidate: true,
+    });
     setSelectedCustomerEmail(customerEmail);
   };
 
