@@ -107,6 +107,9 @@ export const customerCabinet = {
     openMap: "Open on map",
   },
   review: {
+    publishing: "Publishing...",
+    submissionError: "Could not publish the review. Please try again.",
+    alreadySubmitted: "You have already submitted a review for this booking.",
     entryTitle: "How did it go?",
     entryDescription:
       "Tell us about the service and the specialist. Your feedback helps the company improve.",
@@ -191,11 +194,13 @@ export const customerCabinet = {
     CONFIRMED: "Confirmed",
     COMPLETED: "Completed",
     CANCELLED: "Cancelled",
+    BLOCKED: "Blocked",
   },
   statusCompact: {
     PENDING: "Pending",
     CONFIRMED: "Confirmed",
     COMPLETED: "Completed",
     CANCELLED: "Cancelled",
+    BLOCKED: "Blocked",
   },
 };

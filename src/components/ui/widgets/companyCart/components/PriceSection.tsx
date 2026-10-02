@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
-import { formatCurrency } from "@/utils/formatCurrency";
-import { TServiceAndSelectedOption } from "@/scenes/bookingFlow/bookingCreation";
+import { formatCurrency } from "@/src/utils/formatCurrency";
+import { TServiceAndSelectedOption } from "@/src/scenes/bookingFlow/bookingCreation";
 
 type Props = {
   services: TServiceAndSelectedOption[];

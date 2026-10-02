@@ -4,17 +4,17 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
-import { useTranslations, useRouter } from "@/i18n";
+import { useTranslations, useRouter } from "@/src/i18n";
 
-import { useApiClient } from "@/api/context";
-import { PASSWORD_REGEXP } from "@/utils/regexps";
-import Button from "@/components/ui/button";
-import TextField from "@/components/ui/inputs/TextField";
-import { toaster } from "@/components/ui/toaster";
-import LogoIcon from "@/components/ui/icons/LogoFull";
-import ImageSignUp from "@/assets/business_signUp_step_1.svg";
-import ImageRecover from "@/assets/business_recoverPassweord.svg";
-import Spinner from "@/components/ui/loaders/Spinner";
+import { useApiClient } from "@/src/api/context";
+import { PASSWORD_REGEXP } from "@/src/utils/regexps";
+import { Button } from "@/src/components/ui/button";
+import TextField from "@/src/components/ui/inputs/TextField";
+import { toaster } from "@/src/components/ui/toaster";
+import LogoIcon from "@/src/components/ui/icons/LogoFull";
+import ImageSignUp from "@/src/assets/business_signUp_step_1.svg";
+import ImageRecover from "@/src/assets/business_recoverPassweord.svg";
+import Spinner from "@/src/components/ui/loaders/Spinner";
 
 type Form = {
   password: string;
@@ -141,7 +141,7 @@ const EnterPasswordScene = ({
 
               <div className="py-12 flex gap-[100px] sm:gap-0 sm:justify-between">
                 <Button
-                  variant="primary"
+                  variant="default"
                   onClick={form.handleSubmit(handleEnterPassword)}
                   disabled={!submitBtnIsActive || isLoading}
                 >

@@ -132,6 +132,13 @@ export const bookingManagement = {
     },
   },
   today: "Today",
+  timeline: {
+    zoom: "Zoom",
+    previousDay: "Previous day",
+    nextDay: "Next day",
+    employees: "Employees",
+    notWorking: "Not working",
+  },
   addCustomer: "Add Customer",
   emptyBooking: {
     title: "No employees found?",

@@ -20,29 +20,30 @@ import {
 } from "date-fns";
 import { Player } from "@lottiefiles/react-lottie-player";
 import { useLocale, useTranslations } from "next-intl";
-import { DATE_FNS_LOCALES, Link } from "@/i18n";
+import { DATE_FNS_LOCALES, Link } from "@/src/i18n";
 
-import { useGetBookingsQuery } from "@/api/queries/booking";
-import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
-import { useGetCompanyShiftsForDateRangeQuery } from "@/api/queries/company/shift";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
+import { useGetBookingsQuery } from "@/src/api/queries/booking";
+import { useGetCompanySpecialistsQuery } from "@/src/api/queries/company/specialists";
+import { useGetCompanyShiftsForDateRangeQuery } from "@/src/api/queries/company/shift";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
 import UpdateBookingModal from "../components/UpdateBookingModal";
 import TimeLineBreakItem from "./components/TimeLineBreakItem";
-import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
-import Button from "@/components/ui/button";
-import { BOOKING_STATUSES, BOOKING_STATUS_STYLES } from "@/constants/bookingStatuses";
-import { TIME_SLOTS } from "@/constants/timeSlots";
-import { cn } from "@/utils/cn";
+import ArrowSecondaryDownIcon from "@/src/components/ui/icons/ArrowSecondaryDown";
+import { Button } from "@/src/components/ui/button";
+import { BOOKING_STATUSES, BOOKING_STATUS_STYLES } from "@/src/constants/bookingStatuses";
+import { TIME_SLOTS } from "@/src/constants/timeSlots";
+import { cn } from "@/src/utils/cn";
 
-import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
-import ListIsEmptyPlaceholderImage from "@/assets/staffManagement/SpecialistListEmptyOverlay.svg";
-import { TimeManager } from "@/utils/timeManager";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import DatePicker from "@/components/ui/DatePicker";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import { useClickOutside } from "@/hooks/useClickOutside";
-import CustomScrollbar from "@/styles/scrollbar.module.sass";
+import BlackLogoAnimation from "@/src/assets/lottiefiles/blackLogoAnimation.json";
+import ListIsEmptyPlaceholderImage from "@/src/assets/staffManagement/SpecialistListEmptyOverlay.svg";
+import { TimeManager } from "@/src/utils/timeManager";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import DatePicker from "@/src/components/ui/DatePicker";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import { useClickOutside } from "@/src/hooks/useClickOutside";
+import CustomScrollbar from "@/src/styles/scrollbar.module.sass";
 import type { FormattedDataItem, UpdateBookingForm } from "../components/types";
+import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 export type { FormattedDataItem } from "../components/types";
 
 const TimeLineCalendar = () => {
@@ -637,10 +638,11 @@ const TimeLineCalendar = () => {
             <div ref={datePickerContainer} className="relative">
               <Button
                 className="w-12 !p-2"
-                variant="resting-active"
+                variant="outline"
+                size={"icon"}
                 onClick={toggleDatePickerHandler}
               >
-                <CalendarIcon className="" />
+                <CalendarDays />
               </Button>
 
               {isOpenDatePicker && (
@@ -655,25 +657,25 @@ const TimeLineCalendar = () => {
               )}
             </div>
 
-            <span className="ml-3 px-5 py-2 rounded-lg border border-greyOutlineSecondary text-sm font-bold text-greyPrimary">
+            <span className="ml-3 px-5 py-2 rounded-lg border border-border text-sm font-medium text-foreground">
               {getDateStringBySelectedDate(selectedDate)}
             </span>
             <Button
               className="w-12 ml-3"
-              variant="resting-active"
+              variant="outline"
               onClick={selectPrevDayHandler}
             >
-              <ArrowSecondaryDownIcon className="rotate-90" />
+              <ChevronLeft />
             </Button>
             <Button
               className="w-12 ml-1"
-              variant="resting-active"
+              variant="outline"
               onClick={selectNextDayHandler}
             >
-              <ArrowSecondaryDownIcon className="-rotate-90" />
+              <ChevronRight />
             </Button>
             <Link href={`/booking-creation`} className="ml-3">
-              <Button variant="primary">{t("bookingManagement.addCustomer")}</Button>
+              <Button variant="default">{t("bookingManagement.addCustomer")}</Button>
             </Link>
           </div>
         </div>

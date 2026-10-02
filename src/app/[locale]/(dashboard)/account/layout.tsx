@@ -1,5 +1,5 @@
 import { PropsWithChildren } from "react";
-import AccountLayout from "@/components/layouts/main/Account";
+import AccountLayout from "@/src/components/layouts/main/Account";
 
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";

@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { useApiClient } from "@/api/context";
+import { useApiClient } from "@/src/api/context";
 import {
   TCreateCompanyServiceCategoryArgs,
   TDeleteCompanyServiceCategoryArgs,
   TGetCompanyServiceCategoriesArgs,
   TUpdateCompanyServiceCategoryArgs,
-} from "@/api/entities/company";
+} from "@/src/api/entities/company";
 
 const serviceCategoriesQueryKey = (companyId: string) => [
   "service_categories",

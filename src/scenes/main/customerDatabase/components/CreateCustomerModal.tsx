@@ -1,14 +1,14 @@
-import { useCreateCustomerQuery } from "@/api/queries/users";
-import Button from "@/components/ui/button";
-import CloseIcon from "@/components/ui/icons/Close";
-import PersonIcon from "@/components/ui/icons/Person";
-import PlusRight from "@/components/ui/icons/Plus";
-import PhoneTextInput from "@/components/ui/inputs/PhoneTextInput";
-import TextField from "@/components/ui/inputs/TextField";
-import Modal from "@/components/ui/modal";
-import { toaster } from "@/components/ui/toaster";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import { EMAIL_REGEXP } from "@/utils/regexps";
+import { useCreateCustomerQuery } from "@/src/api/queries/users";
+import { Button } from "@/src/components/ui/button";
+import CloseIcon from "@/src/components/ui/icons/Close";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import PlusRight from "@/src/components/ui/icons/Plus";
+import PhoneTextInput from "@/src/components/ui/inputs/PhoneTextInput";
+import TextField from "@/src/components/ui/inputs/TextField";
+import Modal from "@/src/components/ui/modal";
+import { toaster } from "@/src/components/ui/toaster";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import { EMAIL_REGEXP } from "@/src/utils/regexps";
 import { useTranslations } from "next-intl";
 import { FC, ReactNode, useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -28,7 +28,7 @@ type Props = {
 
 const CreateCustomerModal: FC<Props> = ({ isOpen, headerTitle, handleClose }) => {
   const t = useTranslations();
-  const {companyId} = useGetCompanyId()
+  const { companyId } = useGetCompanyId();
 
   const form = useForm<CreateCustomerForm>({
     defaultValues: {
@@ -57,7 +57,7 @@ const CreateCustomerModal: FC<Props> = ({ isOpen, headerTitle, handleClose }) =>
         form.setError("phone", { type: "validate", message: "Phone is not valid" });
       } else {
         const parsedPhone = parsePhoneNumber(formData.phone!);
-        const phone = parsedPhone?.number.replace("+", "");
+        const phone = parsedPhone?.number;
 
         if (phone) {
           const res = await createCustomerQuery.mutateAsync({
@@ -111,7 +111,7 @@ const CreateCustomerModal: FC<Props> = ({ isOpen, headerTitle, handleClose }) =>
       await createCustomerWithEmailHandler(formData);
     }
 
-    localCloseHandler()
+    localCloseHandler();
   };
 
   const localCloseHandler = () => {
@@ -127,7 +127,7 @@ const CreateCustomerModal: FC<Props> = ({ isOpen, headerTitle, handleClose }) =>
           <div className="flex items-center gap-4">
             <Button
               className="w-9 h-9 p-0"
-              variant="resting-active"
+              variant="outline"
               onClick={localCloseHandler}
             >
               <CloseIcon className="w-5 h-5 stroke-greyPrimary" />
@@ -188,12 +188,12 @@ const CreateCustomerModal: FC<Props> = ({ isOpen, headerTitle, handleClose }) =>
       </div>
 
       <div className="mt-5 p-6 flex items-center justify-between gap-5">
-        <Button variant="resting" onClick={localCloseHandler}>
+        <Button variant="outline" onClick={localCloseHandler}>
           {t("ui.actions.cancel")}
         </Button>
         <Button
           className="flex items-center gap-3"
-          variant="dark"
+          variant="outline"
           onClick={form.handleSubmit(createCustomerHandler)}
           disabled={createCustomerQuery.isPending}
         >

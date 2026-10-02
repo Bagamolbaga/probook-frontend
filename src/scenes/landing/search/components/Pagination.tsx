@@ -1,7 +1,7 @@
 import { Dispatch, FC, SetStateAction } from "react";
-import Button from "@/components/ui/button";
-import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
-import { cn } from "@/utils/cn";
+import { Button } from "@/src/components/ui/button";
+import ArrowSecondaryDownIcon from "@/src/components/ui/icons/ArrowSecondaryDown";
+import { cn } from "@/src/utils/cn";
 
 type Props = {
   totalCount: number;
@@ -60,7 +60,7 @@ const Pagination: FC<Props> = ({
     <div className={cn("w-full flex justify-between items-center", className)}>
       <div className="flex items-center gap-2">
         <Button
-          variant="resting"
+          variant="outline"
           className="w-10 h-10 p-0"
           onClick={prevPageHandler}
           disabled={pagination.page === 1}
@@ -87,7 +87,7 @@ const Pagination: FC<Props> = ({
       <div className="flex items-center gap-2">
         {buttonWithText && <span className="text-sm text-greyPrimary">Next</span>}
         <Button
-          variant="resting"
+          variant="outline"
           className="w-10 h-10 p-0"
           onClick={nextPageHandler}
           disabled={pagination.page === btnCounts}

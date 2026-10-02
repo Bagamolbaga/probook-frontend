@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { differenceInHours, setHours } from "date-fns";
-import { TTimeSlot } from "@/constants/timeSlots";
+import { TTimeSlot } from "@/src/constants/timeSlots";
 
 type Props = {
   date?: Date;

@@ -4,14 +4,14 @@ import { PropsWithChildren, useMemo } from "react";
 import { format } from "date-fns";
 
 import SubscriptionForm from "./components/SubscriptionForm";
-import { useGetPaymentdetailsQuery } from "@/api/queries/payment";
-import Button from "@/components/ui/button";
-import Spinner from "@/components/ui/loaders/Spinner";
-import { formatCurrency } from "@/utils/formatCurrency";
-import { cn } from "@/utils/cn";
-import { useGetCompanySubscriptionQuery } from "@/api/queries/company/subscription";
-import { useAppSession } from "@/hooks/useAppSession";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { useGetPaymentdetailsQuery } from "@/src/api/queries/payment";
+import { Button } from "@/src/components/ui/button";
+import Spinner from "@/src/components/ui/loaders/Spinner";
+import { formatCurrency } from "@/src/utils/formatCurrency";
+import { cn } from "@/src/utils/cn";
+import { useGetCompanySubscriptionQuery } from "@/src/api/queries/company/subscription";
+import { useAppSession } from "@/src/hooks/useAppSession";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 
 const RowItem = ({ children }: PropsWithChildren) => {
   return (
@@ -68,7 +68,7 @@ const AccountBillingScene = () => {
                       {paymentDetails?.payment_details?.exp_month}/
                       {paymentDetails?.payment_details?.exp_year}{" "}
                     </p>
-                    <Button variant="transparent" className="p-0">
+                    <Button variant="secondary" className="p-0">
                       <p className="text-sm text-purplePrimary">Update</p>
                     </Button>
                   </div>
@@ -82,7 +82,7 @@ const AccountBillingScene = () => {
                         {paymentDetails?.payment_details?.billing_period}
                       </span>
                     </p>
-                    <Button variant="transparent" className="p-0">
+                    <Button variant="secondary" className="p-0">
                       <p className="text-sm text-purplePrimary">Update</p>
                     </Button>
                   </div>
@@ -90,7 +90,7 @@ const AccountBillingScene = () => {
                 <RowItem>
                   <p className="text-sm text-greyPrimary">License keys</p>
                   <div className="flex items-center gap-5">
-                    <Button variant="transparent" className="p-0">
+                    <Button variant="secondary" className="p-0">
                       <p className="text-sm text-purplePrimary">Redeem a license key</p>
                     </Button>
                   </div>
@@ -114,7 +114,7 @@ const AccountBillingScene = () => {
                     </div>
                     <div className="flex items-center gap-5">
                       <p className="text-sm font-bold">{formatCurrency(34)}</p>
-                      <Button variant="transparent" className="p-0">
+                      <Button variant="secondary" className="p-0">
                         <p className="text-sm text-purplePrimary">Invoice</p>
                       </Button>
                     </div>
@@ -132,8 +132,8 @@ const AccountBillingScene = () => {
 
       <div className="w-full flex items-end justify-between">
         <div className="flex items-center gap-[46px]">
-          <Button variant="primary">Update Settings</Button>
-          <Button variant="resting" className="py-3">
+          <Button variant="default">Update Settings</Button>
+          <Button variant="outline" className="py-3">
             Cancel
           </Button>
         </div>

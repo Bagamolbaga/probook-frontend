@@ -6,11 +6,11 @@ import { Variants, motion } from "framer-motion";
 import clsx from "clsx";
 import { useStore } from "zustand";
 
-import { useThemeStore } from "@/stores/theme";
-import useWindowWidth from "@/hooks/useWindowWidth";
-import Sidebar from "@/components/sidebar";
-import SidebarRightPanel from "@/components/sidebarRightPanel";
-import MobileSidebar from "@/components/sidebar/MobileSidebar";
+import { useThemeStore } from "@/src/stores/theme";
+import useWindowWidth from "@/src/hooks/useWindowWidth";
+import Sidebar from "@/src/components/sidebar";
+import SidebarRightPanel from "@/src/components/sidebarRightPanel";
+import MobileSidebar from "@/src/components/sidebar/MobileSidebar";
 
 export default function DashboardLayout({ children }: PropsWithChildren) {
   const { sidebarIsOpen, toggleOpenSidebar } = useStore(useThemeStore, (state) => state);

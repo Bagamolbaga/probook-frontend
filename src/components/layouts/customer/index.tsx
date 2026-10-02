@@ -3,12 +3,13 @@
 import { signOut } from "next-auth/react";
 import { Bell, Search } from "lucide-react";
 import type { PropsWithChildren } from "react";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import GridIcon from "@/components/ui/icons/Grid";
-import LogoFullIcon from "@/components/ui/icons/LogoFull";
-import PersonIcon from "@/components/ui/icons/Person";
-import { useAppSession } from "@/hooks/useAppSession";
-import { Link, usePathname, useRouter, useTranslations } from "@/i18n";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import GridIcon from "@/src/components/ui/icons/Grid";
+import LogoFullIcon from "@/src/components/ui/icons/LogoFull";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import { useAppSession } from "@/src/hooks/useAppSession";
+import { Link, usePathname, useRouter, useTranslations } from "@/src/i18n";
+import { cn } from "@/src/utils/cn";
 
 const routes = [
   { href: "/cabinet", key: "dashboard", icon: GridIcon },
@@ -72,7 +73,13 @@ export default function CustomerLayout({ children }: PropsWithChildren) {
   );
 
   return (
-    <div className="min-h-screen bg-greyBackgroundLight text-darkPrimary lg:grid lg:h-dvh lg:overflow-hidden lg:grid-cols-[244px_minmax(0,1fr)]">
+    <div
+      className={cn(
+        "min-h-screen overflow-auto bg-greyBackgroundLight text-darkPrimary",
+        "lg:grid lg:h-dvh lg:grid-cols-[244px_minmax(0,1fr)]",
+        "md:flex md:flex-col"
+      )}
+    >
       <aside className="sticky top-0 hidden h-screen flex-col border-r border-greyOutline bg-white px-5 py-[30px] lg:flex">
         <Link
           href="/cabinet"
@@ -145,7 +152,14 @@ export default function CustomerLayout({ children }: PropsWithChildren) {
           </button>
         </div>
       </header>
-      <main className="min-w-0 px-11 py-7 lg:min-h-0 lg:overflow-hidden md:px-7 sm:px-4 sm:pb-[90px] sm:pt-4">
+      <main
+        className={cn(
+          "min-w-0 px-7 py-7 flex min-h-[860px]",
+          "lg:overflow-hidden",
+          "md:flex-1 md:pt-5 md:px-5 md:pb-[calc(76px+4px)]",
+          "sm:px-4 sm:pb-[90px] sm:pt-4"
+        )}
+      >
         {children}
       </main>
       <div className="fixed inset-x-0 bottom-0 z-30 h-[76px] border-t border-greyOutline bg-white px-3 pb-2.5 pt-2 lg:hidden">

@@ -17,6 +17,7 @@ const config: Config = {
     colors: {
       purplePrimary: "#603FEF",
       purpleExtraLight: "#603FEF1A",
+      purpleSurface: "#EFEBFD",
       purpleDark: "#4732BA",
       purplePrimary_hover: "#4833a8",
       darkPrimary: "#1C1D21",
@@ -44,6 +45,41 @@ const config: Config = {
       "grey-800": "#434343",
       "neutral-900": "#2F2F2F",
       transparent: "transparent",
+
+      // shadcn/ui semantic tokens mirror the HEX tokens in globals.sass.
+      background: "#ffffff",
+      foreground: "#1C1D21",
+      card: {
+        DEFAULT: "#ffffff",
+        foreground: "#1C1D21",
+      },
+      popover: {
+        DEFAULT: "#ffffff",
+        foreground: "#1C1D21",
+      },
+      primary: {
+        DEFAULT: "#603FEF",
+        foreground: "#ffffff",
+      },
+      secondary: {
+        DEFAULT: "#F5F5FA",
+        foreground: "#1C1D21",
+      },
+      muted: {
+        DEFAULT: "#F6F6F6",
+        foreground: "#8181A5",
+      },
+      accent: {
+        DEFAULT: "#EFEBFD",
+        foreground: "#4732BA",
+      },
+      destructive: {
+        DEFAULT: "#F92718",
+        foreground: "#ffffff",
+      },
+      border: "#F0F0F3",
+      input: "#F0F0F3",
+      ring: "#603FEF",
     },
     extend: {
       fontFamily: {
@@ -85,9 +121,23 @@ const config: Config = {
           "radial-gradient(circle at center, #603FEF20 10%, transparent 60%)",
         fromTopLeftToBottomRight: "linear-gradient(150deg, #e8d5f1 0%, #923bc6 100%)",
       },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
     },
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animate")],
 };
 
 export default config;

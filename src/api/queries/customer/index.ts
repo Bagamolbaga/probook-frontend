@@ -4,9 +4,9 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useApiClient } from "@/api/context";
-import type { CustomerBookingsView } from "@/api/entities/customer";
-import { useAppSession } from "@/hooks/useAppSession";
+import { useApiClient } from "@/src/api/context";
+import type { CustomerBookingsView, ReviewHighlight } from "@/src/api/entities/customer";
+import { useAppSession } from "@/src/hooks/useAppSession";
 
 const customerKey = (userId: string | number | undefined) =>
   ["customer", userId] as const;
@@ -60,6 +60,17 @@ export const useCustomerBookingQuery = (bookingId: string) => {
   return useQuery({
     queryKey: [...customerKey(session?.user?.id), "booking", bookingId],
     queryFn: async () => (await api.customer.getBooking(bookingId)).data,
+    enabled: Boolean(session?.user?.id && bookingId),
+    retry: false,
+  });
+};
+
+export const useCustomerBookingReviewQuery = (bookingId: string) => {
+  const api = useApiClient();
+  const { data: session } = useAppSession();
+  return useQuery({
+    queryKey: [...customerKey(session?.user?.id), "booking", bookingId, "review"],
+    queryFn: async () => (await api.customer.getBookingReview(bookingId)).data,
     enabled: Boolean(session?.user?.id && bookingId),
     retry: false,
   });
@@ -133,5 +144,25 @@ export const useRescheduleCustomerBookingMutation = () => {
         slots: input.slots,
       }),
     onSuccess: (_, input) => invalidate(input.bookingId),
+  });
+};
+
+export const useCreateCustomerBookingReviewMutation = () => {
+  const api = useApiClient();
+  const invalidate = useBookingMutationInvalidation();
+  return useMutation({
+    mutationFn: ({
+      bookingId,
+      ...data
+    }: {
+      bookingId: string;
+      rating: number;
+      highlights?: ReviewHighlight[];
+      comment?: string;
+      recommended?: boolean;
+    }) => api.customer.createReview(bookingId, data),
+    onSuccess: async (_, input) => {
+      await invalidate(input.bookingId);
+    },
   });
 };

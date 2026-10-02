@@ -1,13 +1,13 @@
 import Image from "next/image";
 
-import BGPattern from "@/assets/search/serviceTypesPreview/bg_pattern.png";
-import FacialsImg from "@/assets/search/serviceTypesPreview/facials_and_skincare.jpg";
-import MassageImg from "@/assets/search/serviceTypesPreview/massage.jpg";
-import NailImg from "@/assets/search/serviceTypesPreview/nail.jpg";
-import HairImg from "@/assets/search/serviceTypesPreview/hair_and_styling.jpg";
-import Button from "@/components/ui/button";
-import MoreIcon from "@/components/ui/icons/More";
-import { SERVICE_TYPES_ENUM } from "@/constants/serviceTypes";
+import BGPattern from "@/src/assets/search/serviceTypesPreview/bg_pattern.png";
+import FacialsImg from "@/src/assets/search/serviceTypesPreview/facials_and_skincare.jpg";
+import MassageImg from "@/src/assets/search/serviceTypesPreview/massage.jpg";
+import NailImg from "@/src/assets/search/serviceTypesPreview/nail.jpg";
+import HairImg from "@/src/assets/search/serviceTypesPreview/hair_and_styling.jpg";
+import { Button } from "@/src/components/ui/button";
+import MoreIcon from "@/src/components/ui/icons/More";
+import { SERVICE_TYPES_ENUM } from "@/src/constants/serviceTypes";
 
 type Props = {
   handleSelectPreset: (args: { st: TServiceType[]; title: string }) => void;
@@ -65,7 +65,7 @@ const ServiceTypesPreview = ({ handleSelectPreset }: Props) => {
                   </p>
                 </div>
                 <Button
-                  variant="resting"
+                  variant="outline"
                   className="pointer-events-none py-2 px-4 !text-[#27272B] !font-normal !leading-6 border border-[#E9E9ED] bg-[#F7F7F8] sm:py-1 sm:px-2 sm:text-[10px]"
                 >
                   Book now
@@ -90,7 +90,7 @@ const ServiceTypesPreview = ({ handleSelectPreset }: Props) => {
             Discover handpicked salons, spas, and personal care specialists near you —
             anytime, anywhere.
           </p>
-          <Button variant="primary" className="py-3 px-6 !rounded-full">
+          <Button variant="default" className="py-3 px-6 !rounded-full">
             Explore All Listings
           </Button>
         </div>

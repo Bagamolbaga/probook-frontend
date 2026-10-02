@@ -1,9 +1,9 @@
 import React, { MouseEvent, ReactNode, useRef, useState } from "react";
 import { UseFormSetValue } from "react-hook-form";
 import ArrowSecondaryDownIcon from "../icons/ArrowSecondaryDown";
-import CustomScrollbarStyles from "@/styles/scrollbar.module.sass";
-import { cn } from "@/utils/cn";
-import { useClickOutside } from "@/hooks/useClickOutside";
+import CustomScrollbarStyles from "@/src/styles/scrollbar.module.sass";
+import { cn } from "@/src/utils/cn";
+import { useClickOutside } from "@/src/hooks/useClickOutside";
 
 type PropsBase<T> = {
   id: string;

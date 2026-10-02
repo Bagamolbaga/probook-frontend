@@ -13,9 +13,9 @@ import {
 import { FieldError, RegisterOptions, UseFormRegister } from "react-hook-form";
 import EyeOpenIcon from "../icons/EyeOpen";
 import EyeCloseIcon from "../icons/EyeClose";
-import { cn } from "@/utils/cn";
-import CustomScrollbarStyles from "@/styles/scrollbar.module.sass";
-import { useClickOutside } from "@/hooks/useClickOutside";
+import { cn } from "@/src/utils/cn";
+import CustomScrollbarStyles from "@/src/styles/scrollbar.module.sass";
+import { useClickOutside } from "@/src/hooks/useClickOutside";
 
 interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   variant?: "select" | "no-border";

@@ -3,45 +3,45 @@
 import {
   useGetBookingByTokenQuery,
   useUpdateBookingByTokenQuery,
-} from "@/api/queries/booking";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
+} from "@/src/api/queries/booking";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
 import ServiceSelection from "../components/ServiceSelection";
-import Stepper, { TStep } from "@/components/ui/stepper";
-import Button from "@/components/ui/button";
-import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
+import Stepper, { TStep } from "@/src/components/ui/stepper";
+import { Button } from "@/src/components/ui/button";
+import ArrowSecondaryDownIcon from "@/src/components/ui/icons/ArrowSecondaryDown";
 import StaffSelection from "../components/StaffSelection";
 import TimeSelection from "../components/TimeSelection";
-import Spinner from "@/components/ui/loaders/Spinner";
-import CompanyCartWidget from "@/components/ui/widgets/companyCart";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import { TIME_SLOTS, TTimeSlot } from "@/constants/timeSlots";
+import Spinner from "@/src/components/ui/loaders/Spinner";
+import CompanyCartWidget from "@/src/components/ui/widgets/companyCart";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import { TIME_SLOTS, TTimeSlot } from "@/src/constants/timeSlots";
 import { useForm } from "react-hook-form";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { parse } from "date-fns";
-import { cn } from "@/utils/cn";
-import NoteIcon from "@/components/ui/icons/Note";
-import PersonIcon from "@/components/ui/icons/Person";
-import CheckmarkCircle from "@/components/ui/icons/CheckmarkCircle";
-import { Link, useTranslations } from "@/i18n";
-import { toaster } from "@/components/ui/toaster";
-import { useApiClient } from "@/api/context";
-import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
+import { cn } from "@/src/utils/cn";
+import NoteIcon from "@/src/components/ui/icons/Note";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import CheckmarkCircle from "@/src/components/ui/icons/CheckmarkCircle";
+import { Link, useTranslations } from "@/src/i18n";
+import { toaster } from "@/src/components/ui/toaster";
+import { useApiClient } from "@/src/api/context";
+import ConfirmationModal from "@/src/components/ui/modal/ConfirmationModal";
 import {
   DateSection,
   PriceSection,
   ServicesSection,
   StaffSection,
   TimeSection,
-} from "@/components/ui/widgets/companyCart/components";
-import { useGetCompanyServicesTypesQuery } from "@/api/queries/company/serviceTypes";
+} from "@/src/components/ui/widgets/companyCart/components";
+import { useGetCompanyServicesTypesQuery } from "@/src/api/queries/company/serviceTypes";
 import MobileBottomCart from "../components/MobileBottomCart";
 import Image from "next/image";
-import LocationIcon from "@/components/ui/icons/Location";
-import { toSlug } from "@/utils/toSlug";
-import { useUpdateBookingLinkOverdue } from "@/hooks/useUpdateBookingLinkOverdue";
+import LocationIcon from "@/src/components/ui/icons/Location";
+import { toSlug } from "@/src/utils/toSlug";
+import { useUpdateBookingLinkOverdue } from "@/src/hooks/useUpdateBookingLinkOverdue";
 import UpdateLinkIsOverdue from "../components/UpdateLinkIsOverdue";
-import { DATE_FORMAT, HORS_BEFORE_UPDATE_LINK_IS_OVERDUE } from "@/constants/other";
-import { TimeManager } from "@/utils/timeManager";
+import { DATE_FORMAT, HORS_BEFORE_UPDATE_LINK_IS_OVERDUE } from "@/src/constants/other";
+import { TimeManager } from "@/src/utils/timeManager";
 
 const STEPS = [
   { id: "services", text: "Services", icon: NoteIcon },
@@ -222,8 +222,8 @@ const BookingManageScene = ({ token: tokenFromUrl }: Props) => {
       arr.push(getCompanyDetailsQuery.data?.city);
     }
 
-    if (getCompanyDetailsQuery.data?.address1) {
-      arr.push(getCompanyDetailsQuery.data?.address1);
+    if (getCompanyDetailsQuery.data?.address) {
+      arr.push(getCompanyDetailsQuery.data?.address);
     }
 
     return arr.join(", ");
@@ -274,14 +274,14 @@ const BookingManageScene = ({ token: tokenFromUrl }: Props) => {
           <div className="w-full mt-[76px] flex justify-between gap-5">
             <Button
               className="w-full"
-              variant="red-outline"
+              variant="outline"
               onClick={showCancelConfirmationModalHandler}
             >
               Cancel booking
             </Button>
             <Button
               className="w-full"
-              variant="dark"
+              variant="outline"
               onClick={() => setBookingIsUpdated(false)}
             >
               Reschedule
@@ -312,7 +312,7 @@ const BookingManageScene = ({ token: tokenFromUrl }: Props) => {
           </p>
           <div className="w-full mt-[76px] flex justify-between gap-5">
             <Link href="/" className="w-full">
-              <Button className="px-10 w-full" variant="resting">
+              <Button className="px-10 w-full" variant="outline">
                 Back to homepage
               </Button>
             </Link>
@@ -336,7 +336,7 @@ const BookingManageScene = ({ token: tokenFromUrl }: Props) => {
           <Link
             href={`/company/${toSlug(getCompanyDetailsQuery.data?.name)}?storeId=${getCompanyDetailsQuery.data?.id}`}
           >
-            <Button className="!p-2" variant="resting">
+            <Button className="!p-2" variant="outline">
               <ArrowSecondaryDownIcon className="rotate-90 stroke-greyPrimary" />
             </Button>
           </Link>
@@ -360,10 +360,10 @@ const BookingManageScene = ({ token: tokenFromUrl }: Props) => {
               {getCompanyDetailsQuery?.data?.name}
             </h5>
             <p className="mt-1 flex items-start gap-1 text-sm text-greyPrimary">
-              {getCompanyDetailsQuery?.data?.address1 && (
+              {getCompanyDetailsQuery?.data?.address && (
                 <LocationIcon className="min-w-4 min-h-4" />
               )}
-              {getCompanyDetailsQuery?.data?.address1}
+              {getCompanyDetailsQuery?.data?.address}
             </p>
           </div>
         </div>
@@ -448,7 +448,7 @@ const BookingManageScene = ({ token: tokenFromUrl }: Props) => {
                         <PriceSection services={form.watch("selectedServices")} />
                         {isShowUpdateBtn && (
                           <Button
-                            variant="dark"
+                            variant="outline"
                             disabled={isLoading}
                             onClick={updateBookingHandler}
                           >
@@ -476,7 +476,7 @@ const BookingManageScene = ({ token: tokenFromUrl }: Props) => {
         selectedTime={form.watch("selectedTime")}
         renderContinueButton={
           isShowUpdateBtn && (
-            <Button variant="dark" disabled={isLoading} onClick={updateBookingHandler}>
+            <Button variant="outline" disabled={isLoading} onClick={updateBookingHandler}>
               {isLoading && <Spinner color="white" className="size-5 mr-2" />}
               Update booking
             </Button>

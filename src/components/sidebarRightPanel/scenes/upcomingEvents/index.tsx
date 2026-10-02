@@ -1,4 +1,4 @@
-import CalendarEvent from "@/components/ui/widgets/sidebar/CalendarEvent";
+import CalendarEvent from "@/src/components/ui/widgets/sidebar/CalendarEvent";
 
 const MOCK_EVENTS: CalendarEvent[] = [
   {

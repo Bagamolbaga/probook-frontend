@@ -1,8 +1,8 @@
-import Button from "@/components/ui/button";
-import Collapse from "@/components/ui/collapse";
-import ArrowRight from "@/components/ui/icons/ArrowRight";
-import PricingCart from "@/components/ui/pricingCart";
-import { getTranslations, Link } from "@/i18n";
+import { Button } from "@/src/components/ui/button";
+import Collapse from "@/src/components/ui/collapse";
+import ArrowRight from "@/src/components/ui/icons/ArrowRight";
+import PricingCart from "@/src/components/ui/pricingCart";
+import { getTranslations, Link } from "@/src/i18n";
 import Pricing from "../home/components/Pricing";
 
 const PricingScene: any = async () => {
@@ -51,7 +51,7 @@ const PricingScene: any = async () => {
               {t("landingPricing.purpleSection.title")}
             </p>
             <Link href="/contact">
-              <Button className="mt-9" variant="dark">
+              <Button className="mt-9" variant="outline">
                 {t("landingPricing.purpleSection.btn")}
               </Button>
             </Link>

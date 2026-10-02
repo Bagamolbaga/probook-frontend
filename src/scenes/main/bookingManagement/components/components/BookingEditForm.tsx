@@ -11,19 +11,19 @@ import {
   useRescheduleOwnBookingMutation,
   useUpdateApiBookingQuery,
   useUpdateOwnBookingStatusMutation,
-} from "@/api/queries/booking";
-import { useGetCompanyServicesQuery } from "@/api/queries/company/services";
-import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
-import DatePicker from "@/components/ui/DatePicker";
-import Button from "@/components/ui/button";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import UiSelect from "@/components/ui/inputs/Select";
+} from "@/src/api/queries/booking";
+import { useGetCompanyServicesQuery } from "@/src/api/queries/company/services";
+import { useGetCompanySpecialistsQuery } from "@/src/api/queries/company/specialists";
+import DatePicker from "@/src/components/ui/DatePicker";
+import { Button } from "@/src/components/ui/button";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import UiSelect from "@/src/components/ui/inputs/Select";
 import {
   BOOKING_STATUSES,
   getSpecialistBookingStatusTransitions,
-} from "@/constants/bookingStatuses";
-import { TIME_SLOTS } from "@/constants/timeSlots";
-import { formatCurrency } from "@/utils/formatCurrency";
+} from "@/src/constants/bookingStatuses";
+import { TIME_SLOTS } from "@/src/constants/timeSlots";
+import { formatCurrency } from "@/src/utils/formatCurrency";
 import type { UseFormReturn } from "react-hook-form";
 import type { UpdateBookingForm } from "./types";
 
@@ -441,7 +441,7 @@ const BookingEditForm = ({
                     <Button
                       type="button"
                       size="sm"
-                      variant="red-outline"
+                      variant="outline"
                       disabled={fields.length === 1}
                       onClick={() => {
                         remove(index);
@@ -476,7 +476,7 @@ const BookingEditForm = ({
                 <Button
                   className="h-10 w-full justify-between px-3 py-2 font-normal"
                   type="button"
-                  variant="resting-active"
+                  variant="outline"
                   onClick={(event) =>
                     setDatePickerAnchor((anchor) => (anchor ? null : event.currentTarget))
                   }
@@ -559,10 +559,10 @@ const BookingEditForm = ({
       ) : null}
 
       <div className="mt-4 flex justify-end gap-2 border-t border-greyOutline pt-4">
-        <Button type="button" variant="resting-active" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel}>
           {t("cancel")}
         </Button>
-        <Button type="submit" variant="primary" disabled={!canSubmit}>
+        <Button type="submit" variant="default" disabled={!canSubmit}>
           {updateBookingMutation.isPending ? t("saving") : t("save")}
         </Button>
       </div>

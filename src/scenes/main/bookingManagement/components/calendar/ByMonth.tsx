@@ -10,11 +10,11 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
-import { cn } from "@/utils/cn";
-import { DATE_FORMAT } from "@/constants/other";
+import { cn } from "@/src/utils/cn";
+import { DATE_FORMAT } from "@/src/constants/other";
 
 import BookingItem from "./BookingItem";
-import CustomScroll from "@/styles/scrollbar.module.sass";
+import CustomScroll from "@/src/styles/scrollbar.module.sass";
 
 const MONTHS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 

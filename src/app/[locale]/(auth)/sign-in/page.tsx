@@ -2,9 +2,9 @@ import { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import BusinessSignInScene from "@/scenes/auth/business/signIn";
-import { authOptions } from "@/lib/auth";
-import { getSafeCallbackUrl } from "@/utils/auth";
+import BusinessSignInScene from "@/src/scenes/auth/business/signIn";
+import { authOptions } from "@/src/lib/auth";
+import { getSafeCallbackUrl } from "@/src/utils/auth";
 
 export async function generateMetadata({
   params,

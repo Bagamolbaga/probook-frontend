@@ -1,27 +1,27 @@
 import Image from "next/image";
 
-import Button from "@/components/ui/button";
-import GridIcon from "@/components/ui/icons/Grid";
-import PieChartIcon from "@/components/ui/icons/PieChart";
-import VertexBrandIcon from "@/components/ui/icons/VertexBrand";
-import MartinoBrandIcon from "@/components/ui/icons/MartinoBrand";
-import ViroganBrandIcon from "@/components/ui/icons/ViroganBrand";
-import WaverioBrandIcon from "@/components/ui/icons/WaverioBrand";
-import SquareStoneBrandIcon from "@/components/ui/icons/SquareStoneBrand";
-import LightningInCircleIcon from "@/components/ui/icons/LightningInCircle";
-import Image1 from "@/assets/about_page_section_1.png";
-import Image3_1 from "@/assets/about_page_section_3_1.png";
-import Image3_2 from "@/assets/about_page_section_3_2.png";
-import Image3_3 from "@/assets/about_page_section_3_3.png";
-import Image5 from "@/assets/about_page_section_5.png";
-import Image6_1 from "@/assets/about_page_section_6_1.png";
-import Image6_2 from "@/assets/about_page_section_6_2.png";
-import Image6_3 from "@/assets/about_page_section_6_3.png";
-import Image7_1 from "@/assets/about_page_section_7_1.png";
-import Image7_2 from "@/assets/about_page_section_7_2.png";
-import Image7_3 from "@/assets/about_page_section_7_3.png";
-import Image7_4 from "@/assets/about_page_section_7_4.png";
-import { Link } from "@/i18n";
+import { Button } from "@/src/components/ui/button";
+import GridIcon from "@/src/components/ui/icons/Grid";
+import PieChartIcon from "@/src/components/ui/icons/PieChart";
+import VertexBrandIcon from "@/src/components/ui/icons/VertexBrand";
+import MartinoBrandIcon from "@/src/components/ui/icons/MartinoBrand";
+import ViroganBrandIcon from "@/src/components/ui/icons/ViroganBrand";
+import WaverioBrandIcon from "@/src/components/ui/icons/WaverioBrand";
+import SquareStoneBrandIcon from "@/src/components/ui/icons/SquareStoneBrand";
+import LightningInCircleIcon from "@/src/components/ui/icons/LightningInCircle";
+import Image1 from "@/src/assets/about_page_section_1.png";
+import Image3_1 from "@/src/assets/about_page_section_3_1.png";
+import Image3_2 from "@/src/assets/about_page_section_3_2.png";
+import Image3_3 from "@/src/assets/about_page_section_3_3.png";
+import Image5 from "@/src/assets/about_page_section_5.png";
+import Image6_1 from "@/src/assets/about_page_section_6_1.png";
+import Image6_2 from "@/src/assets/about_page_section_6_2.png";
+import Image6_3 from "@/src/assets/about_page_section_6_3.png";
+import Image7_1 from "@/src/assets/about_page_section_7_1.png";
+import Image7_2 from "@/src/assets/about_page_section_7_2.png";
+import Image7_3 from "@/src/assets/about_page_section_7_3.png";
+import Image7_4 from "@/src/assets/about_page_section_7_4.png";
+import { Link } from "@/src/i18n";
 
 const AboutScene = () => {
   return (
@@ -199,7 +199,7 @@ const AboutScene = () => {
               Build your next landing page.
             </p>
             <Link href="/contact">
-              <Button className="mt-9" variant="dark">
+              <Button className="mt-9" variant="outline">
                 Get our 14 days free trial
               </Button>
             </Link>

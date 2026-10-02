@@ -10,16 +10,16 @@ import { isAxiosError } from "axios";
 import { useSearchParams } from "next/navigation";
 import { signIn, signOut } from "next-auth/react";
 import { useForm } from "react-hook-form";
-import { useRouter, useTranslations } from "@/i18n";
+import { useRouter, useTranslations } from "@/src/i18n";
 import { useLocale } from "next-intl";
 
-import { useCreateBookingQuery } from "@/api/queries/booking";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
-import { useGetCompanyServicesQuery } from "@/api/queries/company/services";
-import { useGetCompanyServicesTypesQuery } from "@/api/queries/company/serviceTypes";
-import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
-import { useApiClient } from "@/api/context";
-import type { TCreateBookingArgs } from "@/api/entities/booking";
+import { useCreateBookingQuery } from "@/src/api/queries/booking";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
+import { useGetCompanyServicesQuery } from "@/src/api/queries/company/services";
+import { useGetCompanyServicesTypesQuery } from "@/src/api/queries/company/serviceTypes";
+import { useGetCompanySpecialistsQuery } from "@/src/api/queries/company/specialists";
+import { useApiClient } from "@/src/api/context";
+import type { TCreateBookingArgs } from "@/src/api/entities/booking";
 
 import SuccessBooked from "./components/SuccessBooked";
 import ServiceSelection from "../components/ServiceSelection";
@@ -30,28 +30,28 @@ import BookingOtpVerification from "./components/BookingOtpVerification";
 import AuthModal, { AuthForm } from "../components/AuthModal";
 import CustomerDetailsSelection from "../components/CustomerDetailsSelection";
 import MobileBottomCart from "../components/MobileBottomCart";
-import Button from "@/components/ui/button";
-import Spinner from "@/components/ui/loaders/Spinner";
-import Stepper, { TStep } from "@/components/ui/stepper";
-import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import ClockIcon from "@/components/ui/icons/Clock";
-import NoteIcon from "@/components/ui/icons/Note";
-import PersonIcon from "@/components/ui/icons/Person";
-import { toaster } from "@/components/ui/toaster";
+import { Button } from "@/src/components/ui/button";
+import Spinner from "@/src/components/ui/loaders/Spinner";
+import Stepper, { TStep } from "@/src/components/ui/stepper";
+import ArrowSecondaryDownIcon from "@/src/components/ui/icons/ArrowSecondaryDown";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import ClockIcon from "@/src/components/ui/icons/Clock";
+import NoteIcon from "@/src/components/ui/icons/Note";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import { toaster } from "@/src/components/ui/toaster";
 
-import { TIME_SLOTS, TTimeSlot } from "@/constants/timeSlots";
-import { PREVIOUSLY_BOOKED_SERVICES } from "@/constants/keys";
-import { useAppSession } from "@/hooks/useAppSession";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { getUserCompanies } from "@/utils/permissions";
+import { TIME_SLOTS, TTimeSlot } from "@/src/constants/timeSlots";
+import { PREVIOUSLY_BOOKED_SERVICES } from "@/src/constants/keys";
+import { useAppSession } from "@/src/hooks/useAppSession";
+import { useLocalStorage } from "@/src/hooks/useLocalStorage";
+import { getUserCompanies } from "@/src/utils/permissions";
 import DraftModal from "./components/DraftModal";
 import { Player } from "@lottiefiles/react-lottie-player";
-import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
-import { cn } from "@/utils/cn";
-import { formatCurrency } from "@/utils/formatCurrency";
+import BlackLogoAnimation from "@/src/assets/lottiefiles/blackLogoAnimation.json";
+import { cn } from "@/src/utils/cn";
+import { formatCurrency } from "@/src/utils/formatCurrency";
 import Image from "next/image";
-import LocationIcon from "@/components/ui/icons/Location";
+import LocationIcon from "@/src/components/ui/icons/Location";
 import { Lock } from "lucide-react";
 
 const STEPS = [
@@ -921,6 +921,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
         )}
         {!isOpenPhoneVerifyModal && form.watch("_stepId") === "time" && (
           <TimeSelection
+            compact
             companyId={companyId}
             selectedServices={form.watch("selectedServices")}
             selectedSpecialist={form.watch("selectedStaff")}
@@ -980,47 +981,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
         handleResendCodeVerify={resendVerifyCodeHandler}
       />
       <div className="w-full">
-        <div className="flex items-center gap-2">
-          {form.watch("_stepId") === "services" ? (
-            // <Link href={`/company/${companyId}`}>
-            <Button className="!p-2" variant="resting" onClick={handlePrevStep}>
-              <ArrowSecondaryDownIcon className="rotate-90 stroke-greyPrimary" />
-            </Button>
-          ) : (
-            // </Link>
-            <Button className="!p-2" variant="resting" onClick={handlePrevStep}>
-              <ArrowSecondaryDownIcon className="rotate-90 stroke-greyPrimary" />
-            </Button>
-          )}
-          <h4 className="text-[32px] font-bold sm:text-[26px]">
-            {t("booking.bookAnAppointment")}
-          </h4>
-        </div>
-
-        <div className="hidden w-full py-7 items-center gap-2 sm:flex">
-          {getCompanyDetailsQuery.data?.logo && (
-            <div className="min-w-[76px] min-h-[76px] w-[76px] h-[76px] rounded-lg bg-greyLight overflow-hidden">
-              <Image
-                className="!relative w-full h-full object-cover"
-                fill
-                src={getCompanyDetailsQuery.data.logo}
-                alt={getCompanyDetailsQuery.data.name}
-              />
-            </div>
-          )}
-          <div>
-            <h5 className="ml-5 text-base font-bold">
-              {getCompanyDetailsQuery?.data?.name}
-            </h5>
-            <p className="mt-1 flex items-start gap-1 text-sm text-greyPrimary">
-              {getCompanyDetailsQuery?.data?.address && (
-                <LocationIcon className="min-w-4 min-h-4" />
-              )}
-            </p>
-          </div>
-        </div>
-
-        <div className="w-full border-b border-b-greyOutlineSecondary bg-white">
+        <div className="w-full border-b border-b-greyOutlineSecondary">
           <Stepper
             activeStepId={progressStepId}
             steps={clickableProgressSteps}
@@ -1058,7 +1019,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
                 />
                 <Button
                   className="mt-4 w-full"
-                  variant="dark"
+                  variant={"default"}
                   disabled={!isShowContinueButton}
                   type={form.watch("_stepId") === "data" ? "submit" : "button"}
                   form={
@@ -1086,7 +1047,7 @@ const BookingFlowBookingCreation: FC<Props> = ({ companyId }) => {
         selectedTime={form.watch("selectedTime")}
         renderContinueButton={
           <Button
-            variant={isShowContinueButton ? "dark" : "primary"}
+            variant={isShowContinueButton ? "default" : "primary"}
             disabled={!isShowContinueButton}
             type={form.watch("_stepId") === "data" ? "submit" : "button"}
             form={form.watch("_stepId") === "data" ? "booking-contact-form" : undefined}

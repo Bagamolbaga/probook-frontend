@@ -1,26 +1,26 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Button from "@/components/ui/button";
-import DatePicker from "@/components/ui/DatePicker";
-import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import { TIME_SLOTS, TTimeSlot } from "@/constants/timeSlots";
-import { useClickOutside } from "@/hooks/useClickOutside";
-import { cn } from "@/utils/cn";
+import { Button } from "@/src/components/ui/button";
+import DatePicker from "@/src/components/ui/DatePicker";
+import ArrowSecondaryDownIcon from "@/src/components/ui/icons/ArrowSecondaryDown";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import { TIME_SLOTS, TTimeSlot } from "@/src/constants/timeSlots";
+import { useClickOutside } from "@/src/hooks/useClickOutside";
+import { cn } from "@/src/utils/cn";
 import { Grid } from "@mui/material";
 import { addDays, differenceInHours, format, isSameHour, setHours } from "date-fns";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { VerticalTimeLine } from "./components/VerticalTimeLine";
 import Shift from "./components/Shift";
-import { DATE_FNS_LOCALES, useLocale, useTranslations } from "@/i18n";
-import { FormattedDataItem } from "@/scenes/main/bookingManagement/components/timeLineCalendar";
+import { DATE_FNS_LOCALES, useLocale, useTranslations } from "@/src/i18n";
+import { FormattedDataItem } from "@/src/scenes/main/bookingManagement/components/timeLineCalendar";
 import BookingDetailsModal from "./components/BookingDetailsModal";
 import { BreakTime } from "./components/BreakTime/index.";
-import { TimeManager } from "@/utils/timeManager";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
-import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
-import { useGetBookingsQuery } from "@/api/queries/booking";
-import { useGetCompanyShiftsForDateRangeQuery } from "@/api/queries/company/shift";
+import { TimeManager } from "@/src/utils/timeManager";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
+import { useGetCompanySpecialistsQuery } from "@/src/api/queries/company/specialists";
+import { useGetBookingsQuery } from "@/src/api/queries/booking";
+import { useGetCompanyShiftsForDateRangeQuery } from "@/src/api/queries/company/shift";
 import { NotWorkingTime } from "./components/NotWorkingTime";
 import { FullDayOff } from "./components/FullDayOff";
 
@@ -32,7 +32,7 @@ type Props = {
 
 const TimeLineCalendar = ({ companyId, specialistIds, onStopLoading }: Props) => {
   const t = useTranslations();
-  const locale = useLocale() as keyof typeof DATE_FNS_LOCALES;
+  const locale = useLocale();
 
   const datePickerContainer = useRef<HTMLDivElement>(null);
 
@@ -287,7 +287,7 @@ const TimeLineCalendar = ({ companyId, specialistIds, onStopLoading }: Props) =>
             <div ref={datePickerContainer} className="relative">
               <Button
                 className="w-12 !p-2"
-                variant="resting-active"
+                variant="outline"
                 onClick={toggleDatePickerHandler}
               >
                 <CalendarIcon className="" />
@@ -310,14 +310,14 @@ const TimeLineCalendar = ({ companyId, specialistIds, onStopLoading }: Props) =>
             </span>
             <Button
               className="w-12 ml-3"
-              variant="resting-active"
+              variant="outline"
               onClick={selectPrevDayHandler}
             >
               <ArrowSecondaryDownIcon className="rotate-90" />
             </Button>
             <Button
               className="w-12 ml-1"
-              variant="resting-active"
+              variant="outline"
               onClick={selectNextDayHandler}
             >
               <ArrowSecondaryDownIcon className="-rotate-90" />

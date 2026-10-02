@@ -1,14 +1,14 @@
 import Image from "next/image";
 
-import Button from "@/components/ui/button";
-import LogoIcon from "@/components/ui/icons/LogoIcon";
-import { Link } from "@/i18n";
-import { cn } from "@/utils/cn";
-import { toSlug } from "@/utils/toSlug";
+import { Button } from "@/src/components/ui/button";
+import LogoIcon from "@/src/components/ui/icons/LogoIcon";
+import { Link } from "@/src/i18n";
+import { cn } from "@/src/utils/cn";
+import { toSlug } from "@/src/utils/toSlug";
 import { useState } from "react";
-import { useGetCompaniesQuery } from "@/api/queries/company";
+import { useGetCompaniesQuery } from "@/src/api/queries/company";
 import { format } from "date-fns";
-import MainLoader from "@/components/ui/loaders/MainLoader";
+import MainLoader from "@/src/components/ui/loaders/MainLoader";
 
 type Preset = {
   title: string;

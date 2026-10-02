@@ -7,9 +7,9 @@ import {
   useCustomerProfileQuery,
   useUpdateCustomerAvatarMutation,
   useUpdateCustomerProfileMutation,
-} from "@/api/queries/customer";
-import { toaster } from "@/components/ui/toaster";
-import { useTranslations } from "@/i18n";
+} from "@/src/api/queries/customer";
+import { toaster } from "@/src/components/ui/toaster";
+import { useTranslations } from "@/src/i18n";
 import QueryState from "./components/QueryState";
 
 type ProfileForm = {

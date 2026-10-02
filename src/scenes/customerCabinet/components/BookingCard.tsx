@@ -10,9 +10,11 @@ import {
   XCircle,
 } from "lucide-react";
 import { useState } from "react";
-import type { CustomerBooking } from "@/api/entities/customer";
-import { Link, useLocale, useTranslations } from "@/i18n";
+import type { CustomerBooking } from "@/src/api/entities/customer";
+import { Link, useLocale, useTranslations } from "@/src/i18n";
 import RescheduleModal from "./RescheduleModal";
+import { cn } from "@/src/utils/cn";
+import BookingStatusBadge from "./BookingStatusBadge";
 
 const timeFromSlot = (slot: number) => {
   const minutes = slot * 15;
@@ -117,56 +119,15 @@ export default function BookingCard({
 
   return (
     <>
-      <article className="relative flex h-44 items-center gap-[22px] border-b border-greyOutline px-[22px] py-5 last:border-b-0 sm:h-[166px] sm:flex-col sm:items-stretch sm:gap-[11px] sm:rounded-[15px] sm:border sm:border-greyOutline sm:bg-white sm:p-[14px]">
-        <div className="flex h-[106px] w-[78px] shrink-0 flex-col items-center justify-center gap-0.5 rounded-[14px] bg-greyOutline sm:hidden">
-          <span className="text-[9px] font-bold uppercase tracking-[0.8px] text-greyPrimary">
-            {weekday}
-          </span>
-          <span className="font-funnel text-[32px] font-bold leading-none">{day}</span>
-          <span className="text-[10px] font-bold uppercase tracking-[0.7px] text-purplePrimary">
-            {shortMonth}
-          </span>
-        </div>
-
-        <div className="hidden items-center justify-between sm:flex">
-          <span className="font-funnel text-base font-bold">
-            {day} {shortMonth} · {timeFromSlot(Math.min(...booking.slots))}
-          </span>
-          <span
-            className={`flex items-center gap-1 rounded-full px-2 py-[5px] text-[9px] font-bold ${statusStyles[booking.status]}`}
-          >
-            <StatusIcon className="size-[11px]" />
-            {t(`statusCompact.${booking.status}`)}
-          </span>
-        </div>
-
-        <div className="flex min-w-0 flex-1 flex-col gap-2 sm:gap-[7px]">
-          <div className="flex items-center justify-between sm:hidden">
-            <span
-              className={`flex items-center gap-1.5 rounded-full px-[9px] py-1.5 text-[10px] font-bold ${statusStyles[booking.status]}`}
-            >
-              <StatusIcon className="size-[13px]" />
-              {t(`status.${booking.status}`)}
-            </span>
-            <span className="font-funnel text-base font-bold">{price}</span>
-          </div>
-          <h3 className="line-clamp-2 text-[15px] font-bold leading-[1.25] sm:text-xs">
-            {serviceNames}
-          </h3>
-          <p className="flex items-center gap-[7px] truncate text-[11px] text-grey-800 sm:block sm:text-[9px] sm:text-greyPrimary">
-            <Building2 className="size-3.5 shrink-0 text-greyPrimary sm:hidden" />
-            {booking.company.name} · {booking.specialist.fullName}
-          </p>
-          {location && (
-            <p className="flex items-center gap-[7px] truncate text-[10px] text-greyPrimary sm:hidden">
-              <MapPin className="size-3.5 shrink-0" />
-              {location}
-            </p>
-          )}
-        </div>
-
-        <div className="flex h-full w-48 shrink-0 flex-col items-end justify-between sm:h-auto sm:w-full sm:flex-row sm:items-center">
-          <div className="sm:hidden">
+      <article
+        className={cn(
+          "relative flex flex-col gap-1 border-b border-greyOutline px-[22px] py-5 last:border-b-0",
+          "sm:p-3"
+        )}
+      >
+        <div className="flex items-start justify-between">
+          <BookingStatusBadge status={booking.status} />
+          <div className="">
             <p className="font-funnel flex items-center gap-[7px] text-base font-bold">
               <Clock3 className="size-[15px] text-purplePrimary" />
               {formatBookingTime(booking)}
@@ -175,7 +136,47 @@ export default function BookingCard({
               {booking.company.timezone}
             </p>
           </div>
-          <span className="hidden text-[11px] font-bold sm:block">{price}</span>
+        </div>
+
+        <div className="flex items-center gap-5 md:gap-4 sm:gap-3">
+          <div
+            className={cn(
+              "flex p-3 shrink-0 flex-col items-center justify-center gap-0.5 rounded-[14px] bg-greyOutline",
+              "sm:h-auto sm:w-auto sm:p-3 sm:rounded-lg"
+            )}
+          >
+            <span className="text-[9px] font-bold uppercase tracking-[0.8px] text-greyPrimary">
+              {weekday}
+            </span>
+            <span className="font-funnel text-[32px] font-bold leading-none sm:text-2xl">
+              {day}
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.7px] text-purplePrimary">
+              {shortMonth}
+            </span>
+          </div>
+
+          <div className="flex min-w-0 flex-1 flex-col gap-2 sm:gap-[7px]">
+            <h3 className="line-clamp-2 text-[15px] font-bold leading-[1.25] sm:text-xs">
+              {serviceNames}
+            </h3>
+            <p className="flex items-center gap-[7px] truncate text-[11px] text-grey-800 sm:text-[9px] sm:text-greyPrimary">
+              <Building2 className="size-3.5 shrink-0 text-greyPrimary " />
+              {booking.company.name} · {booking.specialist.fullName}
+            </p>
+            {location && (
+              <p className="flex items-center gap-[7px] truncate text-[10px] text-ellipsis text-wrap text-greyPrimary ">
+                <MapPin className="size-3.5 shrink-0" />
+                {location}
+              </p>
+            )}
+          </div>
+          <span className="font-funnel text-base font-bold sm:hidden">{price}</span>
+        </div>
+
+        <div className="flex items-center justify-end sm:justify-between sm:mt-2">
+          <span className="hidden font-funnel text-base font-bold sm:block">{price}</span>
+
           <div className="flex items-center gap-2 sm:gap-[7px]">
             {booking.allowedActions.reschedule && (
               <button
@@ -195,6 +196,93 @@ export default function BookingCard({
             </Link>
           </div>
         </div>
+
+        {/*  */}
+        {/*  */}
+        {/*  */}
+        {/* <div
+          className={cn(
+            "flex h-[106px] w-[78px] shrink-0 flex-col items-center justify-center gap-0.5 rounded-[14px] bg-greyOutline",
+            "sm:h-auto sm:w-auto sm:p-3"
+          )}
+        >
+          <span className="text-[9px] font-bold uppercase tracking-[0.8px] text-greyPrimary">
+            {weekday}
+          </span>
+          <span className="font-funnel text-[32px] font-bold leading-none sm:text-2xl">
+            {day}
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.7px] text-purplePrimary">
+            {shortMonth}
+          </span>
+        </div> */}
+
+        {/* <div className="hidden items-center justify-between">
+          <span className="font-funnel text-base font-bold">
+            {day} {shortMonth} · {timeFromSlot(Math.min(...booking.slots))}
+          </span>
+          <span
+            className={`flex items-center gap-1 rounded-full px-2 py-[5px] text-[9px] font-bold ${statusStyles[booking.status]}`}
+          >
+            <StatusIcon className="size-[11px]" />
+            {t(`statusCompact.${booking.status}`)}
+          </span>
+        </div> */}
+
+        {/* <div className="flex min-w-0 flex-1 flex-col gap-2 sm:gap-[7px]">
+          <div className="flex items-center justify-between ">
+            <span
+              className={`flex items-center gap-1.5 rounded-full px-[9px] py-1.5 text-[10px] font-bold ${statusStyles[booking.status]}`}
+            >
+              <StatusIcon className="size-[13px]" />
+              {t(`status.${booking.status}`)}
+            </span>
+            <span className="font-funnel text-base font-bold">{price}</span>
+          </div>
+          <h3 className="line-clamp-2 text-[15px] font-bold leading-[1.25] sm:text-xs">
+            {serviceNames}
+          </h3>
+          <p className="flex items-center gap-[7px] truncate text-[11px] text-grey-800 sm:text-[9px] sm:text-greyPrimary">
+            <Building2 className="size-3.5 shrink-0 text-greyPrimary " />
+            {booking.company.name} · {booking.specialist.fullName}
+          </p>
+          {location && (
+            <p className="flex items-center gap-[7px] truncate text-[10px] text-ellipsis text-wrap text-greyPrimary ">
+              <MapPin className="size-3.5 shrink-0" />
+              {location}
+            </p>
+          )}
+        </div> */}
+
+        {/* <div className="flex h-full _w-48 shrink-0 flex-col items-end justify-between ">
+          <div className="">
+            <p className="font-funnel flex items-center gap-[7px] text-base font-bold">
+              <Clock3 className="size-[15px] text-purplePrimary" />
+              {formatBookingTime(booking)}
+            </p>
+            <p className="mt-1 text-right text-[9px] text-greyPrimary">
+              {booking.company.timezone}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 sm:gap-[7px]">
+            {booking.allowedActions.reschedule && (
+              <button
+                type="button"
+                onClick={() => setRescheduleOpen(true)}
+                className="flex h-9 items-center justify-center rounded-full border border-greyOutline px-3 text-[11px] font-semibold outline-none hover:border-purplePrimary focus-visible:ring-2 focus-visible:ring-purplePrimary sm:h-[34px] sm:px-[11px] sm:text-[10px]"
+              >
+                {t("detail.reschedule")}
+              </button>
+            )}
+            <Link
+              href={`/cabinet/bookings/${booking.id}`}
+              aria-label={t("bookings.details")}
+              className="flex size-9 items-center justify-center rounded-full bg-purplePrimary text-white outline-none hover:bg-purplePrimary_hover focus-visible:ring-2 focus-visible:ring-purplePrimary focus-visible:ring-offset-2 sm:size-[34px]"
+            >
+              <ArrowRight className="size-[15px]" />
+            </Link>
+          </div>
+        </div> */}
       </article>
       {rescheduleOpen && (
         <RescheduleModal

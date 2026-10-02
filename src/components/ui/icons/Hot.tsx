@@ -1,4 +1,4 @@
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 
 const HotIcon = ({ className, strokeColor }: { className?: string, strokeColor?: string }) => {
   return (

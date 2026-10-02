@@ -2,9 +2,9 @@ import { FC } from "react";
 import { format, parse } from "date-fns";
 import { useTranslations } from "next-intl";
 
-import Button from "@/components/ui/button";
-import Modal from "@/components/ui/modal";
-import { TIME_SLOTS } from "@/constants/timeSlots";
+import { Button } from "@/src/components/ui/button";
+import Modal from "@/src/components/ui/modal";
+import { TIME_SLOTS } from "@/src/constants/timeSlots";
 
 type Props = {
   isOpen: boolean;
@@ -30,7 +30,7 @@ const BookingDetailsModal: FC<Props> = ({ isOpen, company, booking, handleClose 
             </h2>
             <p className="mt-1 text-sm text-greyPrimary">{company.name}</p>
           </div>
-          <Button variant="resting-active" onClick={handleClose}>
+          <Button variant="outline" onClick={handleClose}>
             {t("ui.components.bookingDetails.close")}
           </Button>
         </div>

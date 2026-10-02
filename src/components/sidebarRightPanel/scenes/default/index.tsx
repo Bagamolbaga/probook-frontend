@@ -3,13 +3,13 @@
 import { useMemo } from "react";
 import Image from "next/image";
 
-import { cn } from "@/utils/cn";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
+import { cn } from "@/src/utils/cn";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
 import Header from "../../Header";
-import MockAvatar from "@/assets/home_page_section_7_3.png";
-import LogoIcon from "@/components/ui/icons/LogoIcon";
-import { useAppSession } from "@/hooks/useAppSession";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import MockAvatar from "@/src/assets/home_page_section_7_3.png";
+import LogoIcon from "@/src/components/ui/icons/LogoIcon";
+import { useAppSession } from "@/src/hooks/useAppSession";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 
 export const DefaultHeader = () => {
   const { data: session } = useAppSession();
@@ -18,12 +18,12 @@ export const DefaultHeader = () => {
 
   const avatarSrc = session?.user?.avatar ? session?.user?.avatar : MockAvatar;
   const address = useMemo(() => {
-    if (getCompanyDetailsQuery?.data?.address1) {
-      const arr = getCompanyDetailsQuery?.data?.address1.split(",");
+    if (getCompanyDetailsQuery?.data?.address) {
+      const arr = getCompanyDetailsQuery?.data?.address.split(",");
 
       return [arr[0], arr.at(-1)].join(", ");
     }
-  }, [getCompanyDetailsQuery?.data?.address1]);
+  }, [getCompanyDetailsQuery?.data?.address]);
 
   return (
     <Header>

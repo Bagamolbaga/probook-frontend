@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import type { TBookingCustomerDetails } from "@/api/entities/user/customer";
+import type { TBookingCustomerDetails } from "@/src/api/entities/user/customer";
 
 const Row = ({ label, value }: { label: string; value: string }) => {
   return (

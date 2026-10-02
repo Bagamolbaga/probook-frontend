@@ -3,11 +3,11 @@ import { FormControl } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import AppSelect from "../ui/inputs/AppSelect";
-import Button from "../ui/button";
 import CloseIcon from "../ui/icons/Close";
-import { TTimeSlot } from "@/constants/timeSlots";
-import { cn } from "@/utils/cn";
+import { TTimeSlot } from "@/src/constants/timeSlots";
+import { cn } from "@/src/utils/cn";
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 
 type FormData = {
   from?: TTimeSlot;
@@ -197,7 +197,7 @@ const WorkingTimePicker = ({
               control={form.control}
             />
           </FormControl>
-          <Button variant="red-outline" className="!p-1" onClick={handleHideWorkingTime}>
+          <Button variant="outline" className="!p-1" onClick={handleHideWorkingTime}>
             <CloseIcon className="!stroke-redPrimary" />
           </Button>
         </div>
@@ -283,14 +283,14 @@ const WorkingTimePicker = ({
               />
             </FormControl>
 
-            <Button variant="red-outline" className="!p-1" onClick={handleHideBreakTime}>
+            <Button variant="outline" className="!p-1" onClick={handleHideBreakTime}>
               <CloseIcon className="!stroke-redPrimary" />
             </Button>
           </div>
         ) : (
           <div>
             <Button
-              variant="dark-outline"
+              variant="outline"
               className="!py-3"
               onClick={handleShowBreakTime}
             >

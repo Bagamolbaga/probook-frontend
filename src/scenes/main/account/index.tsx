@@ -6,12 +6,12 @@ import { useForm } from "react-hook-form";
 import {
   useGetCompanyDetailsQuery,
   useUpdateCompanyDetailsQuery,
-} from "@/api/queries/company";
-import Button from "@/components/ui/button";
-import { toaster } from "@/components/ui/toaster";
-import { TTimeSlot } from "@/constants/timeSlots";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import { TimeManager } from "@/utils/timeManager";
+} from "@/src/api/queries/company";
+import { Button } from "@/src/components/ui/button";
+import { toaster } from "@/src/components/ui/toaster";
+import { TTimeSlot } from "@/src/constants/timeSlots";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import { TimeManager } from "@/src/utils/timeManager";
 import AvatarImage from "./components/AvatarImage";
 import CompanyLogo from "./components/CompanyLogo";
 import GeoPosition from "./components/GeoPosition";
@@ -188,13 +188,13 @@ const AccountScene = () => {
       <div className="w-full mt-10 flex items-end justify-between">
         <div className="flex items-center gap-[46px]">
           <Button
-            variant="primary"
+            variant="default"
             onClick={form.handleSubmit(updateInformationHandler)}
             disabled={updateCompanyDetailsQuery.isPending}
           >
             Update Settings
           </Button>
-          <Button variant="resting" className="py-3" onClick={cancelUpdateHandler}>
+          <Button variant="outline" className="py-3" onClick={cancelUpdateHandler}>
             Cancel
           </Button>
         </div>

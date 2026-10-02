@@ -1,6 +1,6 @@
 import { PropsWithChildren } from "react";
-import LandingFooter from "@/components/footers/landing";
-import { LandingHeader } from "@/components/headers/landing";
+import LandingFooter from "@/src/components/footers/landing";
+import { LandingHeader } from "@/src/components/headers/landing";
 
 export default function LandingLayout({ children }: PropsWithChildren) {
   return (

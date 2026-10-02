@@ -4,12 +4,12 @@ import { parse } from "date-fns";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 
-import { useGetBookingQuery } from "@/api/queries/booking";
-import Button from "@/components/ui/button";
-import Modal from "@/components/ui/modal";
-import { TIME_SLOTS } from "@/constants/timeSlots";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import { useBookingDetailsModalStore } from "@/stores/bookingDetailsModal";
+import { useGetBookingQuery } from "@/src/api/queries/booking";
+import { Button } from "@/src/components/ui/button";
+import Modal from "@/src/components/ui/modal";
+import { TIME_SLOTS } from "@/src/constants/timeSlots";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import { useBookingDetailsModalStore } from "@/src/stores/bookingDetailsModal";
 import UpdateBookingModal from "./components/UpdateBookingModal";
 import type { UpdateBookingForm } from "./components/types";
 
@@ -93,7 +93,7 @@ const BookingDetailsModalHost = () => {
       <Modal isOpen enableMobile handleClose={closeBookingDetails}>
         <div className="w-[360px] max-w-[calc(100vw-40px)] px-6 py-8 text-center sm:w-full">
           <p className="text-sm font-bold text-darkPrimary">{t("loadError")}</p>
-          <Button className="mt-5 w-full" variant="primary" onClick={closeBookingDetails}>
+          <Button className="mt-5 w-full" variant="default" onClick={closeBookingDetails}>
             {t("dismiss")}
           </Button>
         </div>

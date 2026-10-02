@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "@/i18n";
+import { usePathname } from "@/src/i18n";
 import { useMemo } from "react";
 import { AccountScene, AccountHeader } from "./scenes/account";
 import { DefaultHeader } from "./scenes/default";

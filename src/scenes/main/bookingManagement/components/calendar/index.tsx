@@ -11,21 +11,21 @@ import {
   startOfWeek,
 } from "date-fns";
 
-import { useGetBookingsQuery } from "@/api/queries/booking";
-import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
-import Button from "@/components/ui/button";
-import DatePicker from "@/components/ui/DatePicker";
-import PersonIcon from "@/components/ui/icons/Person";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import MainLoader from "@/components/ui/loaders/MainLoader";
-import { TIME_SLOTS } from "@/constants/timeSlots";
-import { useClickOutside } from "@/hooks/useClickOutside";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { useGetBookingsQuery } from "@/src/api/queries/booking";
+import { useGetCompanySpecialistsQuery } from "@/src/api/queries/company/specialists";
+import { Button } from "@/src/components/ui/button";
+import DatePicker from "@/src/components/ui/DatePicker";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import MainLoader from "@/src/components/ui/loaders/MainLoader";
+import { TIME_SLOTS } from "@/src/constants/timeSlots";
+import { useClickOutside } from "@/src/hooks/useClickOutside";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 import { UpdateBookingForm } from "../components/types";
 import UpdateBookingModal from "../components/UpdateBookingModal";
 import ByMonth from "./ByMonth";
 import ByWeek from "./ByWeek";
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 
 type TDateRangeType = "month" | "week" | "day";
 
@@ -249,7 +249,7 @@ const Calendar = () => {
             <div ref={datePickerContainer} className="relative">
               <Button
                 className="w-12 !p-2"
-                variant="resting-active"
+                variant="outline"
                 onClick={toggleDatepickerHandler}
               >
                 <CalendarIcon className="" />

@@ -1,6 +1,6 @@
 import { format, isBefore, isSameDay } from "date-fns";
-import { cn } from "@/utils/cn";
-import { DATE_FNS_LOCALES, useLocale } from "@/i18n";
+import { cn } from "@/src/utils/cn";
+import { DATE_FNS_LOCALES, useLocale } from "@/src/i18n";
 
 type Props = {
   compact?: boolean;

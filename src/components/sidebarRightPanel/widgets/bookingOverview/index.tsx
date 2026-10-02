@@ -3,9 +3,9 @@
 import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { useGetBookingsQuery } from "@/api/queries/booking";
-import { DATE_FNS_LOCALES } from "@/i18n";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { useGetBookingsQuery } from "@/src/api/queries/booking";
+import { DATE_FNS_LOCALES } from "@/src/i18n";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 import type { BookingManagementPeriod } from "../../types";
 import {
   formatBookingManagementDateRange,
@@ -25,7 +25,7 @@ const BOOKING_STATUSES = new Set<TApiBooking["status"]>([
 
 export const BookingOverviewWidget = ({ period, date }: Props) => {
   const t = useTranslations("bookingManagement.sidebar.overview");
-  const locale = useLocale() as keyof typeof DATE_FNS_LOCALES;
+  const locale = useLocale();
   const { companyId } = useGetCompanyId();
   const dateRange = useMemo(
     () => getBookingManagementDateRange(period, date),

@@ -1,6 +1,31 @@
-import { ApiClientCore } from "@/api/core";
+import { ApiClientCore } from "@/src/api/core";
 
 export type CustomerBookingStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
+export const reviewHighlights = [
+  "professionalism",
+  "politeness",
+  "result",
+  "cleanliness",
+  "timing",
+] as const;
+export type ReviewHighlight = (typeof reviewHighlights)[number];
+
+export type PublicReview = {
+  id: string;
+  authorName: string;
+  rating: number;
+  highlights: ReviewHighlight[];
+  comment: string | null;
+  recommended: boolean | null;
+  specialistName: string;
+  createdAt: string;
+};
+
+export type CompanyReviews = {
+  summary: { count: number; averageRating: number | null };
+  items: PublicReview[];
+  nextCursor: string | null;
+};
 
 export type CustomerProfile = {
   id: string;
@@ -25,7 +50,7 @@ export type CustomerBooking = {
     address?: string;
     zipCode?: string;
     city?: string;
-    pos: TCompany["pos"]
+    pos: TCompany["pos"];
     logo?: string;
     timezone: string;
     currency: string;
@@ -72,6 +97,7 @@ export type CustomerBooking = {
     cancel: boolean;
     reschedule: boolean;
     repeat: boolean;
+    review: boolean;
   };
 };
 
@@ -125,6 +151,10 @@ export class ApiClientCustomer extends ApiClientCore {
     return this.instance.get<CustomerBooking>(`/customer/me/bookings/${bookingId}`);
   }
 
+  getBookingReview(bookingId: string) {
+    return this.instance.get<PublicReview>(`/customer/me/bookings/${bookingId}/review`);
+  }
+
   cancelBooking(bookingId: string) {
     return this.instance.patch<CustomerBooking>(
       `/customer/me/bookings/${bookingId}/cancel`
@@ -134,6 +164,21 @@ export class ApiClientCustomer extends ApiClientCore {
   rescheduleBooking(bookingId: string, data: { date: string; slots: number[] }) {
     return this.instance.patch<CustomerBooking>(
       `/customer/me/bookings/${bookingId}/reschedule`,
+      data
+    );
+  }
+
+  createReview(
+    bookingId: string,
+    data: {
+      rating: number;
+      highlights?: ReviewHighlight[];
+      comment?: string;
+      recommended?: boolean;
+    }
+  ) {
+    return this.instance.post<PublicReview>(
+      `/customer/me/bookings/${bookingId}/review`,
       data
     );
   }

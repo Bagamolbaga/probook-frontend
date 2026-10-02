@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import BusinessSignUpScene from "@/scenes/auth/business/signUp";
-import { redirect } from "@/i18n";
+import BusinessSignUpScene from "@/src/scenes/auth/business/signUp";
+import { redirect } from "@/src/i18n";
 
 export async function generateMetadata({
   params,

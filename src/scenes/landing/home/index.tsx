@@ -1,25 +1,25 @@
-import { getTranslations, Link } from "@/i18n";
+import { getTranslations, Link } from "@/src/i18n";
 import Image from "next/image";
 
-import PriceCart from "@/components/ui/pricingCart";
-import Button from "@/components/ui/button";
-import GridIcon from "@/components/ui/icons/Grid";
-import VideoIcon from "@/components/ui/icons/Video";
-import VSCodeIcon from "@/components/ui/icons/VSCode";
-import PieChartIcon from "@/components/ui/icons/PieChart";
-import CopyPasteIcon from "@/components/ui/icons/CopyPaste";
-import FourAngleStarIcon from "@/components/ui/icons/FourAngleStar";
-import LightningInCircleIcon from "@/components/ui/icons/LightningInCircle";
+import PriceCart from "@/src/components/ui/pricingCart";
+import { Button } from "@/src/components/ui/button";
+import GridIcon from "@/src/components/ui/icons/Grid";
+import VideoIcon from "@/src/components/ui/icons/Video";
+import VSCodeIcon from "@/src/components/ui/icons/VSCode";
+import PieChartIcon from "@/src/components/ui/icons/PieChart";
+import CopyPasteIcon from "@/src/components/ui/icons/CopyPaste";
+import FourAngleStarIcon from "@/src/components/ui/icons/FourAngleStar";
+import LightningInCircleIcon from "@/src/components/ui/icons/LightningInCircle";
 
-import Image1 from "@/assets/home_page_section_1.png";
-import Image3 from "@/assets/home_page_section_3.png";
-import Image4 from "@/assets/home_page_section_4.png";
-import Image5 from "@/assets/home_page_section_5.png";
-import Image7_1 from "@/assets/home_page_section_7_1.png";
-import Image7_2 from "@/assets/home_page_section_7_2.png";
-import Image7_3 from "@/assets/home_page_section_7_3.png";
-import Line from "@/components/ui/icons/Line";
-import PersonIcon from "@/components/ui/icons/Person";
+import Image1 from "@/src/assets/home_page_section_1.png";
+import Image3 from "@/src/assets/home_page_section_3.png";
+import Image4 from "@/src/assets/home_page_section_4.png";
+import Image5 from "@/src/assets/home_page_section_5.png";
+import Image7_1 from "@/src/assets/home_page_section_7_1.png";
+import Image7_2 from "@/src/assets/home_page_section_7_2.png";
+import Image7_3 from "@/src/assets/home_page_section_7_3.png";
+import Line from "@/src/components/ui/icons/Line";
+import PersonIcon from "@/src/components/ui/icons/Person";
 import Pricing from "./components/Pricing";
 // import B from "@repo/ui/button/index.tsx"
 
@@ -45,7 +45,7 @@ const HomePageScene: any = async () => {
             <div className="mt-9 flex justify-center gap-4 sm:flex-col sm:gap-4">
               <Link href="https://lin.ee/9b2UE3T" className="flex items-center gap-5">
                 <Button
-                  variant="primary"
+                  variant="default"
                   className="py-[10px]"
                   iconLeft={<Line className="stroke-none" />}
                 >
@@ -54,13 +54,13 @@ const HomePageScene: any = async () => {
               </Link>
               {/* <Link href="/sign-up" className="flex items-center gap-5">
                 <Button
-                  variant="dark-outline"
+                  variant="outline"
                   iconLeft={<PersonIcon className="stroke-darkPrimary" />}
                 >
                   {t("ui.getStarted")}
                 </Button>
               </Link> */}
-              {/* <Button variant="dark-outline" iconLeft={<VideoIcon />}>
+              {/* <Button variant="outline" iconLeft={<VideoIcon />}>
                 Watch our video
               </Button> */}
 
@@ -173,7 +173,7 @@ const HomePageScene: any = async () => {
             </p>
             <Link href="https://lin.ee/9b2UE3T" className="flex items-center gap-5">
               <Button
-                variant="primary"
+                variant="default"
                 className="py-[10px]"
                 iconLeft={<Line className="stroke-none" />}
               >
@@ -273,7 +273,7 @@ const HomePageScene: any = async () => {
             <div className="mt-9 flex justify-center gap-4 sm:flex-col">
               <Link href="https://lin.ee/9b2UE3T" className="flex items-center gap-5">
                 <Button
-                  variant="dark"
+                  variant="outline"
                   className="py-[10px]"
                   iconLeft={<Line className="stroke-none" />}
                 >
@@ -282,7 +282,7 @@ const HomePageScene: any = async () => {
               </Link>
               {/* <Link href="/sign-up" className="flex items-center gap-5">
                 <Button
-                  variant="dark-outline"
+                  variant="outline"
                   iconLeft={<PersonIcon className="stroke-darkPrimary" />}
                 >
                   {t("ui.getStarted")}

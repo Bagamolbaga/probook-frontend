@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 
-import { Link } from "@/i18n";
+import { Link } from "@/src/i18n";
 
 const TermsOfServiceScene = () => {
   return (

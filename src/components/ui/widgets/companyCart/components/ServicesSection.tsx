@@ -1,9 +1,9 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { formatCurrency } from "@/utils/formatCurrency";
-import { cn } from "@/utils/cn";
-import CustomScrollbar from "@/styles/scrollbar.module.sass";
-import { TServiceAndSelectedOption } from "@/scenes/bookingFlow/bookingCreation";
+import { formatCurrency } from "@/src/utils/formatCurrency";
+import { cn } from "@/src/utils/cn";
+import CustomScrollbar from "@/src/styles/scrollbar.module.sass";
+import { TServiceAndSelectedOption } from "@/src/scenes/bookingFlow/bookingCreation";
 
 type Props = {
   services: TServiceAndSelectedOption[];

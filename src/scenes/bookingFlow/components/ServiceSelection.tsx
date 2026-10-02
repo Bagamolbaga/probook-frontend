@@ -3,9 +3,9 @@ import { useTranslations } from "next-intl";
 import { useInView } from "react-intersection-observer";
 
 import ServicesList from "./ui/ServicesList";
-import { TServiceAndSelectedOption } from "@/scenes/main/bookingCreation/components/BookingCreation";
-import CustomScrollbar from "@/styles/scrollbar.module.sass";
-import { cn } from "@/utils/cn";
+import { TServiceAndSelectedOption } from "@/src/scenes/main/bookingCreation/components/BookingCreation";
+import CustomScrollbar from "@/src/styles/scrollbar.module.sass";
+import { cn } from "@/src/utils/cn";
 
 export type ServiceCategoryTab = {
   id: string | number;
@@ -79,7 +79,7 @@ const ServiceSelection: FC<Props> = ({
   const [isSmoothScrolling, setIsSmoothScrolling] = useState(false);
 
   const selectServiceTypeLocalHandler = (tab: { id: string | number; text: string }) => {
-    const fullServiceType = servicesTabs.find((st) => st.id === tab.id);
+    const fullServiceType = serviceTypesFiltered.find((st) => st.id === tab.id);
 
     if (fullServiceType) {
       if (tab.id === "all") {
@@ -122,7 +122,7 @@ const ServiceSelection: FC<Props> = ({
     }
   };
 
-  const servicesTabs = useMemo(() => {
+  const serviceTypesFiltered = useMemo(() => {
     const serviceTypesThatHaveServices = serviceTypes.filter((serviceType) =>
       services.some((service) => {
         const categoryId =
@@ -144,16 +144,16 @@ const ServiceSelection: FC<Props> = ({
 
   useEffect(() => {
     setServiceType(
-      (current) => servicesTabs.find((tab) => tab.id === current?.id) || servicesTabs[0]
+      (current) => serviceTypesFiltered.find((tab) => tab.id === current?.id) || serviceTypesFiltered[0]
     );
-  }, [servicesTabs]);
+  }, [serviceTypesFiltered]);
 
   const serviceData: TServiceData[] = useMemo(() => {
-    if (serviceType?.id === "all") {
-      return [{ type: { id: "all", name: "All", text: "All" }, services }];
-    }
+    // if (serviceType?.id === "all") {
+    //   return [{ type: { id: "all", name: "All", text: "All" }, services }];
+    // }
 
-    return servicesTabs.map((serviceType) => ({
+    return serviceTypesFiltered.map((serviceType) => ({
       type: serviceType,
       services: services.filter((service) => {
         const categoryId =
@@ -162,7 +162,7 @@ const ServiceSelection: FC<Props> = ({
         return categoryId === String(serviceType.id);
       }),
     }));
-  }, [servicesTabs, services, serviceType?.id]);
+  }, [serviceTypesFiltered, services, serviceType?.id]);
 
   return (
     <div
@@ -192,8 +192,8 @@ const ServiceSelection: FC<Props> = ({
         </div>
       )}
 
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        {servicesTabs.map((tab) => {
+      <div className="flex items-center flex-wrap gap-2 pb-1">
+        {serviceTypesFiltered.map((tab) => {
           const isActive = serviceType?.id === tab.id;
 
           return (
@@ -214,7 +214,7 @@ const ServiceSelection: FC<Props> = ({
         })}
       </div>
 
-      {variant === "default" && <SelectedTypeRow name={serviceType?.name} />}
+      {/* {variant === "default" && <SelectedTypeRow name={serviceType?.name} />} */}
 
       <div
         ref={scrollableListRef}
@@ -238,7 +238,8 @@ const ServiceSelection: FC<Props> = ({
                       scrollableListRef.current.clientHeight)
                 )}
                 type={type}
-                setServiceType={setServiceType}
+                setServiceType={() => {}}
+                // setServiceType={setServiceType}
               />
             )
           }

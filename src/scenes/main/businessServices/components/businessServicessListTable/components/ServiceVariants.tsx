@@ -4,16 +4,16 @@ import { Controller, UseFormReturn } from "react-hook-form";
 import { CreateServiceForm } from "..";
 import { duration, FormControl, MenuItem } from "@mui/material";
 import { useTranslations } from "next-intl";
-import AppSelect from "@/components/ui/inputs/AppSelect";
-import { Switch } from "@/components/ui/inputs/Switch";
+import AppSelect from "@/src/components/ui/inputs/AppSelect";
+import { Switch } from "@/src/components/ui/inputs/Switch";
 import { useMemo, useState } from "react";
-import TextField from "@/components/ui/inputs/TextField";
-import MoneyIcon from "@/components/ui/icons/Money";
-import ClockIcon from "@/components/ui/icons/Clock";
-import { cn } from "@/utils/cn";
-import DeleteIcon from "@/components/ui/icons/Delete";
-import CustomSelect from "@/components/ui/inputs/Select";
-import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
+import TextField from "@/src/components/ui/inputs/TextField";
+import MoneyIcon from "@/src/components/ui/icons/Money";
+import ClockIcon from "@/src/components/ui/icons/Clock";
+import { cn } from "@/src/utils/cn";
+import DeleteIcon from "@/src/components/ui/icons/Delete";
+import CustomSelect from "@/src/components/ui/inputs/Select";
+import ArrowSecondaryDownIcon from "@/src/components/ui/icons/ArrowSecondaryDown";
 
 type VariantRowProps = {
   showNameInput?: boolean;

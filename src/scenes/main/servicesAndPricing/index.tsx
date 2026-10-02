@@ -1,15 +1,15 @@
 "use client";
 
-import { useApiClient } from "@/api/context";
-import { useGetSubscriptionPlansQuery } from "@/api/queries/payment";
-import Badge from "@/components/ui/badge";
-import Button from "@/components/ui/button";
-import Spinner from "@/components/ui/loaders/Spinner";
-import PricingCart from "@/components/ui/pricingCart";
-import { toaster } from "@/components/ui/toaster";
-import { useAppSession } from "@/hooks/useAppSession";
-import { usePathname } from "@/i18n";
-import { useThemeStore } from "@/stores/theme";
+import { useApiClient } from "@/src/api/context";
+import { useGetSubscriptionPlansQuery } from "@/src/api/queries/payment";
+import Badge from "@/src/components/ui/badge";
+import { Button } from "@/src/components/ui/button";
+import Spinner from "@/src/components/ui/loaders/Spinner";
+import PricingCart from "@/src/components/ui/pricingCart";
+import { toaster } from "@/src/components/ui/toaster";
+import { useAppSession } from "@/src/hooks/useAppSession";
+import { usePathname } from "@/src/i18n";
+import { useThemeStore } from "@/src/stores/theme";
 import { isAfter } from "date-fns";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
@@ -162,7 +162,7 @@ const ServicesAndPricingScene = () => {
             Just straight-forward pricing that aligns with your business goals.
           </p>
           {/* <div className="mt-4 py-[4px] px-[4px] flex items-center justify-center gap-4 rounded-md bg-white">
-            <Button variant="transparent" className="py-2 border-none text-nowrap gap-2">
+            <Button variant="secondary" className="py-2 border-none text-nowrap gap-2">
               Pay yearly{" "}
               <Badge variant="secondary" rounded="sm" color="black" className="px-2">
                 -80%

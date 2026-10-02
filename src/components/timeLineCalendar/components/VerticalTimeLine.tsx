@@ -1,5 +1,5 @@
 import { getHours } from "date-fns";
-import { TTimeSlot } from "@/constants/timeSlots";
+import { TTimeSlot } from "@/src/constants/timeSlots";
 
 export const VerticalTimeLine = ({ headerTimes }: { headerTimes: TTimeSlot[] }) => {
   const currTime = new Date();

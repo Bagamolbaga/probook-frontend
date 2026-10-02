@@ -1,8 +1,8 @@
-import BookingFlowBookingCreation from "@/scenes/bookingFlow/bookingCreation";
+import BookingFlowBookingCreation from "@/src/scenes/bookingFlow/bookingCreation";
 import React from "react";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { redirect } from "@/i18n";
+import { redirect } from "@/src/i18n";
 
 export async function generateMetadata({
   params,

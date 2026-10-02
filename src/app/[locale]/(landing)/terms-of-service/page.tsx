@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import TermsOfServiceScene from "@/scenes/landing/terms-of-service";
+import TermsOfServiceScene from "@/src/scenes/landing/terms-of-service";
 
 export async function generateMetadata({
   params,

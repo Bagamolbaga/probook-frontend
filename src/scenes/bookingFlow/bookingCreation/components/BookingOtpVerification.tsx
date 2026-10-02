@@ -1,8 +1,8 @@
 import { FC, useEffect, useRef, useState } from "react";
-import Button from "@/components/ui/button";
-import ArrowRightIcon from "@/components/ui/icons/ArrowRight";
-import CheckmarkCircle from "@/components/ui/icons/CheckmarkCircle";
-import EmailIcon from "@/components/ui/icons/Email";
+import { Button } from "@/src/components/ui/button";
+import ArrowRightIcon from "@/src/components/ui/icons/ArrowRight";
+import CheckmarkCircle from "@/src/components/ui/icons/CheckmarkCircle";
+import EmailIcon from "@/src/components/ui/icons/Email";
 
 type Props = {
   email?: string;
@@ -110,14 +110,14 @@ const BookingOtpVerification: FC<Props> = ({
       </div>
       <div className="flex gap-3 sm:w-full sm:flex-col-reverse">
         <Button
-          variant="resting-active"
+          variant="outline"
           className="h-12 rounded-full border border-greyOutlineSecondary px-[22px]"
           onClick={handleEdit}
         >
           Изменить email
         </Button>
         <Button
-          variant="primary"
+          variant="default"
           className="h-12 rounded-full px-6"
           disabled={!isVerified || isLoading}
           onClick={handleComplete}

@@ -9,10 +9,10 @@ import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import { useTranslations } from "next-intl";
 
 import { Form } from "..";
-import { useDebounce } from "@/hooks/useDebounce";
-import TextField from "@/components/ui/inputs/TextField";
-import Spinner from "@/components/ui/loaders/Spinner";
-import Button from "@/components/ui/button";
+import { useDebounce } from "@/src/hooks/useDebounce";
+import TextField from "@/src/components/ui/inputs/TextField";
+import Spinner from "@/src/components/ui/loaders/Spinner";
+import { Button } from "@/src/components/ui/button";
 
 type Props = {
   form: UseFormReturn<Form>;

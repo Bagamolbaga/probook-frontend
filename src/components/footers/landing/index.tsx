@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import LogoIcon from "@/components/ui/icons/LogoFull";
-import Button from "@/components/ui/button";
-import Facebook from "@/components/ui/icons/Facebook";
-import XTwitter from "@/components/ui/icons/XTwitter";
-import LinkedIn from "@/components/ui/icons/LinkedIn";
-import Instagram from "@/components/ui/icons/Instagram";
-import Line from "@/components/ui/icons/Line";
+import LogoIcon from "@/src/components/ui/icons/LogoFull";
+import { Button } from "@/src/components/ui/button";
+import Facebook from "@/src/components/ui/icons/Facebook";
+import XTwitter from "@/src/components/ui/icons/XTwitter";
+import LinkedIn from "@/src/components/ui/icons/LinkedIn";
+import Instagram from "@/src/components/ui/icons/Instagram";
+import Line from "@/src/components/ui/icons/Line";
 import { useTranslations } from "next-intl";
 
 const LandingFooter = () => {
@@ -22,7 +22,7 @@ const LandingFooter = () => {
             </Link>
             <Link href="/contact">
               <Button
-                variant="transparent"
+                variant="secondary"
                 className="w-full mt-[52px] border !rounded-full"
               >
                 Connect with us

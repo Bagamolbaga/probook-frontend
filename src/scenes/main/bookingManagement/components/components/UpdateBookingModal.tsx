@@ -5,29 +5,29 @@ import { FC, ReactNode, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useLocale, useTranslations } from "next-intl";
 
-import Button from "@/components/ui/button";
-import Modal from "@/components/ui/modal";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import ClockIcon from "@/components/ui/icons/Clock";
-import CloseIcon from "@/components/ui/icons/Close";
-import EmailIcon from "@/components/ui/icons/Email";
-import MoneyIcon from "@/components/ui/icons/Money";
-import PersonIcon from "@/components/ui/icons/Person";
-import StoreIcon from "@/components/ui/icons/Store";
+import { Button } from "@/src/components/ui/button";
+import Modal from "@/src/components/ui/modal";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import ClockIcon from "@/src/components/ui/icons/Clock";
+import CloseIcon from "@/src/components/ui/icons/Close";
+import EmailIcon from "@/src/components/ui/icons/Email";
+import MoneyIcon from "@/src/components/ui/icons/Money";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import StoreIcon from "@/src/components/ui/icons/Store";
 import {
   BOOKING_STATUS_STYLES,
   getSpecialistBookingStatusTransitions,
-} from "@/constants/bookingStatuses";
-import { cn } from "@/utils/cn";
-import { formatCurrency } from "@/utils/formatCurrency";
+} from "@/src/constants/bookingStatuses";
+import { cn } from "@/src/utils/cn";
+import { formatCurrency } from "@/src/utils/formatCurrency";
 import type { UpdateBookingForm } from "./types";
 import BookingEditForm from "./BookingEditForm";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 import {
   hasPermission,
   isSpecialistMembership,
   SPECIALIST_PERMISSIONS,
-} from "@/utils/permissions";
+} from "@/src/utils/permissions";
 import Image from "next/image";
 import { Phone } from "lucide-react";
 
@@ -207,7 +207,7 @@ const UpdateBookingModal: FC<Props> = ({ isOpen, updateBookingForm, handleClose 
             <Button
               aria-label={t("bookingManagement.detailModal.close")}
               className="size-8 shrink-0 p-0"
-              variant="resting-active"
+              variant="outline"
               onClick={handleModalClose}
             >
               <CloseIcon className="size-4" />

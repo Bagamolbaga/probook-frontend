@@ -1,33 +1,33 @@
 "use client";
 
-import Button from "@/components/ui/button";
-import DeleteIcon from "@/components/ui/icons/Delete";
-import EditIcon from "@/components/ui/icons/Edit";
+import { Button } from "@/src/components/ui/button";
+import DeleteIcon from "@/src/components/ui/icons/Delete";
+import EditIcon from "@/src/components/ui/icons/Edit";
 import { Player } from "@lottiefiles/react-lottie-player";
 import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
-import ListIsEmptyPlaceholderImage from "@/assets/staffManagement/SpecialistListEmptyOverlay.svg";
-import PlusRight from "@/components/ui/icons/Plus";
+import BlackLogoAnimation from "@/src/assets/lottiefiles/blackLogoAnimation.json";
+import ListIsEmptyPlaceholderImage from "@/src/assets/staffManagement/SpecialistListEmptyOverlay.svg";
 import Image from "next/image";
 import Badge from "./components/TimeBadge";
-import { TimeManager } from "@/utils/timeManager";
-import { TTimeSlot } from "@/constants/timeSlots";
+import { TimeManager } from "@/src/utils/timeManager";
+import { TTimeSlot } from "@/src/constants/timeSlots";
 import { useForm, useWatch } from "react-hook-form";
 import CreateUpdateModal from "./components/CreateUpdateModal";
-import { toaster } from "@/components/ui/toaster";
+import { toaster } from "@/src/components/ui/toaster";
 import {
   useCreateCompanyShiftQuery,
   useDeleteCompanyShiftQuery,
   useGetCompanyShiftsQuery,
   useUpdateCompanyShiftQuery,
-} from "@/api/queries/company/shift";
+} from "@/src/api/queries/company/shift";
 import { useTranslations } from "next-intl";
-import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import Table from "@/components/ui/table";
+import ConfirmationModal from "@/src/components/ui/modal/ConfirmationModal";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import Table from "@/src/components/ui/table";
 import { useQueryClient } from "@tanstack/react-query";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
+import { Plus } from "lucide-react";
 
 export type CreateUpdateOpeationHour = {
   id: TShift["id"];
@@ -334,14 +334,14 @@ const OperationHours = () => {
             <div className="w-auto flex items-center gap-2">
               <Button
                 className="w-9 h-9 p-0"
-                variant="resting-active"
+                variant="outline"
                 onClick={() => showUpdateModalHandler(row as TRowItem)}
               >
                 <EditIcon className="w-5 h-5" />
               </Button>
               <Button
                 className="w-9 h-9 p-0"
-                variant="resting-active"
+                variant="outline"
                 onClick={() => setShiftIdDeleteConfirmModal((row as TRowItem).id)}
               >
                 <DeleteIcon className="w-5 h-5" />
@@ -389,11 +389,10 @@ const OperationHours = () => {
           actionButton={
             <Button
               className="flex items-center gap-3"
-              variant="dark"
+              variant="default"
               onClick={form.handleSubmit(createNewOperationHourHandler)}
               disabled={actionBtnIsDisabled || createCompanyShiftQuery.isPending}
             >
-              <PlusRight />
               <p className="text-sm text-white ">
                 {t("staffManagement.operationHours.createNewBtn")}
               </p>
@@ -417,11 +416,11 @@ const OperationHours = () => {
           </p>
           <Button
             className="mt-6 flex items-center gap-3"
-            variant="dark"
+            variant="default"
             onClick={() => setIsOpenCreateModal(true)}
             disabled={createCompanyShiftQuery.isPending}
           >
-            <PlusRight />
+            <Plus />
             <p className="text-sm text-white">
               {t("staffManagement.operationHours.createNewBtn")}
             </p>
@@ -442,11 +441,10 @@ const OperationHours = () => {
         actionButton={
           <Button
             className="flex items-center gap-3"
-            variant="dark"
+            variant="default"
             onClick={form.handleSubmit(createNewOperationHourHandler)}
             disabled={actionBtnIsDisabled || createCompanyShiftQuery.isPending}
           >
-            <PlusRight />
             <p className="text-sm text-white ">
               {t("staffManagement.operationHours.createNewBtn")}
             </p>
@@ -462,11 +460,10 @@ const OperationHours = () => {
         actionButton={
           <Button
             className="flex items-center gap-3"
-            variant="dark"
+            variant="default"
             onClick={form.handleSubmit(updateOpearationHourHandler)}
             disabled={actionBtnIsDisabled || updateCompanyShiftQuery.isPending}
           >
-            <PlusRight />
             <p className="text-sm text-white ">{t("ui.actions.update")}</p>
           </Button>
         }
@@ -482,10 +479,10 @@ const OperationHours = () => {
         <div className="flex items-center justify-end">
           <Button
             className="flex items-center gap-3"
-            variant="dark"
+            variant="default"
             onClick={showCreateModalHandler}
           >
-            <PlusRight />
+            <Plus />
             <p className="text-sm text-white ">
               {t("staffManagement.operationHours.createNewBtn")}
             </p>

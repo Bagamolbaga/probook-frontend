@@ -1,9 +1,9 @@
 import { FC, useState } from "react";
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 import ChangeDailyBreakTimePopup from "./ChangeDailyBreakTimePopup";
 import { FormattedDataItem } from "..";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import { isOwnerMembership } from "@/utils/permissions";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import { isOwnerMembership } from "@/src/utils/permissions";
 
 type TimeLineBreakItemProps = {
   row: FormattedDataItem;

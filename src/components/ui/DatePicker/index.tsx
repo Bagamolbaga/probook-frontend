@@ -3,7 +3,7 @@
 
 import { DayPicker } from "react-day-picker";
 import ArrowSecondaryDownIcon from "../icons/ArrowSecondaryDown";
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 import { useRef } from "react";
 
 export type DatePickerProps = React.ComponentProps<typeof DayPicker>;
@@ -24,7 +24,7 @@ function DatePicker({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("pb-2 rounded-lg overflow-hidden shadow-primary", className)}
+      className={cn("pb-2 rounded-lg overflow-hidden shadow-black", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",

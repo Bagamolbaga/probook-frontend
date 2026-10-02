@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import { cn } from "@/utils/cn";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import { cn } from "@/src/utils/cn";
 
 type Props = {
   className?: string;

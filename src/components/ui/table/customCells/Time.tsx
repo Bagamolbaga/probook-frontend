@@ -1,4 +1,4 @@
-import { formatCurrency } from "@/utils/formatCurrency";
+import { formatCurrency } from "@/src/utils/formatCurrency";
 import React from "react";
 
 const TimeCell = ({ value }: { value: number }) => {

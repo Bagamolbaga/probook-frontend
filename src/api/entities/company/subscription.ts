@@ -1,4 +1,4 @@
-import { ApiClientCore } from "@/api/core";
+import { ApiClientCore } from "@/src/api/core";
 
 export type TGetCompanySubscriptionArgs = {
   companyId: string;

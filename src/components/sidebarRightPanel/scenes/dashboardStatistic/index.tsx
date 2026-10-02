@@ -1,9 +1,9 @@
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
-import Button from "@/components/ui/button";
-import StatisticWithLine from "@/components/ui/widgets/statisticWithLine";
-import { useGetDashboardStatistic } from "@/hooks/useGetDashboardStatistic";
+import { Button } from "@/src/components/ui/button";
+import StatisticWithLine from "@/src/components/ui/widgets/statisticWithLine";
+import { useGetDashboardStatistic } from "@/src/hooks/useGetDashboardStatistic";
 
 export const DashboardStatisticScene = () => {
   const t = useTranslations();

@@ -2,9 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import BookingCreation from "./components/BookingCreation";
-import SubscriptionChecker from "@/components/subscriptionChecker";
-import MainPagesTitle from "@/components/mainPagesTitle";
-import SuperAdminChecker from "@/components/superAdminChecker";
+import SubscriptionChecker from "@/src/components/subscriptionChecker";
+import MainPagesTitle from "@/src/components/mainPagesTitle";
+import SuperAdminChecker from "@/src/components/superAdminChecker";
 
 const BookingCreationScene = () => {
   const t = useTranslations();

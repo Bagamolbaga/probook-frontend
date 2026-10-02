@@ -2,6 +2,34 @@
 @tailwind components
 @tailwind utilities
 
+// shadcn/ui uses semantic color roles. These tokens deliberately map to the
+// existing ProBook palette: purplePrimary is the brand action color and the
+// existing greys remain the neutral surfaces and borders.
+:root
+  --background: #ffffff
+  --foreground: #1C1D21
+
+  --card: #ffffff
+  --card-foreground: #1C1D21
+  --popover: #ffffff
+  --popover-foreground: #1C1D21
+
+  --primary: #603FEF
+  --primary-foreground: #ffffff
+  --secondary: #F5F5FA
+  --secondary-foreground: #1C1D21
+  --muted: #F6F6F6
+  --muted-foreground: #8181A5
+  --accent: #EFEBFD
+  --accent-foreground: #4732BA
+  --destructive: #F92718
+  --destructive-foreground: #ffffff
+
+  --border: #F0F0F3
+  --input: #F0F0F3
+  --ring: #603FEF
+  --radius: 0.75rem
+
 h1
   @apply text-[80px] leading-[84px] font-bold text-darkPrimary md:text-[60px] md:leading-[64px] sm:text-5xl sm:leading-[52px]
 

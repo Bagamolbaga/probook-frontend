@@ -1,5 +1,5 @@
 import React, { FC, ReactNode } from "react";
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 
 type Props = {
   variant?: "primary" | "secondary";

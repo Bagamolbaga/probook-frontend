@@ -1,4 +1,4 @@
-import BookingCreationScene from "@/scenes/main/bookingCreation";
+import BookingCreationScene from "@/src/scenes/main/bookingCreation";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 

@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { isPossiblePhoneNumber, parsePhoneNumber } from "react-phone-number-input/input";
 import { Check, Mail, MessageSquare, Phone, UserRound } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import TextField from "@/components/ui/inputs/TextField";
+import TextField from "@/src/components/ui/inputs/TextField";
 import type { AuthForm } from "./AuthModal";
 
 type ContactForm = AuthForm & {

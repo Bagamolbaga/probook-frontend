@@ -8,7 +8,7 @@ import TextField from "./TextField";
 import DatePicker from "../DatePicker";
 import { addDays, format, isValid, parse } from "date-fns";
 import { UseFormSetValue, useForm } from "react-hook-form";
-import { useClickOutside } from "@/hooks/useClickOutside";
+import { useClickOutside } from "@/src/hooks/useClickOutside";
 import Button from "../button";
 import { useTranslations } from "next-intl";
 

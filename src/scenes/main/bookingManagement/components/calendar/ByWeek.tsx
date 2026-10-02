@@ -1,13 +1,13 @@
 import { eachDayOfInterval, endOfWeek, format, startOfWeek } from "date-fns";
-import { cn } from "@/utils/cn";
-import { DATE_FORMAT } from "@/constants/other";
+import { cn } from "@/src/utils/cn";
+import { DATE_FORMAT } from "@/src/constants/other";
 
 import BookingItem from "./BookingItem";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import { TimeManager } from "@/utils/timeManager";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import { TimeManager } from "@/src/utils/timeManager";
 import { useEffect, useMemo, useState } from "react";
-import { TTimeSlot } from "@/constants/timeSlots";
+import { TTimeSlot } from "@/src/constants/timeSlots";
 
 const BOOKING_ITEM_FIX_MARGIN = 4;
 export const BOOKING_ITEM_FIX_WIDTH = 140;

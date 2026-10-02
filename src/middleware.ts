@@ -4,9 +4,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "next-auth/middleware";
 import createMiddleware from "next-intl/middleware";
-import i18nConfig from "@/i18n/config";
+import i18nConfig from "@/src/i18n/config";
 import { PUBLIC_ROUTES } from "./constants/navigations";
-import type { CompanyMembership, UserCompany } from "@/types/user";
+import type { CompanyMembership, UserCompany } from "@/src/types/user";
 
 const OWNER_ONLY_ROUTES = [
   "/dashboard",

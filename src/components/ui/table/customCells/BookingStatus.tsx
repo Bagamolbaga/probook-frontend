@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 
-import { BOOKING_STATUS_STYLES } from "@/constants/bookingStatuses";
-import { cn } from "@/utils/cn";
+import { BOOKING_STATUS_STYLES } from "@/src/constants/bookingStatuses";
+import { cn } from "@/src/utils/cn";
 
 const BookingStatusCell = ({ value }: { value: BookingStatus }) => {
   const t = useTranslations("bookingManagement.status");

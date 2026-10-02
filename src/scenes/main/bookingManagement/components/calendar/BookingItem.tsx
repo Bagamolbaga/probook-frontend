@@ -1,6 +1,6 @@
-import { TimeManager } from "@/utils/timeManager";
-import { cn } from "@/utils/cn";
-import { BOOKING_STATUS_STYLES } from "@/constants/bookingStatuses";
+import { TimeManager } from "@/src/utils/timeManager";
+import { cn } from "@/src/utils/cn";
+import { BOOKING_STATUS_STYLES } from "@/src/constants/bookingStatuses";
 import { CSSProperties, useState } from "react";
 import { BOOKING_ITEM_FIX_WIDTH } from "./ByWeek";
 

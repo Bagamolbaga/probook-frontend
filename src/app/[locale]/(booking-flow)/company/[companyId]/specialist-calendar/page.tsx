@@ -1,4 +1,4 @@
-import { toSlug } from "@/utils/toSlug";
+import { toSlug } from "@/src/utils/toSlug";
 import { redirect } from "next/navigation";
 
 const Page = ({ params }: { params: { locale: string; companyId: string } }) => {

@@ -4,15 +4,15 @@ import {
   useDeleteCompanyImagesQuery,
   useGetCompaniesImagesQuery,
   useUploadCompanyImagesQuery,
-} from "@/api/queries/company";
-import Button from "@/components/ui/button";
-import DeleteIcon from "@/components/ui/icons/Delete";
-import Checkbox from "@/components/ui/inputs/Checkbox";
-import Spinner from "@/components/ui/loaders/Spinner";
-import { toaster } from "@/components/ui/toaster";
-import { useAppSession } from "@/hooks/useAppSession";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import { cn } from "@/utils/cn";
+} from "@/src/api/queries/company";
+import { Button } from "@/src/components/ui/button";
+import DeleteIcon from "@/src/components/ui/icons/Delete";
+import Checkbox from "@/src/components/ui/inputs/Checkbox";
+import Spinner from "@/src/components/ui/loaders/Spinner";
+import { toaster } from "@/src/components/ui/toaster";
+import { useAppSession } from "@/src/hooks/useAppSession";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import { cn } from "@/src/utils/cn";
 import Image from "next/image";
 import { useRef, useState } from "react";
 
@@ -53,7 +53,7 @@ const BlobImageCard = ({
         new
       </span>
       <Button
-        variant="resting-active"
+        variant="outline"
         className="absolute top-1 right-1 p-[2px] !rounded hover:!border-redPrimary"
         onClick={() => deleteImage(image)}
       >
@@ -270,7 +270,7 @@ const ImagesDetails = () => {
         {imagesForDelete.length ? (
           <Button
             className="py-3"
-            variant="red-outline"
+            variant="outline"
             onClick={deleteSelectedUploadedImages}
             disabled={deleteImagesLoading}
           >

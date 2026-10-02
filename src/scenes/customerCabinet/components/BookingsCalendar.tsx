@@ -14,8 +14,8 @@ import {
 } from "date-fns";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
-import type { CustomerBooking, CustomerBookingStatus } from "@/api/entities/customer";
-import { DATE_FNS_LOCALES, useLocale, useTranslations } from "@/i18n";
+import type { CustomerBooking, CustomerBookingStatus } from "@/src/api/entities/customer";
+import { DATE_FNS_LOCALES, useLocale, useTranslations } from "@/src/i18n";
 
 const statusColors: Record<CustomerBookingStatus, string> = {
   PENDING: "#FCDA00",

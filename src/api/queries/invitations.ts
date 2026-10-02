@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useApiClient } from "@/api/context";
-import type { CreateInvitationInput } from "@/api/entities/invitation";
+import { useApiClient } from "@/src/api/context";
+import type { CreateInvitationInput } from "@/src/api/entities/invitation";
 
 export const useInvitationPreviewQuery = (token: string) => {
   const apiClient = useApiClient();

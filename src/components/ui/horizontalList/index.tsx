@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import clsx from "clsx";
 import Button from "../button";
 import ArrowSecondaryDownIcon from "../icons/ArrowSecondaryDown";
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 
 type Tab = {
   id: string | number;
@@ -95,7 +95,7 @@ const HorizontalList: FC<Props> = ({ activelTabId, tabs, onSelect }) => {
         })}
       >
         <Button
-          variant="resting-active"
+          variant="outline"
           className="!p-0 !rounded !border-none"
           onClick={() => scroll("left")}
         >
@@ -139,7 +139,7 @@ const HorizontalList: FC<Props> = ({ activelTabId, tabs, onSelect }) => {
         })}
       >
         <Button
-          variant="resting-active"
+          variant="outline"
           className="!p-0 !rounded !border-none"
           onClick={() => scroll("right")}
         >

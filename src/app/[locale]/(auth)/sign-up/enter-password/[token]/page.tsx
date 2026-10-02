@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import SignUpEnterPasswordScene from "@/scenes/auth/business/signUp/EnterPassword";
+import SignUpEnterPasswordScene from "@/src/scenes/auth/business/signUp/EnterPassword";
 
 export async function generateMetadata({
   params,

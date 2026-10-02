@@ -9,17 +9,17 @@ import {
   BookingCreatedNotification,
   NOTIFICATION_EVENT,
   NotificationType,
-} from "@/api/entities/notification";
+} from "@/src/api/entities/notification";
 import {
   BOOKING_UPDATED_EVENT,
   COMPANY_DATA_UPDATED_EVENT,
   BookingUpdatedEvent,
   CompanyDataUpdatedEvent,
-} from "@/api/entities/realtime";
-import { invalidateCompanyBookingQueries } from "@/api/queries/booking/cache";
-import { invalidateCompanyDataQueries } from "@/api/queries/company/cache";
-import { TIME_SLOTS } from "@/constants/timeSlots";
-import { toaster } from "@/components/ui/toaster";
+} from "@/src/api/entities/realtime";
+import { invalidateCompanyBookingQueries } from "@/src/api/queries/booking/cache";
+import { invalidateCompanyDataQueries } from "@/src/api/queries/company/cache";
+import { TIME_SLOTS } from "@/src/constants/timeSlots";
+import { toaster } from "@/src/components/ui/toaster";
 import { BookingCreatedToast } from "../ui/toaster/components/BookingCreatedToast";
 
 const getBookingMessage = ({ data }: BookingCreatedNotification) => {

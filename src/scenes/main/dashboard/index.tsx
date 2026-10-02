@@ -7,11 +7,11 @@ import LineChartApacheEcharts from "./components/LineChartApacheEcharts";
 import { useMemo } from "react";
 
 import { useTranslations } from "next-intl";
-import { useGetDashboardStatistic } from "@/hooks/useGetDashboardStatistic";
-import SubscriptionChecker from "@/components/subscriptionChecker";
-import SuperAdminChecker from "@/components/superAdminChecker";
-import { useSuperAdminStore } from "@/stores/superAdmin";
-import MainPagesTitle from "@/components/mainPagesTitle";
+import { useGetDashboardStatistic } from "@/src/hooks/useGetDashboardStatistic";
+import SubscriptionChecker from "@/src/components/subscriptionChecker";
+import SuperAdminChecker from "@/src/components/superAdminChecker";
+import { useSuperAdminStore } from "@/src/stores/superAdmin";
+import MainPagesTitle from "@/src/components/mainPagesTitle";
 
 const DashboardScene = () => {
   const t = useTranslations();

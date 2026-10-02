@@ -6,16 +6,16 @@ import { UseFormReturn } from "react-hook-form";
 import { motion, Variant } from "framer-motion";
 import { isBefore, isSameDay } from "date-fns";
 
-import Button from "@/components/ui/button";
-import SearchIcon from "@/components/ui/icons/Search";
-import DatePickerField from "@/components/ui/inputs/DatePickerField";
-import TimePicker from "@/components/ui/inputs/TimePicker";
-import useWindowWidth from "@/hooks/useWindowWidth";
-import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
+import { Button } from "@/src/components/ui/button";
+import SearchIcon from "@/src/components/ui/icons/Search";
+import DatePickerField from "@/src/components/ui/inputs/DatePickerField";
+import TimePicker from "@/src/components/ui/inputs/TimePicker";
+import useWindowWidth from "@/src/hooks/useWindowWidth";
+import ArrowSecondaryDownIcon from "@/src/components/ui/icons/ArrowSecondaryDown";
 import { SearchForm } from "..";
 import FieldContainer from "./FieldContainer";
 import StoreOrServiceField from "./StoreOrServiceField";
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 
 type VariantKeys =
   | "small"

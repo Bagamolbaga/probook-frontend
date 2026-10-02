@@ -10,19 +10,19 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Checkbox, FormControl, FormControlLabel } from "@mui/material";
 
-import Button from "@/components/ui/button";
-import TextField from "@/components/ui/inputs/TextField";
-import Modal from "@/components/ui/modal";
+import { Button } from "@/src/components/ui/button";
+import TextField from "@/src/components/ui/inputs/TextField";
+import Modal from "@/src/components/ui/modal";
 import { CreateServiceForm } from "..";
-import PersonIcon from "@/components/ui/icons/Person";
-import EmployeeIcon from "@/components/ui/icons/Employee";
-import FlashIcon from "@/components/ui/icons/Flash";
-import CloseIcon from "@/components/ui/icons/Close";
-import AppSelect from "@/components/ui/inputs/AppSelect";
-import { Switch } from "@/components/ui/inputs/Switch";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import EmployeeIcon from "@/src/components/ui/icons/Employee";
+import FlashIcon from "@/src/components/ui/icons/Flash";
+import CloseIcon from "@/src/components/ui/icons/Close";
+import AppSelect from "@/src/components/ui/inputs/AppSelect";
+import { Switch } from "@/src/components/ui/inputs/Switch";
 import ServiceVariants from "./ServiceVariants";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import NoteIcon from "@/components/ui/icons/Note";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import NoteIcon from "@/src/components/ui/icons/Note";
 import SelectCategory from "./SelectCategory";
 
 type Props = {
@@ -82,7 +82,7 @@ const CreateUpdateServiceModal_123: FC<Props> = ({
             <div className="flex items-center gap-4">
               <Button
                 className="w-9 h-9 p-0"
-                variant="resting-active"
+                variant="outline"
                 onClick={localCloseHandler}
               >
                 <CloseIcon className="w-5 h-5 stroke-greyPrimary" />
@@ -277,7 +277,7 @@ const CreateUpdateServiceModal_123: FC<Props> = ({
               </div>
 
               <div className="mt-5 flex items-center justify-between gap-5">
-                <Button variant="resting" onClick={localCloseHandler}>
+                <Button variant="outline" onClick={localCloseHandler}>
                   {t("ui.actions.cancel")}
                 </Button>
                 {actionButton}

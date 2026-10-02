@@ -2,7 +2,7 @@
 "use client";
 
 import { ReactNode, createContext, useContext, useMemo } from "react";
-import { useAppSession } from "@/hooks/useAppSession";
+import { useAppSession } from "@/src/hooks/useAppSession";
 import { useLocale } from "next-intl";
 import { ApiClient } from "./client";
 

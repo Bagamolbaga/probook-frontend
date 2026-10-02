@@ -6,10 +6,10 @@ import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "@mui/material";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import { ToastContainer } from "react-toastify";
-import { ApiClientProvider } from "@/api/context";
+import { ApiClientProvider } from "@/src/api/context";
 import ReactQueryProvider from "./ReactQueryProvider";
 import NotificationProvider from "./NotificationProvider";
-import muiTheme from "@/styles/muiTheme";
+import muiTheme from "@/src/styles/muiTheme";
 
 const Providers = ({
   children,

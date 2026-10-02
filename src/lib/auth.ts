@@ -2,7 +2,7 @@ import axios from "axios";
 import type { AuthOptions, User as NextAuthUser } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import type { User } from "@/types/user";
+import type { User } from "@/src/types/user";
 
 export type AuthResponse = {
   accessToken: string;

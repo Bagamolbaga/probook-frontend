@@ -6,15 +6,15 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import ImageStep1 from "@/assets/business_signIn_step_1.svg";
-import Button from "@/components/ui/button";
-import GoogleBrandIcon from "@/components/ui/icons/GoogleBrand";
-import LogoIcon from "@/components/ui/icons/LogoFull";
-import TextField from "@/components/ui/inputs/TextField";
-import { toaster } from "@/components/ui/toaster";
-import { Link, useLocale, useTranslations } from "@/i18n";
-import { getSafeCallbackUrl } from "@/utils/auth";
-import { EMAIL_REGEXP, PASSWORD_REGEXP } from "@/utils/regexps";
+import ImageStep1 from "@/src/assets/business_signIn_step_1.svg";
+import { Button } from "@/src/components/ui/button";
+import GoogleBrandIcon from "@/src/components/ui/icons/GoogleBrand";
+import LogoIcon from "@/src/components/ui/icons/LogoFull";
+import TextField from "@/src/components/ui/inputs/TextField";
+import { toaster } from "@/src/components/ui/toaster";
+import { Link, useLocale, useTranslations } from "@/src/i18n";
+import { getSafeCallbackUrl } from "@/src/utils/auth";
+import { EMAIL_REGEXP, PASSWORD_REGEXP } from "@/src/utils/regexps";
 
 type SignInForm = {
   email: string;
@@ -92,8 +92,9 @@ const BusinessSignInScene = () => {
       setSecondsUntilResend(60);
       resetField("code");
       toaster.success(t("auth.otp.codeSent"));
-    } catch {
-      toaster.error(t("auth.otp.requestFailed"));
+    } catch (err) {
+      // toaster.error(t("auth.otp.requestFailed"));
+      toaster.error(JSON.stringify(err), {autoClose: false });
     } finally {
       setIsSubmitting(false);
     }
@@ -185,7 +186,7 @@ const BusinessSignInScene = () => {
           />
           <Button
             className="w-full"
-            variant="primary"
+            variant="default"
             type="submit"
             disabled={isSubmitting}
           >
@@ -247,7 +248,7 @@ const BusinessSignInScene = () => {
         )}
         <Button
           className="w-full"
-          variant="primary"
+          variant="default"
           type="submit"
           disabled={isSubmitting}
         >
@@ -342,7 +343,7 @@ const BusinessSignInScene = () => {
                 </div>
                 <Button
                   className="w-full"
-                  variant="primary"
+                  variant="default"
                   type="submit"
                   disabled={isSubmitting}
                 >

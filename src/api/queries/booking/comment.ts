@@ -4,13 +4,13 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useApiClient } from "@/api/context";
+import { useApiClient } from "@/src/api/context";
 import {
   TCreateBookingComment,
   TDeleteBookingComment,
   TGetBookingComments,
   TUpdateBookingComment,
-} from "@/api/entities/booking";
+} from "@/src/api/entities/booking";
 
 type Options<T> = T & {
   queryOptions?: UndefinedInitialDataOptions;

@@ -1,13 +1,13 @@
-import { MAIN_NAVIGATION } from "@/constants/navigations";
+import { MAIN_NAVIGATION } from "@/src/constants/navigations";
 import React, { useMemo } from "react";
 import NavItem from "./NavItem";
 import { useTranslations } from "next-intl";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 import Image from "next/image";
 import Spinner from "../ui/loaders/Spinner";
-import { usePathname } from "@/i18n";
-import { isOwnerMembership } from "@/utils/permissions";
+import { usePathname } from "@/src/i18n";
+import { isOwnerMembership } from "@/src/utils/permissions";
 
 const MobileSidebar = () => {
   const t = useTranslations();

@@ -1,12 +1,12 @@
 "use client";
 
-import { useGetCompaniesQuery } from "@/api/queries/company";
+import { useGetCompaniesQuery } from "@/src/api/queries/company";
 import { DataGrid, GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import { PropsWithChildren, useEffect, useMemo, useRef, useState } from "react";
 import TablePagination from "../ui/table/pagination";
-import { useSuperAdminStore } from "@/stores/superAdmin";
+import { useSuperAdminStore } from "@/src/stores/superAdmin";
 import { useStore } from "zustand";
-import { useAppSession } from "@/hooks/useAppSession";
+import { useAppSession } from "@/src/hooks/useAppSession";
 
 const SuperAdminChecker = ({ children }: PropsWithChildren) => {
   // return children
@@ -48,7 +48,7 @@ const SuperAdminChecker = ({ children }: PropsWithChildren) => {
         },
       },
       {
-        field: "address1",
+        field: "address",
         headerName: "Address",
         type: "string",
         flex: 0.1,
@@ -69,14 +69,14 @@ const SuperAdminChecker = ({ children }: PropsWithChildren) => {
       //       <div className="w-auto flex items-center gap-2">
       //         <Button
       //           className="w-9 h-9 p-0"
-      //           variant="resting-active"
+      //           variant="outline"
       //           // onClick={() => showUpdateModalHandler(row)}
       //         >
       //           <EditIcon className="w-5 h-5" />
       //         </Button>
       //         <Button
       //           className="w-9 h-9 p-0"
-      //           variant="resting-active"
+      //           variant="outline"
       //           // onClick={() => setSpecialistIdDeleteConfirmModal(row.id)}
       //         >
       //           <DeleteIcon className="w-5 h-5" />

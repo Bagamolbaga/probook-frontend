@@ -1,20 +1,20 @@
 // /* eslint-disable @typescript-eslint/no-floating-promises */
-// import EditIcon from "@/components/ui/icons/Edit";
-// import TextField from "@/components/ui/inputs/TextField";
+// import EditIcon from "@/src/components/ui/icons/Edit";
+// import TextField from "@/src/components/ui/inputs/TextField";
 // import React, { FC, useMemo, useState } from "react";
 // import { motion, useScroll, Variants } from "framer-motion";
-// import CalendarIcon from "@/components/ui/icons/Calendar";
-// import LocationIcon from "@/components/ui/icons/Location";
-// import DatePickerField from "@/components/ui/inputs/DatePickerField";
-// import TimePicker from "@/components/ui/inputs/TimePicker";
+// import CalendarIcon from "@/src/components/ui/icons/Calendar";
+// import LocationIcon from "@/src/components/ui/icons/Location";
+// import DatePickerField from "@/src/components/ui/inputs/DatePickerField";
+// import TimePicker from "@/src/components/ui/inputs/TimePicker";
 // import { isBefore, isSameDay } from "date-fns";
-// import Button from "@/components/ui/button";
+// import { Button } from "@/src/components/ui/button";
 // import { UseFormReturn } from "react-hook-form";
 // import { SearchForm as SearchFormType, TLocation } from "..";
-// import { cn } from "@/utils/cn";
-// import useWindowWidth from "@/hooks/useWindowWidth";
-// import MagnifyingGlass from "@/components/ui/icons/MagnifyingGlass";
-// import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
+// import { cn } from "@/src/utils/cn";
+// import useWindowWidth from "@/src/hooks/useWindowWidth";
+// import MagnifyingGlass from "@/src/components/ui/icons/MagnifyingGlass";
+// import ArrowSecondaryDownIcon from "@/src/components/ui/icons/ArrowSecondaryDown";
 // import { useTranslations } from "next-intl";
 
 // type Props = {
@@ -32,7 +32,7 @@
 //   const handleSelectLocation = (c: TLocation["initial"]) => {
 //     form.setValue(
 //       "location",
-//       `${c.country?.name} ${c.city || ""} ${c.address1 || ""} ${c.address2 || ""}`.trim()
+//       `${c.country?.name} ${c.city || ""} ${c.address || ""} ${c.address2 || ""}`.trim()
 //     );
 //     form.setValue("locationObj", c);
 //   };
@@ -45,11 +45,11 @@
 //     const obj: Record<string, TLocation> = {};
 
 //     companies.forEach((c) => {
-//       const str = `${c.country?.name}.${c.city}.${c.address1}.${c.address2}`;
+//       const str = `${c.country?.name}.${c.city}.${c.address}.${c.address2}`;
 
 //       if (!obj[str]) {
 //         const d = {
-//           address1: c.address1,
+//           address: c.address,
 //           address2: c.address2,
 //           country: c.country || {
 //             code: "",
@@ -69,14 +69,14 @@
 //       arr = Object.values(obj)
 //         .filter(
 //           (s) =>
-//             s.address1?.toLowerCase().includes(formData.location.toLowerCase()) ||
+//             s.address?.toLowerCase().includes(formData.location.toLowerCase()) ||
 //             s.address2?.toLowerCase().includes(formData.location.toLowerCase()) ||
 //             s.city?.toLowerCase().includes(formData.location.toLowerCase()) ||
 //             s.country?.name.toLowerCase().includes(formData.location.toLowerCase())
 //         )
 //         .map((s) => ({
 //           ...s,
-//           address1: s.address1?.replace(
+//           address: s.address?.replace(
 //             new RegExp(formData.location, "gi"),
 //             (match) => `<span style="color: #603fef;">${match}</span>`
 //           ),
@@ -131,7 +131,7 @@
 //           <p
 //             className="mt-1 text-xs text-greyPrimary"
 //             dangerouslySetInnerHTML={{
-//               __html: [s.address1, s.address2, s.city, s.country?.name].join(" ") || "",
+//               __html: [s.address, s.address2, s.city, s.country?.name].join(" ") || "",
 //             }}
 //           ></p>
 //         </div>
@@ -422,7 +422,7 @@
 //                 "p-2 md:p-1 sm:p-1": isSmall,
 //               }
 //             )}
-//             variant="primary"
+//             variant="default"
 //             onClick={(e) => {
 //               e.preventDefault()
 //              form.handleSubmit(handleSearch)();
@@ -435,7 +435,7 @@
 //             )}
 //           </Button>
 //           <Button
-//             variant="resting-active"
+//             variant="outline"
 //             className={cn("hidden min-w-[30px] h-[30px] p-1 !rounded-full", {
 //               "md:flex sm:flex": isSmall,
 //             })}

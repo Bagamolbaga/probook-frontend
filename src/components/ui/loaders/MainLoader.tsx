@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { Player } from "@lottiefiles/react-lottie-player";
-import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
-import { cn } from "@/utils/cn";
+import BlackLogoAnimation from "@/src/assets/lottiefiles/blackLogoAnimation.json";
+import { cn } from "@/src/utils/cn";
 
 type Props = {
   className?: string;

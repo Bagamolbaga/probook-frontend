@@ -3,10 +3,10 @@
 import React, { FC, useEffect, useMemo } from "react";
 import cn from "clsx";
 import Button from "../button";
-import { useAppSession } from "@/hooks/useAppSession";
+import { useAppSession } from "@/src/hooks/useAppSession";
 import { isAfter } from "date-fns";
-import { usePathname, useRouter, useTranslations } from "@/i18n";
-import { useApiClient } from "@/api/context";
+import { usePathname, useRouter, useTranslations } from "@/src/i18n";
+import { useApiClient } from "@/src/api/context";
 import { useSearchParams } from "next/navigation";
 
 type Props = {

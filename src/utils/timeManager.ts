@@ -1,7 +1,7 @@
 import { format, isSameDay, parse } from "date-fns";
 
-import { WEEK_DAYS } from "@/constants/other";
-import { TIME_SLOTS, TTimeSlot } from "@/constants/timeSlots";
+import { WEEK_DAYS } from "@/src/constants/other";
+import { TIME_SLOTS, TTimeSlot } from "@/src/constants/timeSlots";
 
 type ConstructorArgs = {
   slots?: TTimeSlot[];

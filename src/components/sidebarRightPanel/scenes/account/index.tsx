@@ -2,14 +2,14 @@
 
 import Image from "next/image";
 import Header from "../../Header";
-import { useAppSession } from "@/hooks/useAppSession";
-import MockAvatar from "@/assets/home_page_section_7_3.png";
-import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
-import NoteIcon from "@/components/ui/icons/Note";
-import Badge from "@/components/ui/badge";
-import LogoIcon from "@/components/ui/icons/LogoIcon";
-import { cn } from "@/utils/cn";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { useAppSession } from "@/src/hooks/useAppSession";
+import MockAvatar from "@/src/assets/home_page_section_7_3.png";
+import { useGetCompanySpecialistsQuery } from "@/src/api/queries/company/specialists";
+import NoteIcon from "@/src/components/ui/icons/Note";
+import Badge from "@/src/components/ui/badge";
+import LogoIcon from "@/src/components/ui/icons/LogoIcon";
+import { cn } from "@/src/utils/cn";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 
 export const AccountHeader = () => {
   const { data: session } = useAppSession();

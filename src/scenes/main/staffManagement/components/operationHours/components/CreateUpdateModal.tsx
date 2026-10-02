@@ -3,17 +3,17 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import Button from "@/components/ui/button";
-import TextField from "@/components/ui/inputs/TextField";
-import Modal from "@/components/ui/modal";
+import { Button } from "@/src/components/ui/button";
+import TextField from "@/src/components/ui/inputs/TextField";
+import Modal from "@/src/components/ui/modal";
 import React, { FC, ReactNode, useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
-import CloseIcon from "@/components/ui/icons/Close";
+import CloseIcon from "@/src/components/ui/icons/Close";
 import { CreateUpdateOpeationHour } from "..";
-import { SHIFT_COLORS } from "@/constants/shiftColors";
-import { cn } from "@/utils/cn";
-import { TimeManager } from "@/utils/timeManager";
-import WorkingTimePicker from "@/components/WorkingTimePicker";
+import { SHIFT_COLORS } from "@/src/constants/shiftColors";
+import { cn } from "@/src/utils/cn";
+import { TimeManager } from "@/src/utils/timeManager";
+import WorkingTimePicker from "@/src/components/WorkingTimePicker";
 
 type Props = {
   isOpen: boolean;
@@ -64,7 +64,7 @@ const CreateUpdateModal: FC<Props> = ({
           <div className="flex items-center gap-4">
             <Button
               className="w-9 h-9 p-0"
-              variant="resting-active"
+              variant="outline"
               onClick={localCloseHandler}
             >
               <CloseIcon className="w-5 h-5 stroke-greyPrimary" />
@@ -113,7 +113,7 @@ const CreateUpdateModal: FC<Props> = ({
         </div>
 
         <div className="mt-5 flex items-center justify-between gap-5">
-          <Button variant="resting" onClick={localCloseHandler}>
+          <Button variant="secondary" onClick={localCloseHandler}>
             Cancel
           </Button>
           {actionButton}

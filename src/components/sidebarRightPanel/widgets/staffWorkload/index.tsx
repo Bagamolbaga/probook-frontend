@@ -5,11 +5,11 @@ import { useMemo } from "react";
 import { eachDayOfInterval, format } from "date-fns";
 import { useTranslations } from "next-intl";
 
-import { useGetBookingsQuery } from "@/api/queries/booking";
-import { useGetCompanyShiftsForDateRangeQuery } from "@/api/queries/company/shift";
-import PersonIcon from "@/components/ui/icons/Person";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import { TimeManager } from "@/utils/timeManager";
+import { useGetBookingsQuery } from "@/src/api/queries/booking";
+import { useGetCompanyShiftsForDateRangeQuery } from "@/src/api/queries/company/shift";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import { TimeManager } from "@/src/utils/timeManager";
 import type { BookingManagementPeriod } from "../../types";
 import { getBookingManagementDateRange } from "../../utils";
 

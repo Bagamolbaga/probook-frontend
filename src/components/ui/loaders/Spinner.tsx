@@ -1,4 +1,4 @@
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 import React from "react";
 
 const Spinner = ({ className, color = "primary" }: { className?: string, color?: "primary" | "white" | "red" | "black" }) => {

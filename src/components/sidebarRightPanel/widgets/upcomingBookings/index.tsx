@@ -4,15 +4,15 @@ import { useMemo } from "react";
 import { format, parse, setHours, setMinutes } from "date-fns";
 import { useLocale, useTranslations } from "next-intl";
 
-import { useGetBookingsQuery } from "@/api/queries/booking";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import ClockIcon from "@/components/ui/icons/Clock";
-import { TIME_SLOTS } from "@/constants/timeSlots";
-import { DATE_FNS_LOCALES } from "@/i18n";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import { formatCurrency } from "@/utils/formatCurrency";
-import { cn } from "@/utils/cn";
-import { useBookingDetailsModalStore } from "@/stores/bookingDetailsModal";
+import { useGetBookingsQuery } from "@/src/api/queries/booking";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import ClockIcon from "@/src/components/ui/icons/Clock";
+import { TIME_SLOTS } from "@/src/constants/timeSlots";
+import { DATE_FNS_LOCALES } from "@/src/i18n";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import { formatCurrency } from "@/src/utils/formatCurrency";
+import { cn } from "@/src/utils/cn";
+import { useBookingDetailsModalStore } from "@/src/stores/bookingDetailsModal";
 import type { BookingManagementPeriod } from "../../types";
 import {
   formatBookingManagementDateRange,
@@ -77,7 +77,7 @@ const getInitials = (name: string) => {
 
 export const UpcomingBookingsWidget = ({ period, date }: Props) => {
   const t = useTranslations("bookingManagement.sidebar.upcoming");
-  const locale = useLocale() as keyof typeof DATE_FNS_LOCALES;
+  const locale = useLocale();
   const { companyId } = useGetCompanyId();
   const openBookingDetails = useBookingDetailsModalStore(
     (state) => state.openBookingDetails

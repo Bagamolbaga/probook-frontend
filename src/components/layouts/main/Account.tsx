@@ -1,18 +1,18 @@
 "use client";
 
 import { FC, PropsWithChildren } from "react";
-import { Link, usePathname } from "@/i18n";
-import MoneyIcon from "@/components/ui/icons/Money";
-import PersonIcon from "@/components/ui/icons/Person";
-import { cn } from "@/utils/cn";
-import DeleteIcon from "@/components/ui/icons/Delete";
+import { Link, usePathname } from "@/src/i18n";
+import MoneyIcon from "@/src/components/ui/icons/Money";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import { cn } from "@/src/utils/cn";
+import DeleteIcon from "@/src/components/ui/icons/Delete";
 import { signOut } from "next-auth/react";
-import MainPagesTitle from "@/components/mainPagesTitle";
-import SuperAdminChecker from "@/components/superAdminChecker";
+import MainPagesTitle from "@/src/components/mainPagesTitle";
+import SuperAdminChecker from "@/src/components/superAdminChecker";
 import { useStore } from "zustand";
-import { useSuperAdminStore } from "@/stores/superAdmin";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import { isOwnerMembership } from "@/utils/permissions";
+import { useSuperAdminStore } from "@/src/stores/superAdmin";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import { isOwnerMembership } from "@/src/utils/permissions";
 
 const NAVIGATION: NavigationItemProps[] = [
   {

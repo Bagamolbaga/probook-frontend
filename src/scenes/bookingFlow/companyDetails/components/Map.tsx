@@ -1,4 +1,4 @@
-import { getYandexMapsUrl } from "@/utils/getYandexMapsUrl";
+import { getYandexMapsUrl } from "@/src/utils/getYandexMapsUrl";
 
 const Map = ({ centerOfMap }: { centerOfMap?: TCompany["pos"] }) => {
   const yandexMapsUrl = getYandexMapsUrl({

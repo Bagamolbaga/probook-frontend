@@ -18,12 +18,12 @@ import {
   EVENING_RANGE_TIME_SLOTS,
   MORNING_RANGE_TIME_SLOTS,
   TIME_SLOTS,
-} from "@/constants/timeSlots";
+} from "@/src/constants/timeSlots";
 import ClockIcon from "../icons/Clock";
 import TextField from "../inputs/TextField";
-import { cn } from "@/utils/cn";
-import CustomScrollbarStyles from "@/styles/scrollbar.module.sass";
-import { useClickOutside } from "@/hooks/useClickOutside";
+import { cn } from "@/src/utils/cn";
+import CustomScrollbarStyles from "@/src/styles/scrollbar.module.sass";
+import { useClickOutside } from "@/src/hooks/useClickOutside";
 import AppSelect from "./AppSelect";
 import { useTranslations } from "next-intl";
 

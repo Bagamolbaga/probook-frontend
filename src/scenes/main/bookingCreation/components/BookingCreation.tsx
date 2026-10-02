@@ -1,37 +1,38 @@
 import { useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { format } from "date-fns";
-import { Link, useRouter, useTranslations } from "@/i18n";
+import { isAxiosError } from "axios";
+import { Link, useRouter, useTranslations } from "@/src/i18n";
 
-import { useCreateBookingQuery } from "@/api/queries/booking";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
-import { useGetCompanyServicesQuery } from "@/api/queries/company/services";
-import { useGetCompanyServiceCategoriesQuery } from "@/api/queries/company/serviceCategories";
-import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
-import type { TCreateBookingArgs } from "@/api/entities/booking";
+import { useCreateBookingQuery } from "@/src/api/queries/booking";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
+import { useGetCompanyServicesQuery } from "@/src/api/queries/company/services";
+import { useGetCompanyServiceCategoriesQuery } from "@/src/api/queries/company/serviceCategories";
+import { useGetCompanySpecialistsQuery } from "@/src/api/queries/company/specialists";
+import type { TCreateBookingArgs } from "@/src/api/entities/booking";
 
-import AuthModal, { AuthForm } from "@/scenes/bookingFlow/components/AuthModal";
-import ServiceSelection from "@/scenes/bookingFlow/components/ServiceSelection";
-import StaffSelection from "@/scenes/bookingFlow/components/StaffSelection";
-import TimeSelection from "@/scenes/bookingFlow/components/TimeSelection";
-import Button from "@/components/ui/button";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import CheckmarkCircle from "@/components/ui/icons/CheckmarkCircle";
-import ClockIcon from "@/components/ui/icons/Clock";
-import NoteIcon from "@/components/ui/icons/Note";
-import PersonIcon from "@/components/ui/icons/Person";
-import Spinner from "@/components/ui/loaders/Spinner";
-import Stepper, { TStep } from "@/components/ui/stepper";
-import { toaster } from "@/components/ui/toaster";
-import CompanyCartWidget from "@/components/ui/widgets/companyCart";
+import AuthModal, { AuthForm } from "@/src/scenes/bookingFlow/components/AuthModal";
+import ServiceSelection from "@/src/scenes/bookingFlow/components/ServiceSelection";
+import StaffSelection from "@/src/scenes/bookingFlow/components/StaffSelection";
+import TimeSelection from "@/src/scenes/bookingFlow/components/TimeSelection";
+import { Button } from "@/src/components/ui/button";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import CheckmarkCircle from "@/src/components/ui/icons/CheckmarkCircle";
+import ClockIcon from "@/src/components/ui/icons/Clock";
+import NoteIcon from "@/src/components/ui/icons/Note";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import Spinner from "@/src/components/ui/loaders/Spinner";
+import Stepper, { TStep } from "@/src/components/ui/stepper";
+import { toaster } from "@/src/components/ui/toaster";
+import CompanyCartWidget from "@/src/components/ui/widgets/companyCart";
 
-import { PREVIOUSLY_BOOKED_SERVICES } from "@/constants/keys";
-import { TIME_SLOTS, TTimeSlot } from "@/constants/timeSlots";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import { formatCurrency } from "@/utils/formatCurrency";
-import { cn } from "@/utils/cn";
-import MobileBottomCart from "@/scenes/bookingFlow/components/MobileBottomCart";
+import { PREVIOUSLY_BOOKED_SERVICES } from "@/src/constants/keys";
+import { TIME_SLOTS, TTimeSlot } from "@/src/constants/timeSlots";
+import { useLocalStorage } from "@/src/hooks/useLocalStorage";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import { formatCurrency } from "@/src/utils/formatCurrency";
+import { cn } from "@/src/utils/cn";
+import MobileBottomCart from "@/src/scenes/bookingFlow/components/MobileBottomCart";
 
 const STEPS = [
   { id: "services", text: "Services", icon: NoteIcon },
@@ -39,6 +40,17 @@ const STEPS = [
   { id: "time", text: "Time", icon: CalendarIcon },
   { id: "confirm", text: "Confirm", icon: CheckmarkCircle },
 ] as const;
+
+const getBookingErrorMessage = (error: unknown) => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+  const responseMessage = isAxiosError(error) ? error.response?.data?.message : null;
+
+  return Array.isArray(responseMessage)
+    ? responseMessage.join(". ")
+    : typeof responseMessage === "string"
+      ? responseMessage
+      : "Something went wrong";
+};
 
 type TStepsId = (typeof STEPS)[number]["id"];
 
@@ -130,7 +142,7 @@ const BookingCreation = () => {
             email: formData.client.email,
             first_name: formData.client.first_name,
             last_name: formData.client.last_name || "",
-            phone: formData.client.phone,
+            phone: formData.client.phone || undefined,
           },
           customerLocale: formData.client.preferredLocale,
           date: formData.selectedDate,
@@ -170,7 +182,7 @@ const BookingCreation = () => {
         }
       }
     } catch (error) {
-      toaster.error("Something went wrong");
+      toaster.error(getBookingErrorMessage(error));
     } finally {
       setIsCreateBookingLoading(false);
     }
@@ -355,8 +367,8 @@ const BookingCreation = () => {
           Schedule appointment successfully
         </h4>
         <p className="text-center">We will send a confirmation via your phone.</p>
-        <Link href="/search" className="mt-10">
-          <Button variant="primary">Search page</Button>
+        <Link href="/booking-creation" className="mt-10">
+          <Button>Back</Button>
         </Link>
       </div>
     );
@@ -572,7 +584,7 @@ const BookingCreation = () => {
                         </div>
                         {isShowContinueButton && (
                           <Button
-                            variant="dark"
+                            variant="default"
                             onClick={
                               form.watch("_stepId") === "confirm"
                                 ? confirmHandler
@@ -603,7 +615,7 @@ const BookingCreation = () => {
         selectedTime={form.watch("selectedTime")}
         renderContinueButton={
           <Button
-            variant={isShowContinueButton ? "dark" : "primary"}
+            variant={isShowContinueButton ? "default" : "primary"}
             disabled={!isShowContinueButton}
             onClick={handleNextStep}
           >

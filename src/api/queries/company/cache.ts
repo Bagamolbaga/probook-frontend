@@ -1,5 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
-import type { CompanyDataType } from "@/api/entities/realtime";
+import type { CompanyDataType } from "@/src/api/entities/realtime";
 
 const COMPANY_DATA_QUERY_KEYS: Record<CompanyDataType, string[]> = {
   specialists: ["specialists", "services", "booking_availability"],

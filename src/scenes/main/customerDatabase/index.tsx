@@ -5,29 +5,29 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { GridColDef, GridRowSelectionModel, GridSortModel } from "@mui/x-data-grid";
 import { Player } from "@lottiefiles/react-lottie-player";
 
-import useStore from "@/hooks/useStore";
-import { useThemeStore } from "@/stores/theme";
-import Button from "@/components/ui/button";
-import PersonIcon from "@/components/ui/icons/Person";
-import PlusRight from "@/components/ui/icons/Plus";
-import UserNameWithAvatar from "@/components/ui/table/customCells/UserNameWithAvatar";
-import ListItemEmptyPlaceholder from "@/assets/customerDatabase/ListItemEmptyPlaceholder.svg";
-import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
-import { useGetCustomersQuery } from "@/api/queries/users";
+import useStore from "@/src/hooks/useStore";
+import { useThemeStore } from "@/src/stores/theme";
+import { Button } from "@/src/components/ui/button";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import PlusRight from "@/src/components/ui/icons/Plus";
+import UserNameWithAvatar from "@/src/components/ui/table/customCells/UserNameWithAvatar";
+import ListItemEmptyPlaceholder from "@/src/assets/customerDatabase/ListItemEmptyPlaceholder.svg";
+import BlackLogoAnimation from "@/src/assets/lottiefiles/blackLogoAnimation.json";
+import { useGetCustomersQuery } from "@/src/api/queries/users";
 import CreateCustomerModal from "./components/CreateCustomerModal";
 import { useTranslations } from "next-intl";
-import { formatCurrency } from "@/utils/formatCurrency";
-import MainPagesTitle from "@/components/mainPagesTitle";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import { isOwnerMembership } from "@/utils/permissions";
-import { useRouter } from "@/i18n";
-import { MAIN_NAVIGATION_ENUM } from "@/constants/navigations";
-import Table from "@/components/ui/table";
-import TextField from "@/components/ui/inputs/TextField";
-import SearchIcon from "@/components/ui/icons/Search";
+import { formatCurrency } from "@/src/utils/formatCurrency";
+import MainPagesTitle from "@/src/components/mainPagesTitle";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import { isOwnerMembership } from "@/src/utils/permissions";
+import { useRouter } from "@/src/i18n";
+import { MAIN_NAVIGATION_ENUM } from "@/src/constants/navigations";
+import Table from "@/src/components/ui/table";
+import TextField from "@/src/components/ui/inputs/TextField";
+import SearchIcon from "@/src/components/ui/icons/Search";
 import { useForm } from "react-hook-form";
-import Spinner from "@/components/ui/loaders/Spinner";
-import type { TBookingCustomerListItem } from "@/api/entities/user/customer";
+import Spinner from "@/src/components/ui/loaders/Spinner";
+import type { TBookingCustomerListItem } from "@/src/api/entities/user/customer";
 
 type TRowItem = TBookingCustomerListItem;
 
@@ -161,14 +161,14 @@ const CustomerDatabaseScene = () => {
       //       <div className="w-auto flex items-center gap-2">
       //         <Button
       //           className="w-9 h-9 p-0"
-      //           variant="resting-active"
+      //           variant="outline"
       //           // onClick={() => showUpdateModalHandler(row)}
       //         >
       //           <EditIcon className="w-5 h-5" />
       //         </Button>
       //         <Button
       //           className="w-9 h-9 p-0"
-      //           variant="resting-active"
+      //           variant="outline"
       //           // onClick={() => setSpecialistIdDeleteConfirmModal(row.id)}
       //         >
       //           <DeleteIcon className="w-5 h-5" />
@@ -236,7 +236,7 @@ const CustomerDatabaseScene = () => {
           {canCreateCustomers && (
             <Button
               className="mt-6 flex items-center gap-3"
-              variant="primary"
+              variant="default"
               onClick={openCreateModalHandler}
             >
               <PlusRight />
@@ -287,7 +287,7 @@ const CustomerDatabaseScene = () => {
                 {canCreateCustomers && (
                   <Button
                     className="text-nowrap"
-                    variant="dark"
+                    variant="outline"
                     iconLeft={<PlusRight />}
                     onClick={openCreateModalHandler}
                   >

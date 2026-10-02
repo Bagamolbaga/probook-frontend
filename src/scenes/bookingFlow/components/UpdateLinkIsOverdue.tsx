@@ -1,6 +1,6 @@
-import { Link } from "@/i18n";
-import Button from "@/components/ui/button";
-import Sad from "@/components/ui/icons/Sad";
+import { Link } from "@/src/i18n";
+import { Button } from "@/src/components/ui/button";
+import Sad from "@/src/components/ui/icons/Sad";
 
 const UpdateLinkIsOverdue = () => {
   return (
@@ -18,7 +18,7 @@ const UpdateLinkIsOverdue = () => {
         </p>
         <p className="text-center text-greyPrimary">Thank you for your understanding.</p>
         <Link href={"/"} className="mt-7">
-          <Button variant="dark">Back to homepage</Button>
+          <Button variant="outline">Back to homepage</Button>
         </Link>
       </div>
     </div>

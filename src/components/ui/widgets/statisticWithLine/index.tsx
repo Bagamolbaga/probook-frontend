@@ -1,6 +1,6 @@
 import { FC } from "react";
-import { cn } from "@/utils/cn";
-import Spinner from "@/components/ui/loaders/Spinner";
+import { cn } from "@/src/utils/cn";
+import Spinner from "@/src/components/ui/loaders/Spinner";
 
 type Props = {
   color: "green" | "purple" | "orange";

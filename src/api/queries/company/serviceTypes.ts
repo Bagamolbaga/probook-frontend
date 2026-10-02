@@ -1,11 +1,11 @@
-import { useApiClient } from "@/api/context";
+import { useApiClient } from "@/src/api/context";
 import {
   TCreateServicesTypeArgs,
   TDeleteServicesTypeArgs,
   TGetServicesTypesArgs,
   TGetServicesTypesRes,
   TUpdateServicesTypeArgs,
-} from "@/api/entities/services";
+} from "@/src/api/entities/services";
 import {
   useMutation,
   useQuery,

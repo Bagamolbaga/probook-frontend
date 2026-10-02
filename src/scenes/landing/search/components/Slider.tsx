@@ -2,7 +2,7 @@ import { FC } from "react";
 import { SwiperSlide } from "swiper/react";
 import { Pagination, Navigation, Autoplay } from "swiper/modules";
 
-import Swiper from "@/components/ui/swiper";
+import Swiper from "@/src/components/ui/swiper";
 import StoreCard from "./sections/FindedStores/StoreCard";
 
 type Props = {

@@ -7,7 +7,7 @@ import DeleteIcon from "../../icons/Delete";
 import EditIcon from "../../icons/Edit";
 import ThreeDotsIcon from "../../icons/ThreeDots";
 import Button from "../../button";
-import { useClickOutside } from "@/hooks/useClickOutside";
+import { useClickOutside } from "@/src/hooks/useClickOutside";
 import ConfirmationModal from "../../modal/ConfirmationModal";
 import { useTranslations } from "next-intl";
 
@@ -112,7 +112,7 @@ const Comment: FC<Props> = ({ comment, editHandler, deleteHandler }) => {
           <div className="mt-1">{comment.body}</div>
         </div>
         <Button
-          variant="resting-active"
+          variant="outline"
           className="w-6 h-6 p-1 ml-auto mb-auto cursor-pointer hidden group-hover/comment:block"
           onClick={toggleActionsHandler}
         >

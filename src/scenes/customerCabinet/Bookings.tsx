@@ -1,25 +1,21 @@
 "use client";
 
-import {
-  ArrowRight,
-  ArrowUpDown,
-  Building2,
-  ChevronDown,
-  Info,
-  Plus,
-} from "lucide-react";
+import { ArrowRight, ArrowUpDown, Building2, Info, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import type {
   CustomerBookingStatus,
   CustomerBookingsView,
-} from "@/api/entities/customer";
-import { useCustomerBookingsQuery } from "@/api/queries/customer";
-import Button from "@/components/ui/button";
-import { Link, useLocale, useTranslations } from "@/i18n";
-import CustomScrollbar from "@/styles/scrollbar.module.sass";
+} from "@/src/api/entities/customer";
+import { useCustomerBookingsQuery } from "@/src/api/queries/customer";
+import { Button } from "@/src/components/ui/button";
+import AppSelect from "@/src/components/ui/inputs/AppSelect";
+import { Link, useLocale, useTranslations } from "@/src/i18n";
+import CustomScrollbar from "@/src/styles/scrollbar.module.sass";
 import BookingCard, { formatBookingTime } from "./components/BookingCard";
 import BookingsCalendar, { toDateKey } from "./components/BookingsCalendar";
 import QueryState from "./components/QueryState";
+import { cn } from "@/src/utils/cn";
 
 const views: CustomerBookingsView[] = ["upcoming", "past", "cancelled"];
 
@@ -30,11 +26,20 @@ const statusColors: Record<CustomerBookingStatus, string> = {
   CANCELLED: "#FCE5E9",
 };
 
+type CompanyFilterOption = { id: string; name: string };
+
 export default function CustomerBookingsScene() {
   const t = useTranslations("customerCabinet");
   const locale = useLocale();
   const [view, setView] = useState<CustomerBookingsView>("upcoming");
-  const [companyId, setCompanyId] = useState("");
+  const companyFilterForm = useForm<{ company: CompanyFilterOption }>({
+    defaultValues: { company: { id: "", name: "" } },
+  });
+  const selectedCompany = useWatch({
+    control: companyFilterForm.control,
+    name: "company",
+  });
+  const companyId = selectedCompany?.id || "";
   const [ascending, setAscending] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(toDateKey(new Date()));
   const bookingsListRef = useRef<HTMLDivElement>(null);
@@ -53,6 +58,13 @@ export default function CustomerBookingsScene() {
         ).entries()
       ),
     [items]
+  );
+  const companyOptions = useMemo<CompanyFilterOption[]>(
+    () => [
+      { id: "", name: t("bookings.allCompanies") },
+      ...companies.map(([id, name]) => ({ id, name })),
+    ],
+    [companies, t]
   );
   const sortedItems = useMemo(
     () =>
@@ -110,11 +122,11 @@ export default function CustomerBookingsScene() {
   }, [sortedItems, updateBookingsScrollbar]);
 
   return (
-    <div className="h-full min-h-0 flex flex-col gap-6 sm:gap-4">
+    <div className="h-full min-h-0 flex-1 flex flex-col gap-6 sm:gap-4">
       <header className="flex items-end justify-between gap-6 sm:items-center">
         <div>
           <h1 className="font-funnel text-[32px] font-bold leading-none tracking-[-0.7px] text-darkPrimary sm:text-[26px]">
-            {t("bookings.title")}
+            {t("bookings.title")} | {window.innerWidth}
           </h1>
           <p className="mt-1.5 text-sm text-greyPrimary sm:text-[10px]">
             <span className="sm:hidden">{t("bookings.subtitle")}</span>
@@ -146,7 +158,10 @@ export default function CustomerBookingsScene() {
                 className={`flex h-[34px] items-center justify-center gap-2 rounded-lg px-[13px] text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-purplePrimary sm:min-w-0 sm:flex-1 sm:px-2 sm:text-[10px] ${active ? "bg-white font-bold text-darkPrimary shadow-[0_1px_3px_#0000000A]" : "font-medium text-greyPrimary hover:text-darkPrimary"}`}
                 onClick={() => {
                   setView(item);
-                  setCompanyId("");
+                  companyFilterForm.setValue("company", {
+                    id: "",
+                    name: t("bookings.allCompanies"),
+                  });
                 }}
               >
                 {t(`bookings.${item}`)}
@@ -161,23 +176,24 @@ export default function CustomerBookingsScene() {
         </div>
 
         <div className="flex items-center gap-2">
-          <label className="relative flex h-[38px] items-center rounded-full border border-greyOutline bg-white sm:h-10 sm:flex-1 sm:rounded-xl">
-            <Building2 className="pointer-events-none absolute left-3.5 size-[15px] text-greyPrimary sm:left-3" />
-            <span className="sr-only">{t("bookings.allCompanies")}</span>
-            <select
-              className="h-full min-w-[155px] appearance-none rounded-full bg-transparent pl-9 pr-9 text-[11px] font-semibold text-darkPrimary outline-none focus:ring-2 focus:ring-purplePrimary sm:w-full sm:rounded-xl"
-              value={companyId}
-              onChange={(event) => setCompanyId(event.target.value)}
-            >
-              <option value="">{t("bookings.allCompanies")}</option>
-              {companies.map(([id, name]) => (
-                <option key={id} value={id}>
-                  {name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="pointer-events-none absolute right-3 size-3.5 text-greyPrimary" />
-          </label>
+          <AppSelect
+            id="company"
+            options={companyOptions}
+            selectedOption={selectedCompany}
+            setValue={companyFilterForm.setValue}
+            renderLeftIcon={() => <Building2 className="size-[15px] text-greyPrimary" />}
+            renderOption={(option) => <span className="text-[11px]">{option.name}</span>}
+            renderOptionSelected={(option) => (
+              <span className="text-[11px] font-semibold text-darkPrimary">
+                {option?.name || t("bookings.allCompanies")}
+              </span>
+            )}
+            classNames={{
+              container:
+                "!h-[38px] !min-w-[155px] !rounded-full !border-greyOutline !bg-white !py-0 sm:!h-10 sm:!flex-1 sm:!rounded-xl",
+              selectContainer: "min-w-[180px]",
+            }}
+          />
           <button
             type="button"
             aria-label={t("bookings.sort")}
@@ -198,8 +214,8 @@ export default function CustomerBookingsScene() {
       />
 
       {items.length > 0 ? (
-        <section className="flex flex-1 min-h-0 gap-3">
-          <div className="flex min-h-0 w-1/2 flex-col">
+        <section className="flex flex-1 min-h-0 gap-3 md:flex-col-reverse sm:flex-col-reverse">
+          <div className="flex min-h-0 flex-1 flex-col">
             <div className="flex items-center justify-between sm:hidden">
               <h2 className="font-funnel text-xl font-bold">{t("bookings.nearest")}</h2>
               <p className="text-[11px] text-greyPrimary">
@@ -207,24 +223,20 @@ export default function CustomerBookingsScene() {
               </p>
             </div>
 
-            <div className="relative flex min-h-0 py-2 pr-2 rounded-2xl bg-white">
+            <div className="relative flex min-h-0 mt-2 py-2 pr-2 rounded-2xl bg-white">
               <div
                 ref={bookingsListRef}
-                className={`min-h-0 flex-1 overflow-y-auto rounded-2xl bg-white pr-3 sm:flex sm:flex-col sm:gap-2.5 sm:overflow-visible sm:pr-0 sm:rounded-none ${CustomScrollbar.BookingsScrollbar}`}
+                className={cn(
+                  "min-h-0 flex-1 overflow-y-auto rounded-2xl bg-white pr-3",
+                  "md:max-h-[527px]",
+                  "sm:max-h-[527px]",
+                  CustomScrollbar.BookingsScrollbar
+                )}
                 onScroll={updateBookingsScrollbar}
               >
                 {sortedItems.map((booking) => (
                   <BookingCard key={booking.id} booking={booking} />
                 ))}
-              </div>
-              <div
-                ref={bookingsScrollTrackRef}
-                className="pointer-events-none absolute inset-y-4 right-2.5 hidden w-1 rounded-full bg-greyOutline sm:hidden"
-              >
-                <div
-                  ref={bookingsScrollThumbRef}
-                  className="w-full rounded-full bg-purplePrimary"
-                />
               </div>
             </div>
 
@@ -236,7 +248,7 @@ export default function CustomerBookingsScene() {
             </div>
           </div>
 
-          <div className="mt-7 w-1/2 flex flex-col gap-3">
+          <div className="mt-7 w-[420px] flex flex-col gap-3 md:w-full md:mt-0 sm:w-full sm:mt-0">
             <BookingsCalendar
               key={`${view}-${companyId}-${effectiveSelectedDate}`}
               bookings={items}
@@ -270,11 +282,8 @@ export default function CustomerBookingsScene() {
                         <span
                           className="size-2 rounded-full"
                           style={{ backgroundColor: statusColors[booking.status] }}
-                        >
-                        </span>
-                        <span
-                          className="shrink-0 font-funnel text-xs font-bold tabular-nums text-purplePrimary"
-                        >
+                        ></span>
+                        <span className="shrink-0 font-funnel text-xs font-bold tabular-nums text-purplePrimary">
                           {formatBookingTime(booking)}
                         </span>
                         <span className="min-w-0 flex-1 truncate text-xs font-bold text-darkPrimary">

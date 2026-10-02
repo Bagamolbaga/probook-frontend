@@ -1,11 +1,11 @@
 "use client";
 
-import { useUploadUserAvatarQuery } from "@/api/queries/users";
-import Button from "@/components/ui/button";
-import FileUploadButton from "@/components/ui/button/FileUploadButton";
-import PersonIcon from "@/components/ui/icons/Person";
-import { toaster } from "@/components/ui/toaster";
-import { useAppSession } from "@/hooks/useAppSession";
+import { useUploadUserAvatarQuery } from "@/src/api/queries/users";
+import { Button } from "@/src/components/ui/button";
+import FileUploadButton from "@/src/components/ui/button/FileUploadButton";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import { toaster } from "@/src/components/ui/toaster";
+import { useAppSession } from "@/src/hooks/useAppSession";
 import Image from "next/image";
 import { useState } from "react";
 

@@ -5,12 +5,12 @@ import { getSession, signIn, useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useLocale, useTranslations } from "next-intl";
-import Button from "@/components/ui/button";
-import TextField from "@/components/ui/inputs/TextField";
-import GoogleBrandIcon from "@/components/ui/icons/GoogleBrand";
-import { useInvitationPreviewQuery } from "@/api/queries/invitations";
-import { PASSWORD_REGEXP } from "@/utils/regexps";
-import { toaster } from "@/components/ui/toaster";
+import { Button } from "@/src/components/ui/button";
+import TextField from "@/src/components/ui/inputs/TextField";
+import GoogleBrandIcon from "@/src/components/ui/icons/GoogleBrand";
+import { useInvitationPreviewQuery } from "@/src/api/queries/invitations";
+import { PASSWORD_REGEXP } from "@/src/utils/regexps";
+import { toaster } from "@/src/components/ui/toaster";
 
 type RegistrationForm = { password: string };
 
@@ -94,7 +94,7 @@ const InvitationScene = () => {
         {session?.user ? (
           <Button
             className="mt-8 w-full"
-            variant="primary"
+            variant="default"
             onClick={acceptWithCurrentSession}
           >
             {t("accept")}
@@ -105,7 +105,7 @@ const InvitationScene = () => {
             <div className="mt-4 flex gap-3">
               <Button
                 className="flex-1"
-                variant="primary"
+                variant="default"
                 onClick={() =>
                   router.push(
                     `/${locale}/sign-in?callbackUrl=${encodeURIComponent(callbackUrl)}`
@@ -116,7 +116,7 @@ const InvitationScene = () => {
               </Button>
               <Button
                 className="flex-1 gap-2"
-                variant="resting-active"
+                variant="outline"
                 onClick={() => void signIn("google", { callbackUrl })}
               >
                 <GoogleBrandIcon className="w-5 h-5" />
@@ -137,7 +137,7 @@ const InvitationScene = () => {
             <Button
               className="w-full"
               type="submit"
-              variant="primary"
+              variant="default"
               disabled={form.formState.isSubmitting || !form.formState.isValid}
             >
               {t("createAndAccept")}
@@ -145,7 +145,7 @@ const InvitationScene = () => {
             <Button
               className="w-full gap-2"
               type="button"
-              variant="resting-active"
+              variant="outline"
               onClick={() => void signIn("google", { callbackUrl })}
             >
               <GoogleBrandIcon className="w-5 h-5" />

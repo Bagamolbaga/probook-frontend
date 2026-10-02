@@ -2,15 +2,15 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import { useScroll, useTransform, motion, useMotionValueEvent } from "framer-motion";
 import { UseFormReturn } from "react-hook-form";
-import { useTranslations } from "@/i18n";
+import { useTranslations } from "@/src/i18n";
 import { Syne } from "next/font/google";
 
 import { SearchForm as TSearchForm } from "..";
 // import SearchForm from "./SearchForm";
 
-import BgLeftFigure from "@/assets/search/section_1_left_figure.png";
-import BgRightFigure from "@/assets/search/section_1_right_figure.png";
-import { cn } from "@/utils/cn";
+import BgLeftFigure from "@/src/assets/search/section_1_left_figure.png";
+import BgRightFigure from "@/src/assets/search/section_1_right_figure.png";
+import { cn } from "@/src/utils/cn";
 
 const syne = Syne({ weight: ["400", "500", "600", "700", "800"], subsets: ["latin"] });
 

@@ -4,22 +4,22 @@ import { FormControl } from "@mui/material";
 import { format } from "date-fns";
 import { useTranslations } from "next-intl";
 
-import type { TCreateCompanyShift } from "@/api/entities/company/shift";
-import { useGetBookingsQuery } from "@/api/queries/booking";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
+import type { TCreateCompanyShift } from "@/src/api/entities/company/shift";
+import { useGetBookingsQuery } from "@/src/api/queries/booking";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
 import {
   useCreateCompanyShiftQuery,
   useUpdateCompanyShiftQuery,
-} from "@/api/queries/company/shift";
-import Button from "@/components/ui/button";
-import CloseIcon from "@/components/ui/icons/Close";
-import AppSelect from "@/components/ui/inputs/AppSelect";
-import Modal from "@/components/ui/modal";
-import { toaster } from "@/components/ui/toaster";
-import { TIME_SLOTS, TTimeSlot } from "@/constants/timeSlots";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import { cn } from "@/utils/cn";
-import { TimeManager } from "@/utils/timeManager";
+} from "@/src/api/queries/company/shift";
+import { Button } from "@/src/components/ui/button";
+import CloseIcon from "@/src/components/ui/icons/Close";
+import AppSelect from "@/src/components/ui/inputs/AppSelect";
+import Modal from "@/src/components/ui/modal";
+import { toaster } from "@/src/components/ui/toaster";
+import { TIME_SLOTS, TTimeSlot } from "@/src/constants/timeSlots";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import { cn } from "@/src/utils/cn";
+import { TimeManager } from "@/src/utils/timeManager";
 import type { FormattedDataItem } from "../../components/types";
 
 type Props = {
@@ -136,7 +136,7 @@ const ChangeDailyBreakTimePopup: FC<Props> = ({
           <span className="text-sm font-bold text-greyPrimary">
             {t("bookingManagement.calendar.changeBreakTime")}
           </span>
-          <Button className="size-8 p-0" variant="resting-active" onClick={handleClose}>
+          <Button className="size-8 p-0" variant="outline" onClick={handleClose}>
             <CloseIcon className="w-5 h-5 stroke-greyPrimary" />
           </Button>
         </div>
@@ -189,12 +189,12 @@ const ChangeDailyBreakTimePopup: FC<Props> = ({
         </div>
 
         <div className="mt-6 flex justify-between gap-2">
-          <Button className="w-full h-9 p-0" variant="resting" onClick={handleClose}>
+          <Button className="w-full h-9 p-0" variant="outline" onClick={handleClose}>
             {t("ui.actions.cancel")}
           </Button>
           <Button
             className={cn("w-full h-9 p-0")}
-            variant="dark"
+            variant="outline"
             disabled={hasError || createShift.isPending || updateShift.isPending}
             onClick={form.handleSubmit(save)}
           >

@@ -1,28 +1,28 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { memo, useEffect, useMemo, useRef, useState } from "react";
-import { cn } from "@/utils/cn";
-import Button from "@/components/ui/button";
-import { useClickOutside } from "@/hooks/useClickOutside";
+import { cn } from "@/src/utils/cn";
+import { Button } from "@/src/components/ui/button";
+import { useClickOutside } from "@/src/hooks/useClickOutside";
 import {
   useCreateCompanyShiftForDateQuery,
   useCreateCompanyShiftQuery,
   useGetCompanyShiftsQuery,
   useUpdateCompanyShiftForDateQuery,
   useUpdateCompanyShiftQuery,
-} from "@/api/queries/company/shift";
-import { toaster } from "@/components/ui/toaster";
-import CloseIcon from "@/components/ui/icons/Close";
+} from "@/src/api/queries/company/shift";
+import { toaster } from "@/src/components/ui/toaster";
+import CloseIcon from "@/src/components/ui/icons/Close";
 import { useTranslations } from "next-intl";
 import { FormControl } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
-import AppSelect from "@/components/ui/inputs/AppSelect";
-import { TTimeSlot } from "@/constants/timeSlots";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
-import { useGetAllBookingsQuery } from "@/api/queries/booking";
-import { SHIFT_COLORS } from "@/constants/shiftColors";
-import { TimeManager } from "@/utils/timeManager";
+import AppSelect from "@/src/components/ui/inputs/AppSelect";
+import { TTimeSlot } from "@/src/constants/timeSlots";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
+import { useGetAllBookingsQuery } from "@/src/api/queries/booking";
+import { SHIFT_COLORS } from "@/src/constants/shiftColors";
+import { TimeManager } from "@/src/utils/timeManager";
 import { format } from "date-fns";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 
 const POPUP_MAX_HEIGHT = 550;
 
@@ -694,7 +694,7 @@ const ShiftItem = memo(
               </span>
               <Button
                 className="size-8 p-0"
-                variant="resting-active"
+                variant="outline"
                 onClick={closePopupHandler}
               >
                 <CloseIcon className="w-5 h-5 stroke-greyPrimary" />
@@ -855,14 +855,14 @@ const ShiftItem = memo(
             <div className="mt-6 flex justify-between gap-2">
               <Button
                 className="w-full h-9 p-0"
-                variant="resting"
+                variant="outline"
                 onClick={closePopupHandler}
               >
                 {t("ui.actions.cancel")}
               </Button>
               <Button
                 className="w-full h-9 p-0"
-                variant="dark"
+                variant="outline"
                 disabled={
                   !actionBtnIsActive ||
                   createCompanyShiftForDateQuery.isPending ||

@@ -2,22 +2,22 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 "use client";
 
-import { Link, useTranslations } from "@/i18n";
+import { Link, useTranslations } from "@/src/i18n";
 import { useForm } from "react-hook-form";
 
-import Button from "@/components/ui/button";
-import TextField from "@/components/ui/inputs/TextField";
-import ChatIcon from "@/components/ui/icons/Chat";
-import PhoneIcon from "@/components/ui/icons/Phone";
-import EmailIcon from "@/components/ui/icons/Email";
-import PersonIcon from "@/components/ui/icons/Person";
-import { EMAIL_REGEXP } from "@/utils/regexps";
-import ArrowRight from "@/components/ui/icons/ArrowRight";
-import Line from "@/components/ui/icons/Line";
+import { Button } from "@/src/components/ui/button";
+import TextField from "@/src/components/ui/inputs/TextField";
+import ChatIcon from "@/src/components/ui/icons/Chat";
+import PhoneIcon from "@/src/components/ui/icons/Phone";
+import EmailIcon from "@/src/components/ui/icons/Email";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import { EMAIL_REGEXP } from "@/src/utils/regexps";
+import ArrowRight from "@/src/components/ui/icons/ArrowRight";
+import Line from "@/src/components/ui/icons/Line";
 import { useMemo } from "react";
-import Instagram from "@/components/ui/icons/Instagram";
-import Facebook from "@/components/ui/icons/Facebook";
-import TwitterBrandIcon from "@/components/ui/icons/TwitterBrand";
+import Instagram from "@/src/components/ui/icons/Instagram";
+import Facebook from "@/src/components/ui/icons/Facebook";
+import TwitterBrandIcon from "@/src/components/ui/icons/TwitterBrand";
 
 type ContactForm = {
   firstName: string;
@@ -121,7 +121,7 @@ const ContactScene = () => {
               <p className="mt-10 text-base text-center text-white">Message Our Team</p>
               <Button
                 className="mt-4 !p-[14px] !border !border-darkPrimary"
-                variant="dark"
+                variant="outline"
                 iconLeft={<Line fillColor="fill-white" className="stroke-none" />}
               >
                 Connect via Line
@@ -281,7 +281,7 @@ const ContactScene = () => {
                 <div className="pt-12 flex justify-between">
                   <Button
                     className="w-full !p-[14px] !text-sm"
-                    variant="primary"
+                    variant="default"
                     onClick={handleSubmit(handleSignup)}
                   >
                     {t("landingContact.form.submit")}

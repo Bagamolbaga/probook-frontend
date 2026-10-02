@@ -4,10 +4,10 @@
 import { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { formatPhoneNumberIntl } from "react-phone-number-input";
-import Button from "@/components/ui/button";
-import CloseIcon from "@/components/ui/icons/Close";
-import Modal from "@/components/ui/modal";
-import EnterCodeField from "@/components/ui/inputs/EnterCodeField";
+import { Button } from "@/src/components/ui/button";
+import CloseIcon from "@/src/components/ui/icons/Close";
+import Modal from "@/src/components/ui/modal";
+import EnterCodeField from "@/src/components/ui/inputs/EnterCodeField";
 import { useTranslations } from "next-intl";
 
 export type PhoneVerifyForm = {
@@ -84,7 +84,7 @@ const PhoneVerifyModal: FC<Props> = ({
           <div className="flex items-center gap-4">
             <Button
               className="w-9 h-9 p-0"
-              variant="resting-active"
+              variant="outline"
               onClick={handleClose}
             >
               <CloseIcon className="w-5 h-5 stroke-greyPrimary" />
@@ -118,7 +118,7 @@ const PhoneVerifyModal: FC<Props> = ({
         )}
 
         <Button
-          variant="dark"
+          variant="outline"
           className="w-full mt-10"
           disabled={!phoneVerifiedSuccess}
           onClick={handleSubmit(handleSubmitHandler)}

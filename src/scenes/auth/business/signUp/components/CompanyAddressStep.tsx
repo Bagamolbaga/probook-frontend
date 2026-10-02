@@ -7,10 +7,10 @@ import { UseFormReturn } from "react-hook-form";
 import { useLoadScript, GoogleMap, Marker } from "@react-google-maps/api";
 import { setDefaults, OutputFormat, fromLatLng, fromAddress } from "react-geocode";
 
-import Button from "@/components/ui/button";
-import TextField from "@/components/ui/inputs/TextField";
+import { Button } from "@/src/components/ui/button";
+import TextField from "@/src/components/ui/inputs/TextField";
 import { SignUpForm } from "..";
-import { useDebounce } from "@/hooks/useDebounce";
+import { useDebounce } from "@/src/hooks/useDebounce";
 import { useTranslations } from "next-intl";
 
 type TPos = {
@@ -63,7 +63,7 @@ const CompanyAddressStep: FC<Props> = ({ form, handleSignUpStep }) => {
           (i) => i.types.length === 1 && i.types.includes("postal_code")
         )?.long_name;
 
-        form.setValue("address1", res.results[0].formatted_address);
+        form.setValue("address", res.results[0].formatted_address);
         postalCode && form.setValue("zip_code", postalCode);
       }
     };
@@ -104,7 +104,7 @@ const CompanyAddressStep: FC<Props> = ({ form, handleSignUpStep }) => {
   const t = useTranslations();
   const isNextBtnActive =
     form.watch("city") &&
-    form.watch("address1") &&
+    form.watch("address") &&
     form.watch("zip_code") &&
     form.watch("lat") &&
     form.watch("lng");
@@ -127,7 +127,7 @@ const CompanyAddressStep: FC<Props> = ({ form, handleSignUpStep }) => {
       </div>
       <div className="mt-2">
         <TextField
-          id="address1"
+          id="address"
           label={t("ui.labels.firstAddress")}
           placeholder={t("ui.labels.startTyping")}
           type="text"
@@ -135,7 +135,7 @@ const CompanyAddressStep: FC<Props> = ({ form, handleSignUpStep }) => {
           rules={{
             required: t("ui.errors.fieldIsRequired"),
           }}
-          error={form.formState.errors.address1}
+          error={form.formState.errors.address}
           requiredHideSymbol
         />
       </div>
@@ -173,11 +173,11 @@ const CompanyAddressStep: FC<Props> = ({ form, handleSignUpStep }) => {
         )}
       </div>
       <div className="py-12 flex gap-[100px] sm:gap-0 sm:justify-between">
-        <Button variant="resting" onClick={() => form.setValue("_step", 2)}>
+        <Button variant="outline" onClick={() => form.setValue("_step", 2)}>
           {t("ui.actions.cancel")}
         </Button>
         <Button
-          variant="primary"
+          variant="default"
           onClick={form.handleSubmit(handleSignUpStep)}
           disabled={!isNextBtnActive}
         >

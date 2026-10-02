@@ -3,7 +3,7 @@ import { FieldError, RegisterOptions, UseFormRegister } from "react-hook-form";
 import { CountrySelector, usePhoneInput } from "react-international-phone";
 import TextField from "./TextField";
 import "react-international-phone/style.css";
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 
 type Props = {
   id: string;
@@ -24,7 +24,7 @@ const PhoneTextInput: FC<Props> = ({
 }) => {
   const { inputValue, phone, country, setCountry, handlePhoneValueChange, inputRef } =
     usePhoneInput({
-      defaultCountry: "th",
+      defaultCountry: "ru",
       value: "",
       onChange: ({ phone, inputValue, country }) => {
         setValue(inputValue);
@@ -32,14 +32,7 @@ const PhoneTextInput: FC<Props> = ({
     });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value;
-
-    if (!val.startsWith("+66")) {
-      val = "+66" + val.replace(/^(\+6)/, "").replace(/\D/g, "");
-    } else {
-      const digitsOnly = val.replace(/^(\+66)/, "").replace(/\D/g, "");
-      val = "+66" + digitsOnly;
-    }
+    const val = e.target.value;
 
     setValue(val);
   };
@@ -62,7 +55,7 @@ const PhoneTextInput: FC<Props> = ({
             buttonClassName="!border-none"
             buttonContentWrapperClassName="!border-none"
             className="bgnh"
-            selectedCountry={country.iso2}
+            selectedCountry={"ru"}
             // onSelect={({ iso2 }) => setCountry(iso2)}
             disabled
           />

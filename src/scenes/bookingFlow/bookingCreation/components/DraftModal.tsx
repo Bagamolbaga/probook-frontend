@@ -1,7 +1,7 @@
 import { FC } from "react";
-import Modal from "@/components/ui/modal";
-import Button from "@/components/ui/button";
-import CloseIcon from "@/components/ui/icons/Close";
+import Modal from "@/src/components/ui/modal";
+import { Button } from "@/src/components/ui/button";
+import CloseIcon from "@/src/components/ui/icons/Close";
 
 type Props = {
   isOpen: boolean;
@@ -19,7 +19,7 @@ const DraftModal: FC<Props> = ({ isOpen, handleContinue, handleClose, handleDele
           <div className="flex items-center gap-4">
             <Button
               className="w-9 h-9 p-0"
-              variant="resting-active"
+              variant="outline"
               onClick={handleClose}
             >
               <CloseIcon className="w-5 h-5 stroke-greyPrimary" />
@@ -27,10 +27,10 @@ const DraftModal: FC<Props> = ({ isOpen, handleContinue, handleClose, handleDele
           </div>
         </div>
         <p className="mt-2 text text-greyPrimary">You have unconfirmed draft booking</p>
-        <Button variant="dark" className="w-full mt-10" onClick={handleContinue}>
+        <Button variant="outline" className="w-full mt-10" onClick={handleContinue}>
           Continue
         </Button>
-        <Button variant="dark-outline" className="w-full mt-2" onClick={handleDelete}>
+        <Button variant="outline" className="w-full mt-2" onClick={handleDelete}>
           Create new booking
         </Button>
       </div>

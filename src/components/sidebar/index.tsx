@@ -4,24 +4,24 @@
 
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-import { MAIN_NAVIGATION } from "@/constants/navigations";
+import { MAIN_NAVIGATION } from "@/src/constants/navigations";
 import { useStore } from "zustand";
-import { Link, usePathname, useTranslations } from "@/i18n";
+import { Link, usePathname, useTranslations } from "@/src/i18n";
 import clsx from "clsx";
 
-import { useThemeStore } from "@/stores/theme";
-import useWindowWidth from "@/hooks/useWindowWidth";
+import { useThemeStore } from "@/src/stores/theme";
+import useWindowWidth from "@/src/hooks/useWindowWidth";
 import NavItem from "./NavItem";
 import LogoFullIcon from "../ui/icons/LogoFull";
 import LogoIcon from "../ui/icons/LogoIcon";
 
 import { useMemo } from "react";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 import {
   hasPermission,
   isOwnerMembership,
   SPECIALIST_PERMISSIONS,
-} from "@/utils/permissions";
+} from "@/src/utils/permissions";
 
 const Sidebar = () => {
   const t = useTranslations();

@@ -7,15 +7,15 @@ import {
   Sparkles,
   Stethoscope,
 } from "lucide-react";
-import { formatCurrency } from "@/utils/formatCurrency";
+import { formatCurrency } from "@/src/utils/formatCurrency";
 import { useTranslations } from "next-intl";
-import RadioButton from "@/components/ui/inputs/RadioButton";
-import Modal from "@/components/ui/modal";
-import Button from "@/components/ui/button";
-import CloseIcon from "@/components/ui/icons/Close";
-import { cn } from "@/utils/cn";
-import { TServiceAndSelectedOption } from "@/scenes/main/bookingCreation/components/BookingCreation";
-import { toaster } from "@/components/ui/toaster";
+import RadioButton from "@/src/components/ui/inputs/RadioButton";
+import Modal from "@/src/components/ui/modal";
+import { Button } from "@/src/components/ui/button";
+import CloseIcon from "@/src/components/ui/icons/Close";
+import { cn } from "@/src/utils/cn";
+import { TServiceAndSelectedOption } from "@/src/scenes/main/bookingCreation/components/BookingCreation";
+import { toaster } from "@/src/components/ui/toaster";
 import type { ServiceCategoryTab } from "../ServiceSelection";
 
 type TServiceData = {
@@ -120,7 +120,7 @@ const ServicesList: FC<Props> = ({
             <div className="flex items-center gap-4">
               <Button
                 className="w-9 h-9 p-0"
-                variant="resting-active"
+                variant={"secondary"}
                 onClick={handleCloseDetailsModal}
               >
                 <CloseIcon className="w-5 h-5 stroke-greyPrimary" />
@@ -178,7 +178,6 @@ const ServicesList: FC<Props> = ({
 
           <Button
             className="w-full mt-3"
-            variant="dark-outline"
             onClick={addServiceToBookingHandler}
             disabled={
               selectedService &&

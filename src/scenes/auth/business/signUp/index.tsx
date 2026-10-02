@@ -8,19 +8,19 @@
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 
-import LogoIcon from "@/components/ui/icons/LogoFull";
-import ImageStep1 from "@/assets/business_signUp_step_1.svg";
-import ImageStep2 from "@/assets/business_signUp_step_2.svg";
-import { toaster } from "@/components/ui/toaster";
+import LogoIcon from "@/src/components/ui/icons/LogoFull";
+import ImageStep1 from "@/src/assets/business_signUp_step_1.svg";
+import ImageStep2 from "@/src/assets/business_signUp_step_2.svg";
+import { toaster } from "@/src/components/ui/toaster";
 import EmailPasswordStep from "./components/EmailPasswordStep";
 import CompanyInformationStep from "./components/CompanyInformationStep";
 import CompanyAddressStep from "./components/CompanyAddressStep";
 import CompanyAvailableWorkHoursStep, {
   WEEK_DAYS,
 } from "./components/CompanyAvailableWorkHoursStep";
-import { TTimeSlot } from "@/constants/timeSlots";
+import { TTimeSlot } from "@/src/constants/timeSlots";
 import { signIn } from "next-auth/react";
-import { Link, useRouter, useTranslations } from "@/i18n";
+import { Link, useRouter, useTranslations } from "@/src/i18n";
 import axios, { AxiosError } from "axios";
 
 export type SignUpForm = {
@@ -38,7 +38,7 @@ export type SignUpForm = {
   business: string;
   phone: string;
 
-  address1: string;
+  address: string;
   zip_code: string;
   city: string;
   lat?: number;
@@ -125,7 +125,7 @@ const BusinessSignInScene = () => {
           name: values.companyName.trim(),
           businessType: values.business.trim() || undefined,
           phone: values.phone.trim() || undefined,
-          address: values.address1.trim(),
+          address: values.address.trim(),
           zipCode: values.zip_code.trim(),
           city: values.city.trim(),
           pos: { lat: values.lat!, lng: values.lng! },

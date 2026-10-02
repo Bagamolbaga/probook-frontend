@@ -1,7 +1,7 @@
-import { TIME_SLOTS, TTimeSlot } from "@/constants/timeSlots";
-import { BOOKING_STATUS_STYLES } from "@/constants/bookingStatuses";
-import { FormattedDataItem } from "@/scenes/main/bookingManagement/components/timeLineCalendar";
-import { cn } from "@/utils/cn";
+import { TIME_SLOTS, TTimeSlot } from "@/src/constants/timeSlots";
+import { BOOKING_STATUS_STYLES } from "@/src/constants/bookingStatuses";
+import { FormattedDataItem } from "@/src/scenes/main/bookingManagement/components/timeLineCalendar";
+import { cn } from "@/src/utils/cn";
 
 type Props = {
   row: number;

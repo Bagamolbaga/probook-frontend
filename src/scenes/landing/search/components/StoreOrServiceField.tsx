@@ -3,20 +3,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import FieldContainer from "./FieldContainer";
-import TextField from "@/components/ui/inputs/TextField";
-import { SERVICE_TYPES } from "@/constants/serviceTypes";
-import { cn } from "@/utils/cn";
+import TextField from "@/src/components/ui/inputs/TextField";
+import { SERVICE_TYPES } from "@/src/constants/serviceTypes";
+import { cn } from "@/src/utils/cn";
 import { motion } from "framer-motion";
 import { UseFormReturn } from "react-hook-form";
 import { SearchForm } from "..";
-import { TSearchCompanysRes } from "@/api/entities/company";
-import StoreIcon from "@/components/ui/icons/Store";
-import CustomScrollbar from "@/styles/scrollbar.module.sass";
-import { HighlightText } from "@/components/ui/HighlightText";
+import { TSearchCompanysRes } from "@/src/api/entities/company";
+import StoreIcon from "@/src/components/ui/icons/Store";
+import CustomScrollbar from "@/src/styles/scrollbar.module.sass";
+import { HighlightText } from "@/src/components/ui/HighlightText";
 import Image from "next/image";
-import { Link } from "@/i18n";
-import { toSlug } from "@/utils/toSlug";
-import MainLoader from "@/components/ui/loaders/MainLoader";
+import { Link } from "@/src/i18n";
+import { toSlug } from "@/src/utils/toSlug";
+import MainLoader from "@/src/components/ui/loaders/MainLoader";
 
 type Props = {
   form: UseFormReturn<SearchForm>;
@@ -165,7 +165,7 @@ const StoreOrServiceField = ({
                     <p className="flex items-center gap-1 text-xs text-nowrap text-ellipsis text-greyPrimary">
                       {c.city}
                       <div className="min-w-[3px] min-h-[3px] rounded bg-greyPrimary" />{" "}
-                      {c.address1}
+                      {c.address}
                     </p>
                   </div>
                 </Link>

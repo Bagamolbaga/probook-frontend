@@ -1,6 +1,6 @@
 import { CSSProperties } from "react";
 
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 
 type SemanticVariant = "working" | "break" | "neutral";
 type TimeBadgeVariant = SemanticVariant | "shift";

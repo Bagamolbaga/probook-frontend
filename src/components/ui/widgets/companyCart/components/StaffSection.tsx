@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import AnyAvatarPlaceholder from "@/assets/staffManagement/specialistWithoutAvatar.png";
+import AnyAvatarPlaceholder from "@/src/assets/staffManagement/specialistWithoutAvatar.png";
 
 type Props = {
   staff: TBooking["specialist"] | "ANY";

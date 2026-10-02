@@ -1,4 +1,4 @@
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 import React from "react";
 
 const MagnifyingGlass = ({ className, strokeColor }: { className?: string; strokeColor?: string }) => {

@@ -1,13 +1,13 @@
-import PeoplesIcon from '@/components/ui/icons/Peoples';
-import EmailIcon from "@/components/ui/icons/Email";
-import EmployeeIcon from "@/components/ui/icons/Employee";
-import HotIcon from "@/components/ui/icons/Hot";
-import InvoiceIcon from "@/components/ui/icons/Invoice";
-import PersonIcon from "@/components/ui/icons/Person";
-import SettingsIcon from "@/components/ui/icons/Settings";
-import StoreIcon from "@/components/ui/icons/Store";
-import VideoIcon from "@/components/ui/icons/Video";
-import CalendarIcon from '@/components/ui/icons/Calendar';
+import PeoplesIcon from '@/src/components/ui/icons/Peoples';
+import EmailIcon from "@/src/components/ui/icons/Email";
+import EmployeeIcon from "@/src/components/ui/icons/Employee";
+import HotIcon from "@/src/components/ui/icons/Hot";
+import InvoiceIcon from "@/src/components/ui/icons/Invoice";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import SettingsIcon from "@/src/components/ui/icons/Settings";
+import StoreIcon from "@/src/components/ui/icons/Store";
+import VideoIcon from "@/src/components/ui/icons/Video";
+import CalendarIcon from '@/src/components/ui/icons/Calendar';
 
 export const LANDING_NAVIGATION = [
   {

@@ -1,4 +1,4 @@
-import CustomerBookingDetailScene from "@/scenes/customerCabinet/BookingDetail";
+import CustomerBookingDetailScene from "@/src/scenes/customerCabinet/BookingDetail";
 
 export default function CustomerBookingDetailPage({
   params,

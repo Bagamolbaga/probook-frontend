@@ -1,18 +1,18 @@
 import {
   useCreateCompanyServiceCategoryQuery,
   useUpdateCompanyServiceCategoryQuery,
-} from "@/api/queries/company/serviceCategories";
-import Button from "@/components/ui/button";
-import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
-import CloseIcon from "@/components/ui/icons/Close";
-import FlashIcon from "@/components/ui/icons/Flash";
-import PlusRight from "@/components/ui/icons/Plus";
-import TextField from "@/components/ui/inputs/TextField";
-import Modal from "@/components/ui/modal";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+} from "@/src/api/queries/company/serviceCategories";
+import { Button } from "@/src/components/ui/button";
+import ArrowSecondaryDownIcon from "@/src/components/ui/icons/ArrowSecondaryDown";
+import CloseIcon from "@/src/components/ui/icons/Close";
+import FlashIcon from "@/src/components/ui/icons/Flash";
+import PlusRight from "@/src/components/ui/icons/Plus";
+import TextField from "@/src/components/ui/inputs/TextField";
+import Modal from "@/src/components/ui/modal";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { toaster } from "@/components/ui/toaster";
+import { toaster } from "@/src/components/ui/toaster";
 import { AxiosError } from "axios";
 
 type Props = {
@@ -111,14 +111,14 @@ const CreateUpdateServiceCategoryModal = ({
       <div className="w-[620px] py-6 sm:w-full">
         <div className="px-6 flex items-center justify-between sm:px-5">
           <div className="flex items-center gap-4">
-            <Button className="w-9 h-9 p-0" variant="resting" onClick={localCloseHandler}>
+            <Button className="w-9 h-9 p-0" variant="outline" onClick={localCloseHandler}>
               <ArrowSecondaryDownIcon className="w-5 h-5 rotate-90 stroke-greyPrimary" />
             </Button>
             <h5 className="text-sm font-bold text-greyPrimary">{headerTitle}</h5>
           </div>
           <Button
             className="w-9 h-9 p-0"
-            variant="resting-active"
+            variant="outline"
             onClick={localCloseHandler}
           >
             <CloseIcon className="w-5 h-5 stroke-greyPrimary" />
@@ -137,13 +137,13 @@ const CreateUpdateServiceCategoryModal = ({
           />
 
           <div className="w-full mt-12 flex items-center justify-between">
-            <Button variant="resting" onClick={localCloseHandler}>
+            <Button variant="outline" onClick={localCloseHandler}>
               Cancel
             </Button>
 
             {actionType === "create" && (
               <Button
-                variant="dark"
+                variant="outline"
                 className="flex items-center gap-2"
                 disabled={!createBtnActive}
                 onClick={form.handleSubmit(createServiceTypeHandler)}
@@ -154,7 +154,7 @@ const CreateUpdateServiceCategoryModal = ({
             )}
             {actionType === "update" && (
               <Button
-                variant="dark"
+                variant="outline"
                 className="flex items-center gap-2"
                 disabled={!updateBtnActive}
                 onClick={form.handleSubmit(updateServiceTypeHandler)}

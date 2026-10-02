@@ -1,14 +1,14 @@
-import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
-import CustomSelect from "@/components/ui/inputs/Select";
+import ArrowSecondaryDownIcon from "@/src/components/ui/icons/ArrowSecondaryDown";
+import CustomSelect from "@/src/components/ui/inputs/Select";
 import { FormControl, MenuItem } from "@mui/material";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { CreateServiceForm } from "..";
 import { useState } from "react";
 import CreateUpdateServiceCategoryModal from "../../createCategoryModal";
-import EditIcon from "@/components/ui/icons/Edit";
-import DeleteIcon from "@/components/ui/icons/Delete";
-import { useDeleteCompanyServiceCategoryQuery } from "@/api/queries/company/serviceCategories";
-import { toaster } from "@/components/ui/toaster";
+import EditIcon from "@/src/components/ui/icons/Edit";
+import DeleteIcon from "@/src/components/ui/icons/Delete";
+import { useDeleteCompanyServiceCategoryQuery } from "@/src/api/queries/company/serviceCategories";
+import { toaster } from "@/src/components/ui/toaster";
 import { AxiosError } from "axios";
 
 type Props = {

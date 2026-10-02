@@ -5,20 +5,20 @@ import Image from "next/image";
 import { GoogleMap, OverlayView, useLoadScript } from "@react-google-maps/api";
 import { OutputFormat, setDefaults } from "react-geocode";
 import { motion, Variant } from "framer-motion";
-import { Link } from "@/i18n";
+import { Link } from "@/src/i18n";
 
-import MainLoader from "@/components/ui/loaders/MainLoader";
-import { toSlug } from "@/utils/toSlug";
+import MainLoader from "@/src/components/ui/loaders/MainLoader";
+import { toSlug } from "@/src/utils/toSlug";
 import StoreCard from "./StoreCard";
-import { cn } from "@/utils/cn";
-import CustomScrollbar from "@/styles/scrollbar.module.sass";
-import Button from "@/components/ui/button";
-import CloseIcon from "@/components/ui/icons/Close";
-import HeartIcon from "@/components/ui/icons/Heart";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { FAVORITE_STORES } from "@/constants/keys";
-import Spinner from "@/components/ui/loaders/Spinner";
-import { TSearchCompany } from "@/api/entities/company";
+import { cn } from "@/src/utils/cn";
+import CustomScrollbar from "@/src/styles/scrollbar.module.sass";
+import { Button } from "@/src/components/ui/button";
+import CloseIcon from "@/src/components/ui/icons/Close";
+import HeartIcon from "@/src/components/ui/icons/Heart";
+import { useLocalStorage } from "@/src/hooks/useLocalStorage";
+import { FAVORITE_STORES } from "@/src/constants/keys";
+import Spinner from "@/src/components/ui/loaders/Spinner";
+import { TSearchCompany } from "@/src/api/entities/company";
 
 type NonNullablePos = {
   lat: NonNullable<TCompany["pos"]["lat"]>;
@@ -283,7 +283,7 @@ const FindedStores: FC<Props> = ({
                             <HeartIcon className="w-4 h-4 fill-darkPrimary stroke-transparent" />
                           </Button>
                           <Button
-                            variant="resting-active"
+                            variant="outline"
                             className="size-8 !rounded-full p-0"
                             onClick={() => handleCloseSelectedStoreWidget()}
                           >

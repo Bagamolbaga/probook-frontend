@@ -1,8 +1,8 @@
-import BookingConfirmationScene from "@/scenes/bookingFlow/bookingConfirmation";
+import BookingConfirmationScene from "@/src/scenes/bookingFlow/bookingConfirmation";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { redirect } from "@/i18n";
+import { redirect } from "@/src/i18n";
 
 export async function generateMetadata({
   params,

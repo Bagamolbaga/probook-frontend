@@ -1,6 +1,6 @@
 import { FC } from "react";
 import Star from "../icons/Star";
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 
 type Props = {
   raiting: number;

@@ -2,13 +2,13 @@
 
 import { PropsWithChildren, ReactNode } from "react";
 import { Player } from "@lottiefiles/react-lottie-player";
-import { Link, redirect } from "@/i18n";
-import { useAppSession } from "@/hooks/useAppSession";
-import { cn } from "@/utils/cn";
-import { useGetCompanySubscriptionQuery } from "@/api/queries/company/subscription";
-import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { Link, redirect } from "@/src/i18n";
+import { useAppSession } from "@/src/hooks/useAppSession";
+import { cn } from "@/src/utils/cn";
+import { useGetCompanySubscriptionQuery } from "@/src/api/queries/company/subscription";
+import BlackLogoAnimation from "@/src/assets/lottiefiles/blackLogoAnimation.json";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 
 const TYPO = {
   TRIAL_OVER: {

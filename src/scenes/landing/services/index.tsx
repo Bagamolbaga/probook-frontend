@@ -1,23 +1,23 @@
 /* eslint-disable react/no-unescaped-entities */
 import Image from "next/image";
 
-import Button from "@/components/ui/button";
-import CheckmarkCircle from "@/components/ui/icons/CheckmarkCircle";
+import { Button } from "@/src/components/ui/button";
+import CheckmarkCircle from "@/src/components/ui/icons/CheckmarkCircle";
 
-import Image1 from "@/assets/services_page_section_1.png";
-import Image2_1 from "@/assets/services_page_section_2_1.png";
-import Image2_2 from "@/assets/services_page_section_2_2.png";
-import Image2_3 from "@/assets/services_page_section_2_3.png";
-import Image3_1 from "@/assets/services_page_section_3_1.png";
-import Image3_2 from "@/assets/services_page_section_3_2.png";
-import Image3_3 from "@/assets/services_page_section_3_3.png";
-import SettingsIcon from "@/components/ui/icons/Settings";
-import ChartLineIcon from "@/components/ui/icons/ChartLine";
-import PeoplesIcon from "@/components/ui/icons/Peoples";
-import PaperIcon from "@/components/ui/icons/Paper";
-import LampIcon from "@/components/ui/icons/lamp";
-import WindTurbineIcon from "@/components/ui/icons/WindTurbine";
-import { getTranslations, Link } from "@/i18n";
+import Image1 from "@/src/assets/services_page_section_1.png";
+import Image2_1 from "@/src/assets/services_page_section_2_1.png";
+import Image2_2 from "@/src/assets/services_page_section_2_2.png";
+import Image2_3 from "@/src/assets/services_page_section_2_3.png";
+import Image3_1 from "@/src/assets/services_page_section_3_1.png";
+import Image3_2 from "@/src/assets/services_page_section_3_2.png";
+import Image3_3 from "@/src/assets/services_page_section_3_3.png";
+import SettingsIcon from "@/src/components/ui/icons/Settings";
+import ChartLineIcon from "@/src/components/ui/icons/ChartLine";
+import PeoplesIcon from "@/src/components/ui/icons/Peoples";
+import PaperIcon from "@/src/components/ui/icons/Paper";
+import LampIcon from "@/src/components/ui/icons/lamp";
+import WindTurbineIcon from "@/src/components/ui/icons/WindTurbine";
+import { getTranslations, Link } from "@/src/i18n";
 
 const ServicesScene: any = async () => {
   const t = await getTranslations();
@@ -56,7 +56,7 @@ const ServicesScene: any = async () => {
                 required
               />
               <Link href="/contact">
-                <Button variant="primary" type="submit">
+                <Button variant="default" type="submit">
                   {t("ui.getStartedFree")}
                 </Button>
               </Link>
@@ -160,7 +160,7 @@ const ServicesScene: any = async () => {
                 </p>
               </div>
               <Link href="/contact">
-                <Button variant="primary" className="mt-8">
+                <Button variant="default" className="mt-8">
                   {t("ui.getStartedFree")}
                 </Button>
               </Link>
@@ -199,7 +199,7 @@ const ServicesScene: any = async () => {
                 </p>
               </div>
               <Link href="/contact">
-                <Button variant="primary" className="mt-8 sm:ml-auto">
+                <Button variant="default" className="mt-8 sm:ml-auto">
                   {t("ui.getStartedFree")}
                 </Button>
               </Link>
@@ -248,7 +248,7 @@ const ServicesScene: any = async () => {
                 </p>
               </div>
               <Link href="/contact">
-                <Button variant="primary" className="mt-8">
+                <Button variant="default" className="mt-8">
                   {t("ui.getStartedFree")}
                 </Button>
               </Link>
@@ -327,7 +327,7 @@ const ServicesScene: any = async () => {
               })}
             </p>
             <Link href="/contact">
-              <Button className="mt-9" variant="dark">
+              <Button className="mt-9" variant="outline">
                 {t("landingServices.purpleSection.btn")}
               </Button>
             </Link>

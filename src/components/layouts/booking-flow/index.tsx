@@ -1,22 +1,29 @@
-import LandingFooter from "@/components/footers/landing";
-import { BookingFlowHeader } from "@/components/headers/landing";
+import LandingFooter from "@/src/components/footers/landing";
+import { BookingFlowHeader } from "@/src/components/headers/landing";
+import { cn } from "@/src/utils/cn";
 import { PropsWithChildren, ReactNode } from "react";
 
 type Props = {
-  header?: ReactNode
-  footer?: ReactNode
+  header?: ReactNode;
+  footer?: ReactNode;
 };
 
 export default function BookingFlowLayout({
-  header = BookingFlowHeader,
+  header = <BookingFlowHeader />,
   footer,
   children,
 }: PropsWithChildren<Props>) {
   return (
-    <div className="relative w-full mx-auto">
+    <div className="relative min-h-screen w-full mx-auto bg-[#F5F5FA]">
       {header}
 
-      <div className="max-w-content min-h-screenExHeader mx-auto pt-[158px] pb-[80px] flex flex-col px-layoutLeftRight md:px-layoutLeftRight_md sm:px-layoutLeftRight_sm sm:pt-[100px]">
+      <div
+        className={cn(
+          "max-w-content min-h-screenExHeader max-h-dvh mx-auto pt-[90px] pb-[80px] flex flex-col px-layoutLeftRight  ",
+          "md:flex md:flex-col md:px-layoutLeftRight_md",
+          "sm:px-layoutLeftRight_sm sm:pt-[100px]"
+        )}
+      >
         {children}
       </div>
 

@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { authOptions } from "@/lib/auth";
-import RecoveryPasswordScene from "@/scenes/auth/business/recoveryPassword";
+import { authOptions } from "@/src/lib/auth";
+import RecoveryPasswordScene from "@/src/scenes/auth/business/recoveryPassword";
 
 export async function generateMetadata({
   params,

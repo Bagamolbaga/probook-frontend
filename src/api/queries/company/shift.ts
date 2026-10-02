@@ -4,21 +4,21 @@ import {
   useQueryClient,
   UseQueryOptions,
 } from "@tanstack/react-query";
-import { useApiClient } from "@/api/context";
+import { useApiClient } from "@/src/api/context";
 import {
   TGetCompanyShiftsForDateRangeArgs,
   TCreateCustomShiftForDateArgs,
   TUpdateCustomShiftForDateArgs,
   TGetCompanyShiftsForDateRangeRes,
-} from "@/api/entities/company";
+} from "@/src/api/entities/company";
 import {
   TCreateCompanyShift,
   TDeleteCompanyShift,
   TGetCompanyShiftById,
   TGetCompanyShifts,
   TUpdateCompanyShift,
-} from "@/api/entities/company/shift";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+} from "@/src/api/entities/company/shift";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 
 type CustomUseQueryOptions<TRes> = Omit<UseQueryOptions<TRes, Error>, "queryKey">;
 

@@ -11,44 +11,44 @@ import Image from "next/image";
 import { Syne } from "next/font/google";
 import { useForm } from "react-hook-form";
 import { format } from "date-fns";
-import { Link, usePathname, useRouter, useTranslations } from "@/i18n";
-import { cn } from "@/utils/cn";
+import { Link, usePathname, useRouter, useTranslations } from "@/src/i18n";
+import { cn } from "@/src/utils/cn";
 
-import { TTimeSlot } from "@/constants/timeSlots";
+import { TTimeSlot } from "@/src/constants/timeSlots";
 
 import {
   useGetCompaniesQuery,
   useSearchCompaniesQuery,
   useSearchServicesAndStoresQuery,
-} from "@/api/queries/company";
-import { TSearchCompany } from "@/api/entities/company";
+} from "@/src/api/queries/company";
+import { TSearchCompany } from "@/src/api/entities/company";
 import Slider from "./components/Slider";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { PREVIOUSLY_BOOKED_SERVICES } from "@/constants/keys";
-import Button from "@/components/ui/button";
+import { useLocalStorage } from "@/src/hooks/useLocalStorage";
+import { PREVIOUSLY_BOOKED_SERVICES } from "@/src/constants/keys";
+import { Button } from "@/src/components/ui/button";
 import ServiceTypesPreview from "./components/sections/ServiceTypesPreview";
 import TopServiceProviders from "./components/sections/TopServiceProviders";
-import LogoFullIcon from "@/components/ui/icons/LogoFull";
-import ChangeLanguage from "@/components/ui/button/ChangeLanguage";
+import LogoFullIcon from "@/src/components/ui/icons/LogoFull";
+import ChangeLanguage from "@/src/components/ui/button/ChangeLanguage";
 import Search from "./components/Search";
-import BGPattern from "@/assets/search/serviceTypesPreview/bg_pattern_large.png";
+import BGPattern from "@/src/assets/search/serviceTypesPreview/bg_pattern_large.png";
 
-import CircleImgLeft1 from "@/assets/search/mainSectionCircles/left_1.jpg";
-import CircleImgLeft2 from "@/assets/search/mainSectionCircles/left_2.jpg";
-import CircleImgLeft3 from "@/assets/search/mainSectionCircles/left_3.jpg";
-import CircleImgRight1 from "@/assets/search/mainSectionCircles/right_1.jpg";
-import CircleImgRight2 from "@/assets/search/mainSectionCircles/right_2.jpg";
-import CircleImgRight3 from "@/assets/search/mainSectionCircles/right_3.jpg";
-import Figure1 from "@/assets/search/figures/figure_1.png";
-import Figure2 from "@/assets/search/figures/figure_2.png";
-import Figure3 from "@/assets/search/figures/figure_3.png";
+import CircleImgLeft1 from "@/src/assets/search/mainSectionCircles/left_1.jpg";
+import CircleImgLeft2 from "@/src/assets/search/mainSectionCircles/left_2.jpg";
+import CircleImgLeft3 from "@/src/assets/search/mainSectionCircles/left_3.jpg";
+import CircleImgRight1 from "@/src/assets/search/mainSectionCircles/right_1.jpg";
+import CircleImgRight2 from "@/src/assets/search/mainSectionCircles/right_2.jpg";
+import CircleImgRight3 from "@/src/assets/search/mainSectionCircles/right_3.jpg";
+import Figure1 from "@/src/assets/search/figures/figure_1.png";
+import Figure2 from "@/src/assets/search/figures/figure_2.png";
+import Figure3 from "@/src/assets/search/figures/figure_3.png";
 import FindedStores from "./components/sections/FindedStores";
 import FindedStoresMobile from "./components/sections/FindedStores/FindedStoresMobile";
 
 const syne = Syne({ weight: ["400", "500", "600", "700", "800"], subsets: ["latin"] });
 
 export type TLocation = {
-  address1: string | undefined;
+  address: string | undefined;
   address2: string | undefined;
   city: string | undefined;
   country: {
@@ -56,7 +56,7 @@ export type TLocation = {
     name: string;
   };
   initial: {
-    address1: string | undefined;
+    address: string | undefined;
     address2: string | undefined;
     country:
       | {
@@ -352,7 +352,7 @@ const SearchPageScene = () => {
               })}
             >
               <Button
-                variant="dark-outline"
+                variant="outline"
                 className="!py-3 !px-6 !border-none !rounded-full hover:text-purplePrimary"
               >
                 {t("navigation.landing.header.forBusiness")}

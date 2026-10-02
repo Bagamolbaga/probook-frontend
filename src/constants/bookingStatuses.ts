@@ -1,10 +1,23 @@
-export const BOOKING_STATUSES = [
-  "PENDING",
-  "CONFIRMED",
-  "COMPLETED",
-  "BLOCKED",
-  "CANCELLED",
-] as const satisfies readonly TApiBooking["status"][];
+import {
+  Ban,
+  CircleCheck,
+  CircleDashedCheck,
+  CircleX,
+  Clock,
+  LucideIcon,
+} from "lucide-react";
+
+export enum BOOKING_STATUS {
+  PENDING = "PENDING",
+  CONFIRMED = "CONFIRMED",
+  COMPLETED = "COMPLETED",
+  BLOCKED = "BLOCKED",
+  CANCELLED = "CANCELLED",
+}
+
+export const BOOKING_STATUSES = Object.values(
+  BOOKING_STATUS
+) satisfies readonly TApiBooking["status"][];
 
 export const SPECIALIST_BOOKING_STATUS_TRANSITIONS: Partial<
   Record<TApiBooking["status"], readonly TApiBooking["status"][]>
@@ -24,9 +37,18 @@ type BookingStatusStyle = {
   dotClassName: string;
 };
 
+export const BOOKING_STATUS_ICONS: Record<BookingStatus, LucideIcon> = {
+  PENDING: Clock,
+  CONFIRMED: CircleDashedCheck,
+  COMPLETED: CircleCheck,
+  CANCELLED: CircleX,
+  BLOCKED: Ban,
+};
+
 export const BOOKING_STATUS_STYLES = {
   PENDING: {
-    timelineClassName: "bg-yellowPrimary/10 hover:bg-yellowPrimary/20",
+    timelineClassName:
+      "bg-yellowPrimary/30 border-yellowPrimary hover:bg-yellowPrimary/20",
     textClassName: "text-yellowPrimary",
     badgeClassName: "bg-yellowExtraLight text-darkPrimary",
     borderClassName: "border-yellowPrimary",
@@ -40,7 +62,7 @@ export const BOOKING_STATUS_STYLES = {
     dotClassName: "bg-greenPrimary",
   },
   COMPLETED: {
-    timelineClassName: "bg-purplePrimary/10 hover:bg-purplePrimary/20",
+    timelineClassName: "bg-purplePrimary/20 hover:bg-purplePrimary/30",
     textClassName: "text-purplePrimary",
     badgeClassName: "bg-purpleExtraLight text-purplePrimary",
     borderClassName: "border-purplePrimary",

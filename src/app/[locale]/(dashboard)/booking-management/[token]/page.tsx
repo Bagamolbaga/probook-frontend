@@ -1,4 +1,4 @@
-import BookingManagementScene from "@/scenes/main/bookingManagement";
+import BookingManagementScene from "@/src/scenes/main/bookingManagement";
 
 const BookingManagementPage = () => <BookingManagementScene />;
 

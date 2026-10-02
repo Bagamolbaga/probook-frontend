@@ -1,8 +1,9 @@
-import { ApiClientCore } from "@/api/core";
+import { ApiClientCore } from "@/src/api/core";
 import { format } from "date-fns";
 import { AxiosResponse } from "axios";
-import { removeEmptyFields } from "@/utils/removeEmptyFields";
-import { BackendShift, toFrontendShift } from "@/api/entities/company/shift";
+import { removeEmptyFields } from "@/src/utils/removeEmptyFields";
+import { BackendShift, toFrontendShift } from "@/src/api/entities/company/shift";
+import type { CompanyReviews } from "@/src/api/entities/customer";
 
 export type TGetCompaniesArgs = {
   queryParams?: {
@@ -85,6 +86,12 @@ export type TDeleteCompanySpecialistsArgs = {
 
 export type TGetCompanyDetailsArgs = {
   companyId: string;
+};
+
+export type TGetCompanyReviewsArgs = {
+  companyId: string;
+  cursor?: string;
+  limit?: number;
 };
 
 export type TUpdateCompanyDetailsArgs = {
@@ -225,6 +232,15 @@ export class ApiClientCompany extends ApiClientCore {
 
   async getCompanyDetails({ companyId }: TGetCompanyDetailsArgs) {
     return this.instanceWithoutAuth.get<TCompany>(`/companies/${companyId}`);
+  }
+
+  async getCompanyReviews({ companyId, cursor, limit = 10 }: TGetCompanyReviewsArgs) {
+    return this.instanceWithoutAuth.get<CompanyReviews>(
+      `/companies/${companyId}/reviews`,
+      {
+        params: { cursor, limit },
+      }
+    );
   }
 
   async updateCompanyDetails({

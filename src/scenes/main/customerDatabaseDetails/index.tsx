@@ -1,34 +1,34 @@
 "use client";
 
-import UserNameWithAvatar from "@/components/ui/table/customCells/UserNameWithAvatar";
+import UserNameWithAvatar from "@/src/components/ui/table/customCells/UserNameWithAvatar";
 import { Player } from "@lottiefiles/react-lottie-player";
 import { GridColDef, GridSortModel } from "@mui/x-data-grid";
 import { useMemo, useRef, useState } from "react";
-import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
-import Button from "@/components/ui/button";
-import ArrowRight from "@/components/ui/icons/ArrowRight";
+import BlackLogoAnimation from "@/src/assets/lottiefiles/blackLogoAnimation.json";
+import { Button } from "@/src/components/ui/button";
+import ArrowRight from "@/src/components/ui/icons/ArrowRight";
 import Image from "next/image";
-import ListItemEmptyPlaceholder from "@/assets/customerDatabase/ListItemEmptyPlaceholder.svg";
-import { useRouter } from "@/i18n";
+import ListItemEmptyPlaceholder from "@/src/assets/customerDatabase/ListItemEmptyPlaceholder.svg";
+import { useRouter } from "@/src/i18n";
 import { AxiosError } from "axios";
-import SceneTitle from "@/components/sceneHeader/SceneTitle";
-import Table from "@/components/ui/table";
+import SceneTitle from "@/src/components/sceneHeader/SceneTitle";
+import Table from "@/src/components/ui/table";
 import CustomerDetailsWidget from "./components/CustomerDetailsWidget";
 import {
   useGetCustomerBookingsHistoryQuery,
   useGetCustomerDetailsQuery,
-} from "@/api/queries/users";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+} from "@/src/api/queries/users";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 import { format } from "date-fns";
-import ScrollableCell from "@/components/ui/table/customCells/ScrollableCell";
-import { formatCurrency } from "@/utils/formatCurrency";
-import PriceCell from "@/components/ui/table/customCells/Price";
-import BookingStatusCell from "@/components/ui/table/customCells/BookingStatus";
-import MoneyIcon from "@/components/ui/icons/Money";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import { cn } from "@/utils/cn";
-import type { TCustomerBookingOrdering } from "@/api/entities/user/customer";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
+import ScrollableCell from "@/src/components/ui/table/customCells/ScrollableCell";
+import { formatCurrency } from "@/src/utils/formatCurrency";
+import PriceCell from "@/src/components/ui/table/customCells/Price";
+import BookingStatusCell from "@/src/components/ui/table/customCells/BookingStatus";
+import MoneyIcon from "@/src/components/ui/icons/Money";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import { cn } from "@/src/utils/cn";
+import type { TCustomerBookingOrdering } from "@/src/api/entities/user/customer";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
 
 type TCustomerVisitHistoryTableRowItem = {
   id: string | number;
@@ -190,7 +190,7 @@ const CustomerDatabaseDetailsScene = ({ customerId }: Props) => {
           <SceneTitle>
             <div className="flex items-center gap-5">
               <Button
-                variant="resting-active"
+                variant="outline"
                 className="size-9 p-2"
                 onClick={goBackHandler}
               >
@@ -210,7 +210,7 @@ const CustomerDatabaseDetailsScene = ({ customerId }: Props) => {
           </p>
           <Button
             className="mt-6 flex items-center gap-3"
-            variant="primary"
+            variant="default"
             onClick={goBackHandler}
           >
             <p className="text-sm text-white">Go back</p>
@@ -226,7 +226,7 @@ const CustomerDatabaseDetailsScene = ({ customerId }: Props) => {
         <SceneTitle>
           <div className="flex items-center gap-5">
             <Button
-              variant="resting-active"
+              variant="outline"
               className="size-9 p-2"
               onClick={goBackHandler}
             >

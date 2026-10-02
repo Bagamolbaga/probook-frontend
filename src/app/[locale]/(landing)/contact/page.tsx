@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import ContactScene from "@/scenes/landing/contact";
+import ContactScene from "@/src/scenes/landing/contact";
 
 export async function generateMetadata({
   params,

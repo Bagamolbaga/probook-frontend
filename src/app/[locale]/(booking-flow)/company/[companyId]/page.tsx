@@ -1,13 +1,13 @@
 import CompanyDetailsScene, {
   PublicCompanyFooter,
-} from "@/scenes/bookingFlow/companyDetails";
+} from "@/src/scenes/bookingFlow/companyDetails";
 import { notFound } from "next/navigation";
 import React from "react";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { redirect } from "@/i18n";
-import BookingFlowLayout from "@/components/layouts/booking-flow";
-import { BaseHeader } from "@/components/headers/landing";
+import { redirect } from "@/src/i18n";
+import BookingFlowLayout from "@/src/components/layouts/booking-flow";
+import { BaseHeader } from "@/src/components/headers/landing";
 
 export async function generateMetadata({
   params,
@@ -30,7 +30,7 @@ export async function generateMetadata({
 
     return {
       title: `${companyDetails?.name} | Bowers`,
-      description: `${companyDetails?.address1} | Bowers`,
+      description: `${companyDetails?.address} | Bowers`,
     };
   } catch (error) {
     return {

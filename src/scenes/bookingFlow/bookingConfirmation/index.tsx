@@ -3,33 +3,33 @@
 import { FC, useMemo, useState } from "react";
 import Image from "next/image";
 import { format, parse } from "date-fns";
-import { Link } from "@/i18n";
+import { Link } from "@/src/i18n";
 
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
-import { useGetBookingByTokenQuery } from "@/api/queries/booking";
-import CompanyCartWidget from "@/components/ui/widgets/companyCart";
-import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
-import CheckmarkCircle from "@/components/ui/icons/CheckmarkCircle";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import Spinner from "@/components/ui/loaders/Spinner";
-import ClockIcon from "@/components/ui/icons/Clock";
-import Button from "@/components/ui/button";
-import CustomScrollbar from "@/styles/scrollbar.module.sass";
-import { useApiClient } from "@/api/context";
-import { TIME_SLOTS } from "@/constants/timeSlots";
-import { formatCurrency } from "@/utils/formatCurrency";
-import { cn } from "@/utils/cn";
-import { toaster } from "@/components/ui/toaster";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
+import { useGetBookingByTokenQuery } from "@/src/api/queries/booking";
+import CompanyCartWidget from "@/src/components/ui/widgets/companyCart";
+import ArrowSecondaryDownIcon from "@/src/components/ui/icons/ArrowSecondaryDown";
+import CheckmarkCircle from "@/src/components/ui/icons/CheckmarkCircle";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import Spinner from "@/src/components/ui/loaders/Spinner";
+import ClockIcon from "@/src/components/ui/icons/Clock";
+import { Button } from "@/src/components/ui/button";
+import CustomScrollbar from "@/src/styles/scrollbar.module.sass";
+import { useApiClient } from "@/src/api/context";
+import { TIME_SLOTS } from "@/src/constants/timeSlots";
+import { formatCurrency } from "@/src/utils/formatCurrency";
+import { cn } from "@/src/utils/cn";
+import { toaster } from "@/src/components/ui/toaster";
 import {
   DateSection,
   PriceSection,
   ServicesSection,
   StaffSection,
   TimeSection,
-} from "@/components/ui/widgets/companyCart/components";
-import { toSlug } from "@/utils/toSlug";
-import { useUpdateBookingLinkOverdue } from "@/hooks/useUpdateBookingLinkOverdue";
-import { HORS_BEFORE_UPDATE_LINK_IS_OVERDUE } from "@/constants/other";
+} from "@/src/components/ui/widgets/companyCart/components";
+import { toSlug } from "@/src/utils/toSlug";
+import { useUpdateBookingLinkOverdue } from "@/src/hooks/useUpdateBookingLinkOverdue";
+import { HORS_BEFORE_UPDATE_LINK_IS_OVERDUE } from "@/src/constants/other";
 import UpdateLinkIsOverdue from "../components/UpdateLinkIsOverdue";
 
 type Props = {
@@ -74,8 +74,8 @@ const BookingConfirmationScene: FC<Props> = ({ token: tokenFromUrl }) => {
       arr.push(getCompanyDetailsQuery.data?.city);
     }
 
-    if (getCompanyDetailsQuery.data?.address1) {
-      arr.push(getCompanyDetailsQuery.data?.address1);
+    if (getCompanyDetailsQuery.data?.address) {
+      arr.push(getCompanyDetailsQuery.data?.address);
     }
 
     return arr.join(", ");
@@ -137,7 +137,7 @@ const BookingConfirmationScene: FC<Props> = ({ token: tokenFromUrl }) => {
           </p>
           <div className="w-full mt-[76px] flex justify-between gap-5">
             <Link href="/" className="w-full">
-              <Button className="px-10 w-full" variant="resting">
+              <Button className="px-10 w-full" variant="outline">
                 Back to homepage
               </Button>
             </Link>
@@ -154,7 +154,7 @@ const BookingConfirmationScene: FC<Props> = ({ token: tokenFromUrl }) => {
           <Link
             href={`/company/${toSlug(getCompanyDetailsQuery.data?.name)}?storeId=${getCompanyDetailsQuery.data?.id}`}
           >
-            <Button className="!p-2" variant="resting">
+            <Button className="!p-2" variant="outline">
               <ArrowSecondaryDownIcon className="rotate-90 stroke-greyPrimary" />
             </Button>
           </Link>
@@ -216,7 +216,7 @@ const BookingConfirmationScene: FC<Props> = ({ token: tokenFromUrl }) => {
                           href={`/company/${toSlug(getCompanyDetailsQuery.data?.name)}/booking-manage/${token}`}
                           className="w-full"
                         >
-                          <Button className="w-full" variant="dark">
+                          <Button className="w-full" variant="outline">
                             Reschedule
                           </Button>
                         </Link>

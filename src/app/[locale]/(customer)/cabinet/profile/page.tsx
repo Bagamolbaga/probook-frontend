@@ -1,4 +1,4 @@
-import CustomerProfileScene from "@/scenes/customerCabinet/Profile";
+import CustomerProfileScene from "@/src/scenes/customerCabinet/Profile";
 
 export default function CustomerProfilePage() {
   return <CustomerProfileScene />;

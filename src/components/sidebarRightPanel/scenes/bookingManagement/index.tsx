@@ -3,10 +3,10 @@
 import { useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import Button from "@/components/ui/button";
-import DatePicker from "@/components/ui/DatePicker";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import { useClickOutside } from "@/hooks/useClickOutside";
+import { Button } from "@/src/components/ui/button";
+import DatePicker from "@/src/components/ui/DatePicker";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import { useClickOutside } from "@/src/hooks/useClickOutside";
 import { BookingOverviewWidget } from "../../widgets/bookingOverview";
 import { StaffWorkloadWidget } from "../../widgets/staffWorkload";
 import { UpcomingBookingsWidget } from "../../widgets/upcomingBookings";

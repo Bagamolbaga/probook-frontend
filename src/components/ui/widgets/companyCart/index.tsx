@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { FC, ReactNode } from "react";
 import LocationIcon from "../../icons/Location";
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 
 type Props = {
   avatar?: string;

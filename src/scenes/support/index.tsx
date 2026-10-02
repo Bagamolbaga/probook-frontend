@@ -4,13 +4,13 @@ import { useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { usePathname, useRouter } from "@/i18n";
+import { usePathname, useRouter } from "@/src/i18n";
 import { useForm } from "react-hook-form";
 
-import Button from "@/components/ui/button";
-import PersonIcon from "@/components/ui/icons/Person";
-import TextField from "@/components/ui/inputs/TextField";
-import { CATEGORIES, QUESTIONS } from "@/constants/supportPageData";
+import { Button } from "@/src/components/ui/button";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import TextField from "@/src/components/ui/inputs/TextField";
+import { CATEGORIES, QUESTIONS } from "@/src/constants/supportPageData";
 
 const SupportScene = () => {
   const pathname = usePathname();

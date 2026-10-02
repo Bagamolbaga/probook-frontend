@@ -1,6 +1,6 @@
-import { ApiClientCore } from "@/api/core";
-import type { AuthResponse } from "@/lib/auth";
-import type { CompanyMembershipRole } from "@/types/user";
+import { ApiClientCore } from "@/src/api/core";
+import type { AuthResponse } from "@/src/lib/auth";
+import type { CompanyMembershipRole } from "@/src/types/user";
 
 export type InvitationStatus = "PENDING" | "ACCEPTED" | "EXPIRED" | "REVOKED";
 export type InvitationDeliveryStatus = "PENDING" | "SENT" | "FAILED";

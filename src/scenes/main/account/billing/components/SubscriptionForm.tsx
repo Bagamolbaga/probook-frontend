@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/utils/cn";
-import { formatCurrency } from "@/utils/formatCurrency";
+import { cn } from "@/src/utils/cn";
+import { formatCurrency } from "@/src/utils/formatCurrency";
 import { addDays, differenceInDays, format } from "date-fns";
 import { useMemo } from "react";
 

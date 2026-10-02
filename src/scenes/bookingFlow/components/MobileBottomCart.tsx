@@ -3,14 +3,14 @@
 import { FC, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { motion, PanInfo, Variants } from "framer-motion";
 import { createPortal } from "react-dom";
-import { formatCurrency } from "@/utils/formatCurrency";
-import { cn } from "@/utils/cn";
-import CustomScrollbar from "@/styles/scrollbar.module.sass";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import ClockIcon from "@/components/ui/icons/Clock";
+import { formatCurrency } from "@/src/utils/formatCurrency";
+import { cn } from "@/src/utils/cn";
+import CustomScrollbar from "@/src/styles/scrollbar.module.sass";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import ClockIcon from "@/src/components/ui/icons/Clock";
 import { format } from "date-fns";
 import { useTranslations } from "next-intl";
-import { TIME_SLOTS } from "@/constants/timeSlots";
+import { TIME_SLOTS } from "@/src/constants/timeSlots";
 
 type Props = {
   isDashboard?: boolean;
@@ -181,7 +181,7 @@ const MobileBottomCart: FC<Props> = ({
                       <h5 className="ml-5 text-base font-bold">{company?.name}</h5>
                       <p className="mt-1 flex items-start gap-1 text-sm text-greyPrimary">
                         <LocationIcon className="min-w-4 min-h-4" />
-                        {company?.address1}
+                        {company?.address}
                       </p>
                     </div>
                   </div>

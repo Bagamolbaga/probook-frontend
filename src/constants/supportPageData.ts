@@ -1,6 +1,6 @@
-import Image1 from "@/assets/support_page_1.png";
-import Image2 from "@/assets/support_page_2.png";
-import Image3 from "@/assets/support_page_3.png";
+import Image1 from "@/src/assets/support_page_1.png";
+import Image2 from "@/src/assets/support_page_2.png";
+import Image3 from "@/src/assets/support_page_3.png";
 
 export const CATEGORIES = [
   {

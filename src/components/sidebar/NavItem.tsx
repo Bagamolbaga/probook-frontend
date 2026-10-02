@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import useWindowWidth from "@/hooks/useWindowWidth";
-import { Link, usePathname } from "@/i18n";
-import { useThemeStore } from "@/stores/theme";
+import useWindowWidth from "@/src/hooks/useWindowWidth";
+import { Link, usePathname } from "@/src/i18n";
+import { useThemeStore } from "@/src/stores/theme";
 import clsx from "clsx";
 import React, { FC } from "react";
 import { useStore } from "zustand";

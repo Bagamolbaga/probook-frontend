@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import React from "react";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import SpecialistCalendarScene from "@/scenes/company/specialistCalendar";
-import { redirect } from "@/i18n";
+import SpecialistCalendarScene from "@/src/scenes/company/specialistCalendar";
+import { redirect } from "@/src/i18n";
 
 export async function generateMetadata({
   params,

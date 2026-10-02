@@ -9,10 +9,10 @@ const AccountNotificationsScene = () => {
 
       <div className="w-full mt-10 flex items-end justify-between">
         <div className="flex items-center gap-[46px]">
-          {/* <Button variant="primary" onClick={form.handleSubmit(updateInformationHandler)}>
+          {/* <Button variant="default" onClick={form.handleSubmit(updateInformationHandler)}>
             Update Settings
           </Button>
-          <Button variant="resting" className="py-3" onClick={cancelUpdateHandler}>
+          <Button variant="outline" className="py-3" onClick={cancelUpdateHandler}>
             Cancel
           </Button> */}
         </div>

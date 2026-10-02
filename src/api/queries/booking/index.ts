@@ -6,7 +6,8 @@ import {
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
-import { useApiClient } from "@/api/context";
+import { useApiClient } from "@/src/api/context";
+import { useAppSession } from "@/src/hooks/useAppSession";
 import {
   TCreateBookingArgs,
   TDeleteBookingsArgs,
@@ -18,12 +19,12 @@ import {
   TUpdateBookingByTokenArgs,
   TRescheduleOwnBookingArgs,
   TUpdateOwnBookingStatusArgs,
-} from "@/api/entities/booking";
+} from "@/src/api/entities/booking";
 import {
   TGetCompanySalesAndCustomerStat,
   TGetCompanySalesAndCustomerStatRes,
-} from "@/api/entities/company";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+} from "@/src/api/entities/company";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 import { invalidateCompanyBookingQueries } from "./cache";
 
 type TGetBookings<T = unknown> = {
@@ -136,10 +137,18 @@ export const useGetBookingAvailabilityQuery = (
   options: Options<TGetBookingAvailabilityArgs, TBookingAvailability>
 ) => {
   const apiClient = useApiClient();
+  const session = useAppSession();
   const { companyId, bookingId, specialistId, date, queryOptions } = options;
 
   return useQuery({
-    queryKey: ["booking_availability", companyId, specialistId, date, bookingId],
+    queryKey: [
+      "booking_availability",
+      companyId,
+      session.data?.user?.id ?? null,
+      specialistId,
+      date,
+      bookingId,
+    ],
     queryFn: async () =>
       (
         await apiClient.bookings.getBookingAvailability({
@@ -159,11 +168,19 @@ export const useGetBookingAvailabilitiesQuery = (
   options: Array<Options<TGetBookingAvailabilityArgs, TBookingAvailability>>
 ) => {
   const apiClient = useApiClient();
+  const session = useAppSession();
 
   return useQueries({
     queries: options.map(
       ({ companyId, bookingId, specialistId, date, queryOptions }) => ({
-        queryKey: ["booking_availability", companyId, specialistId, date, bookingId],
+        queryKey: [
+          "booking_availability",
+          companyId,
+          session.data?.user?.id ?? null,
+          specialistId,
+          date,
+          bookingId,
+        ],
         queryFn: async () =>
           (
             await apiClient.bookings.getBookingAvailability({

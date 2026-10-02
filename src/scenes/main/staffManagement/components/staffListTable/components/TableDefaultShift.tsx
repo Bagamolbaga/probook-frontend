@@ -1,6 +1,6 @@
-import { SHIFT_COLORS } from "@/constants/shiftColors";
-import { cn } from "@/utils/cn";
-import { TIME_SLOTS } from "@/constants/timeSlots";
+import { SHIFT_COLORS } from "@/src/constants/shiftColors";
+import { cn } from "@/src/utils/cn";
+import { TIME_SLOTS } from "@/src/constants/timeSlots";
 
 type Props = {
   shiftPresets: TShift[];

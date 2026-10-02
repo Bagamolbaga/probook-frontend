@@ -1,6 +1,6 @@
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 import Image from "next/image";
-import LogoIconSvg from "@/assets/LogoIcon.svg";
+import LogoIconSvg from "@/src/assets/LogoIcon.svg";
 
 const LogoIcon = ({ className }: { className?: string }) => {
   return (

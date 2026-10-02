@@ -1,5 +1,5 @@
-import { usePathname, useRouter } from "@/i18n";
-import i18nConfig from "@/i18n/config";
+import { usePathname, useRouter } from "@/src/i18n";
+import i18nConfig from "@/src/i18n/config";
 import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";

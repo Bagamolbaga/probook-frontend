@@ -1,4 +1,4 @@
-import HomePageScene from "@/scenes/landing/home";
+import HomePageScene from "@/src/scenes/landing/home";
 
 const HomePage = () => {
   return <HomePageScene />;

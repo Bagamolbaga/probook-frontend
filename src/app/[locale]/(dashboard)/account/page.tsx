@@ -1,4 +1,4 @@
-import AccountScene from "@/scenes/main/account";
+import AccountScene from "@/src/scenes/main/account";
 
 const AccountPage = () => {
   return <AccountScene />;

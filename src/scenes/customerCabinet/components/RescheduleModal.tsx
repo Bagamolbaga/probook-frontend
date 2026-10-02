@@ -4,13 +4,13 @@ import axios from "axios";
 import { format } from "date-fns";
 import { Activity, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import type { CustomerBooking } from "@/api/entities/customer";
-import { useRescheduleCustomerBookingMutation } from "@/api/queries/customer";
-import Button from "@/components/ui/button";
-import Modal from "@/components/ui/modal";
-import { toaster } from "@/components/ui/toaster";
-import { TIME_SLOTS } from "@/constants/timeSlots";
-import { useLocale, useTranslations } from "@/i18n";
+import type { CustomerBooking } from "@/src/api/entities/customer";
+import { useRescheduleCustomerBookingMutation } from "@/src/api/queries/customer";
+import { Button } from "@/src/components/ui/button";
+import Modal from "@/src/components/ui/modal";
+import { toaster } from "@/src/components/ui/toaster";
+import { TIME_SLOTS } from "@/src/constants/timeSlots";
+import { useLocale, useTranslations } from "@/src/i18n";
 import TimeSelection from "../../bookingFlow/components/TimeSelection";
 import { formatBookingTime } from "./BookingCard";
 
@@ -113,7 +113,7 @@ export default function RescheduleModal({ booking, isOpen, onClose }: Props) {
           </div>
         </div>
 
-        <div className="mt-5 flex max-h-[450px] overflow-y-hidden rounded-xl bg-greyBackgroundLight p-3">
+        <div className="mt-5 flex max-h-[550px] overflow-y-hidden rounded-xl bg-greyBackgroundLight p-3">
           <TimeSelection
             compact
             companyId={booking.company.id}
@@ -142,11 +142,11 @@ export default function RescheduleModal({ booking, isOpen, onClose }: Props) {
         </div>
 
         <footer className="mt-6 flex justify-end gap-3 sm:flex-col-reverse">
-          <Button variant="resting" onClick={onClose}>
+          <Button variant="outline" onClick={onClose}>
             {t("detail.back")}
           </Button>
           <Button
-            variant="primary"
+            variant="default"
             disabled={!date || slots.length === 0 || rescheduleMutation.isPending}
             onClick={() => void submit()}
           >

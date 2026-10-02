@@ -5,15 +5,15 @@
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 
-import Button from "@/components/ui/button";
-import TextField from "@/components/ui/inputs/TextField";
-import ChatIcon from "@/components/ui/icons/Chat";
-import PhoneIcon from "@/components/ui/icons/Phone";
-import StoreIcon from "@/components/ui/icons/Store";
-import EmailIcon from "@/components/ui/icons/Email";
-import PersonIcon from "@/components/ui/icons/Person";
-import ImageBg from "@/assets/contact_page_section_1.png";
-import { EMAIL_REGEXP } from "@/utils/regexps";
+import { Button } from "@/src/components/ui/button";
+import TextField from "@/src/components/ui/inputs/TextField";
+import ChatIcon from "@/src/components/ui/icons/Chat";
+import PhoneIcon from "@/src/components/ui/icons/Phone";
+import StoreIcon from "@/src/components/ui/icons/Store";
+import EmailIcon from "@/src/components/ui/icons/Email";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import ImageBg from "@/src/assets/contact_page_section_1.png";
+import { EMAIL_REGEXP } from "@/src/utils/regexps";
 
 type ContactForm = {
   firstName: string;
@@ -144,10 +144,10 @@ const ContactScene = () => {
                 />
               </div>
               <div className="py-12 flex justify-between">
-                <Button variant="resting" onClick={resetFormHandler}>
+                <Button variant="outline" onClick={resetFormHandler}>
                   Reset
                 </Button>
-                <Button variant="dark" onClick={handleSubmit(handleSignup)}>
+                <Button variant="outline" onClick={handleSubmit(handleSignup)}>
                   Submit
                 </Button>
               </div>

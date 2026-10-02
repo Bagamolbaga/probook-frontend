@@ -6,12 +6,12 @@ import Image from "next/image";
 import {
   useGetCompanyDetailsQuery,
   useUploadCompanyLogoQuery,
-} from "@/api/queries/company";
-import Button from "@/components/ui/button";
-import FileUploadButton from "@/components/ui/button/FileUploadButton";
-import PersonIcon from "@/components/ui/icons/Person";
-import { toaster } from "@/components/ui/toaster";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+} from "@/src/api/queries/company";
+import { Button } from "@/src/components/ui/button";
+import FileUploadButton from "@/src/components/ui/button/FileUploadButton";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import { toaster } from "@/src/components/ui/toaster";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 
 const CompanyLogo = () => {
   const { companyId } = useGetCompanyId();

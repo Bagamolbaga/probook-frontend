@@ -1,6 +1,6 @@
 import { useStore } from "zustand";
-import { useSuperAdminStore } from "@/stores/superAdmin";
-import { getUserCompanies } from "@/utils/permissions";
+import { useSuperAdminStore } from "@/src/stores/superAdmin";
+import { getUserCompanies } from "@/src/utils/permissions";
 import { useAppSession } from "./useAppSession";
 
 type UseGetCompanyIdArgs = {

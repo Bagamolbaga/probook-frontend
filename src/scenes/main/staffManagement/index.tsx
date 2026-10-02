@@ -6,9 +6,9 @@ import Tabs from "@/components/ui/tab";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import OperationHours from "./components/operationHours";
-import SubscriptionChecker from "@/components/subscriptionChecker";
-import MainPagesTitle from "@/components/mainPagesTitle";
-import SuperAdminChecker from "@/components/superAdminChecker";
+import SubscriptionChecker from "@/src/components/subscriptionChecker";
+import MainPagesTitle from "@/src/components/mainPagesTitle";
+import SuperAdminChecker from "@/src/components/superAdminChecker";
 
 const TABS = [
   {

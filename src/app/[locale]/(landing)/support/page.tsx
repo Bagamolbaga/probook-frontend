@@ -1,7 +1,7 @@
 import { Metadata } from "next";
-import { getTranslations, redirect } from "@/i18n";
-import SupportPageScene from "@/scenes/support";
-import { CATEGORIES } from "@/constants/supportPageData";
+import { getTranslations, redirect } from "@/src/i18n";
+import SupportPageScene from "@/src/scenes/support";
+import { CATEGORIES } from "@/src/constants/supportPageData";
 
 export async function generateMetadata({
   params,

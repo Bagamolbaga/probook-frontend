@@ -13,30 +13,30 @@ import {
   isSameDay,
 } from "date-fns";
 
-import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
+import { useGetCompanySpecialistsQuery } from "@/src/api/queries/company/specialists";
 import {
   useGetCompanyShiftsForDateRangeQuery,
   useGetCompanyShiftsQuery,
-} from "@/api/queries/company/shift";
+} from "@/src/api/queries/company/shift";
 
 import ShiftItem from "./components/ShiftItem";
-import Button from "@/components/ui/button";
-import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
-import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
-import ListIsEmptyPlaceholderImage from "@/assets/staffManagement/SpecialistListEmptyOverlay.svg";
-import { cn } from "@/utils/cn";
-import { DEFAULT_SHIFTS } from "@/constants/defaultShifts";
+import { Button } from "@/src/components/ui/button";
+import ArrowSecondaryDownIcon from "@/src/components/ui/icons/ArrowSecondaryDown";
+import BlackLogoAnimation from "@/src/assets/lottiefiles/blackLogoAnimation.json";
+import ListIsEmptyPlaceholderImage from "@/src/assets/staffManagement/SpecialistListEmptyOverlay.svg";
+import { cn } from "@/src/utils/cn";
+import { DEFAULT_SHIFTS } from "@/src/constants/defaultShifts";
 import { useLocale, useTranslations } from "next-intl";
-import { DATE_FNS_LOCALES } from "@/i18n";
-import { TimeManager } from "@/utils/timeManager";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
+import { DATE_FNS_LOCALES } from "@/src/i18n";
+import { TimeManager } from "@/src/utils/timeManager";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
 
 const WEEK_STARTS_ON = 1;
 
 const ShiftManagement = () => {
   const t = useTranslations();
-  const locale = useLocale() as keyof typeof DATE_FNS_LOCALES;
+  const locale = useLocale();
   const { companyId } = useGetCompanyId();
 
   const [firstDayOnWeek, setFirstDayOnWeek] = useState(
@@ -229,14 +229,14 @@ const ShiftManagement = () => {
         <div className="flex items-center gap-1">
           <Button
             className="w-12"
-            variant="resting-active"
+            variant="outline"
             onClick={selectPrevWeekHandler}
           >
             <ArrowSecondaryDownIcon className="rotate-90" />
           </Button>
           <Button
             className="w-12"
-            variant="resting-active"
+            variant="outline"
             onClick={selectNextWeekHandler}
           >
             <ArrowSecondaryDownIcon className="-rotate-90" />

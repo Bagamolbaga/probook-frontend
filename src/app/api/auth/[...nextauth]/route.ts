@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/src/lib/auth";
 import NextAuth from "next-auth";
 
 const handler = NextAuth(authOptions);

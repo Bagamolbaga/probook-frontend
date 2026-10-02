@@ -4,7 +4,7 @@
 
 "use client";
 
-import Button from "@/components/ui/button";
+import { Button } from "@/src/components/ui/button";
 import {
   eachDayOfInterval,
   eachMonthOfInterval,
@@ -22,8 +22,8 @@ import ReactECharts from "echarts-for-react";
 import { EChartOption, EChartsLoadingOption, EChartsOption } from "echarts";
 import { graphic } from "echarts";
 import { useTranslations } from "next-intl";
-import { formatCurrency } from "@/utils/formatCurrency";
-import { TRange } from "@/hooks/useGetDashboardStatistic";
+import { formatCurrency } from "@/src/utils/formatCurrency";
+import { TRange } from "@/src/hooks/useGetDashboardStatistic";
 
 type TData = {
   name: string;

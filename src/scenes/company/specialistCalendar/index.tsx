@@ -5,8 +5,8 @@
 import { useState } from "react";
 import { Player } from "@lottiefiles/react-lottie-player";
 
-import TimeLineCalendar from "@/components/timeLineCalendar";
-import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
+import TimeLineCalendar from "@/src/components/timeLineCalendar";
+import BlackLogoAnimation from "@/src/assets/lottiefiles/blackLogoAnimation.json";
 
 type Props = {
   companyId: string;

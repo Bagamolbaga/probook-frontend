@@ -134,6 +134,13 @@ export const bookingManagement = {
     },
   },
   today: "Сегодня",
+  timeline: {
+    zoom: "Масштаб",
+    previousDay: "Предыдущий день",
+    nextDay: "Следующий день",
+    employees: "Сотрудники",
+    notWorking: "Не рабочее время",
+  },
   addCustomer: "Добавить клиента",
   emptyBooking: {
     title: "Сотрудники не найдены?",

@@ -1,8 +1,8 @@
 import React, { FC, useRef } from "react";
 import { motion } from "framer-motion";
 import clsx from "clsx";
-import Button from "../button";
 import ArrowSecondaryDownIcon from "../icons/ArrowSecondaryDown";
+import { Button } from "@/components/ui/button";
 
 type Tab = {
   id: string;
@@ -40,7 +40,7 @@ const Tabs: FC<Props> = ({ activelTabId, tabs, onSelect }) => {
           <div
             key={t.id}
             className={clsx(
-              "relative z-10 py-2 px-4 text-sm font-bold rounded-[24px] cursor-pointer text-nowrap",
+              "relative z-10 py-2 px-4 text-sm font-medium rounded-[24px] cursor-pointer text-nowrap",
               {
                 "text-white": activelTabId === t.id,
                 " text-greyPrimary transition-colors hover:text-purplePrimary":
@@ -65,14 +65,12 @@ const Tabs: FC<Props> = ({ activelTabId, tabs, onSelect }) => {
       {isScrollable && (
         <div className="absolute z-10 right-0 top-[1px] bottom-[1px] h-[calc(100%-2px)] pl-2 bg-white flex items-center">
           <Button
-            variant="resting-active"
             className="!p-0 !rounded"
             onClick={() => scroll(-300)}
           >
             <ArrowSecondaryDownIcon className="rotate-90" />
           </Button>
           <Button
-            variant="resting-active"
             className="!p-0 !rounded"
             onClick={() => scroll(300)}
           >

@@ -1,7 +1,7 @@
 import { FC } from "react";
 import CheckmarkCircle from "../icons/CheckmarkCircle";
 import XCircle from "../icons/XCircle";
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 import Button from "../button";
 
 type Props = {

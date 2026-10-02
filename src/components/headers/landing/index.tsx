@@ -4,20 +4,22 @@
 
 import { FC, useMemo, useState } from "react";
 import { signOut } from "next-auth/react";
+import Image from "next/image";
+import { useParams, useSearchParams } from "next/navigation";
 import { motion, useMotionValueEvent, useScroll, Variants } from "framer-motion";
 import cn from "clsx";
-import { Link, usePathname, useRouter, useTranslations } from "@/i18n";
+import { Link, usePathname, useRouter, useTranslations } from "@/src/i18n";
 
-import Button from "@/components/ui/button";
-import MenuIcon from "@/components/ui/icons/Menu";
-import { LANDING_NAVIGATION, MAIN_NAVIGATION_ENUM } from "@/constants/navigations";
-import LogoIcon from "@/components/ui/icons/LogoFull";
-import ChangeLanguage from "@/components/ui/button/ChangeLanguage";
-import { useAppSession } from "@/hooks/useAppSession";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
-import Spinner from "@/components/ui/loaders/Spinner";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import { isOwnerMembership } from "@/utils/permissions";
+import { Button } from "@/src/components/ui/button";
+import MenuIcon from "@/src/components/ui/icons/Menu";
+import { LANDING_NAVIGATION, MAIN_NAVIGATION_ENUM } from "@/src/constants/navigations";
+import LogoIcon from "@/src/components/ui/icons/LogoFull";
+import ChangeLanguage from "@/src/components/ui/button/ChangeLanguage";
+import { useAppSession } from "@/src/hooks/useAppSession";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
+import Spinner from "@/src/components/ui/loaders/Spinner";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import { isOwnerMembership } from "@/src/utils/permissions";
 
 type Props = {
   color?: "dark" | "white" | "transparent";
@@ -94,7 +96,7 @@ export const BaseHeader: FC<Props> = ({
     if (session?.user && activeCompany) {
       return (
         <Button
-          variant="primary"
+          variant="default"
           rounded
           onClick={() =>
             router.push(
@@ -116,7 +118,7 @@ export const BaseHeader: FC<Props> = ({
     if (session?.user) {
       return (
         <Button
-          variant="primary"
+          variant="default"
           rounded
           onClick={() => void signOut({ callbackUrl: "/sign-in" })}
         >
@@ -127,7 +129,7 @@ export const BaseHeader: FC<Props> = ({
 
     return (
       <Link href="/sign-in">
-        <Button variant="primary" rounded>
+        <Button variant="default" rounded>
           {t("navigation.landing.header.signIn")}
         </Button>
       </Link>
@@ -196,14 +198,14 @@ export const BaseHeader: FC<Props> = ({
               {withLanguageSwitcher && <ChangeLanguage />}
               {withForCustomersBtn && (
                 <Link href="/search" onClick={closeMobileMenuHandler}>
-                  <Button className="" variant="dark">
+                  <Button className="" variant="outline">
                     {t("navigation.landing.header.forCustomer")}
                   </Button>
                 </Link>
               )}
               {withForBusinessBtn && (
                 <Link href="/">
-                  <Button variant="dark-outline" rounded>
+                  <Button variant="outline" rounded>
                     {t("navigation.landing.header.forBusiness")}
                   </Button>
                 </Link>
@@ -248,7 +250,60 @@ export const BaseHeader: FC<Props> = ({
   );
 };
 
-export const BookingFlowHeader = <BaseHeader withLanguageSwitcher />;
+export const BookingFlowHeader = () => {
+  const params = useParams<{ companyId?: string }>();
+  const searchParams = useSearchParams();
+  const storeId = searchParams.get("storeId");
+  const companyQuery = useGetCompanyDetailsQuery({ companyId: storeId || "" });
+  const company = companyQuery.data;
+  const companyDetailsHref = `/company/${params.companyId || ""}${
+    storeId ? `?storeId=${storeId}` : ""
+  }`;
+
+  return (
+    <header className="fixed z-[100] flex h-[78px] w-full items-center bg-white shadow-[0_4px_21px_rgba(153,155,168,0.08)]">
+      <div className="max-w-content mx-auto w-full flex px-[100px] md:px-layoutLeftRight_md sm:px-5">
+        <Link
+          href={companyDetailsHref}
+          className="flex min-w-0 items-center gap-3 rounded-lg outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-purplePrimary"
+          aria-label={company?.name || "Компания"}
+        >
+          <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-purplePrimary text-[10px] font-bold text-white">
+            {company?.logo ? (
+              <Image
+                src={company.logo}
+                alt=""
+                width={36}
+                height={36}
+                className="size-full object-cover"
+              />
+            ) : (
+              "PB"
+            )}
+          </div>
+          <div className="min-w-0 font-funnel">
+            <p className="truncate text-base font-bold text-darkPrimary">
+              {company?.name || "ProBook"}
+            </p>
+            <p className="truncate text-[10px] text-greyPrimary">
+              Онлайн-запись · ProBook
+            </p>
+          </div>
+        </Link>
+
+        <div className="ml-auto flex items-center gap-5">
+          <Link
+            href="/support"
+            className="text-xs font-semibold text-darkSecondary hover:text-purplePrimary sm:hidden"
+          >
+            Нужна помощь?
+          </Link>
+          <ChangeLanguage />
+        </div>
+      </div>
+    </header>
+  );
+};
 export const LandingHeader = (
   <BaseHeader
     withLanguageSwitcher

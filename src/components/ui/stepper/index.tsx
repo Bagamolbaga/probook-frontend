@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { FC } from "react";
 import { motion, Variants } from "framer-motion";
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 
 export type TStep = {
   id: string;

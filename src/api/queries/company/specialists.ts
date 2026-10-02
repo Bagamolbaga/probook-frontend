@@ -5,14 +5,14 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useApiClient } from "@/api/context";
+import { useApiClient } from "@/src/api/context";
 import {
   TDeleteCompanySpecialistsArgs,
   TGetCompanyShiftsForDateRangeArgs,
   TGetCompanySpecialistsArgs,
   TUpdateCompanySpecialistsArgs,
-} from "@/api/entities/company";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+} from "@/src/api/entities/company";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 
 type Options<T> = T & {
   queryOptions?: UndefinedInitialDataOptions;

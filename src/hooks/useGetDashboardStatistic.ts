@@ -3,8 +3,8 @@
 import {
   useGetAllBookingsQuery,
   useGetCompanySalesAndCustomerStatQuery,
-} from "@/api/queries/booking";
-import { useAppSession } from "@/hooks/useAppSession";
+} from "@/src/api/queries/booking";
+import { useAppSession } from "@/src/hooks/useAppSession";
 import {
   endOfMonth,
   endOfWeek,

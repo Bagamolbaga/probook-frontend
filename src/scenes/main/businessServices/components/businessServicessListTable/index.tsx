@@ -9,33 +9,33 @@ import { GridColDef, GridRowSelectionModel, GridSortModel } from "@mui/x-data-gr
 import { Player } from "@lottiefiles/react-lottie-player";
 import { differenceInSeconds } from "date-fns";
 
-import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
+import { useGetCompanySpecialistsQuery } from "@/src/api/queries/company/specialists";
 import {
   useCreateCompanyServiceQuery,
   useDeleteCompanyServiceQuery,
   useGetCompanyServicesQuery,
   useUpdateCompanyServiceQuery,
-} from "@/api/queries/company/services";
-import { useGetCompanyServiceCategoriesQuery } from "@/api/queries/company/serviceCategories";
+} from "@/src/api/queries/company/services";
+import { useGetCompanyServiceCategoriesQuery } from "@/src/api/queries/company/serviceCategories";
 
 // import CreateUpdateServiceModal from "./components/CreateNewServiceModal";
 import CreateUpdateServiceModal from "./components/CreateServiceModal";
 
-import Button from "@/components/ui/button";
-import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
-import TimeCell from "@/components/ui/table/customCells/Time";
-import PriceCell from "@/components/ui/table/customCells/Price";
-import { toaster } from "@/components/ui/toaster";
+import { Button } from "@/src/components/ui/button";
+import ConfirmationModal from "@/src/components/ui/modal/ConfirmationModal";
+import TimeCell from "@/src/components/ui/table/customCells/Time";
+import PriceCell from "@/src/components/ui/table/customCells/Price";
+import { toaster } from "@/src/components/ui/toaster";
 
-import EditIcon from "@/components/ui/icons/Edit";
-import PlusRight from "@/components/ui/icons/Plus";
-import DeleteIcon from "@/components/ui/icons/Delete";
-import PersonIcon from "@/components/ui/icons/Person";
-import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
-import ServicesListEmptyImage from "@/assets/businessServices/ServicesListEmptyOverlay.svg";
+import EditIcon from "@/src/components/ui/icons/Edit";
+import PlusRight from "@/src/components/ui/icons/Plus";
+import DeleteIcon from "@/src/components/ui/icons/Delete";
+import PersonIcon from "@/src/components/ui/icons/Person";
+import BlackLogoAnimation from "@/src/assets/lottiefiles/blackLogoAnimation.json";
+import ServicesListEmptyImage from "@/src/assets/businessServices/ServicesListEmptyOverlay.svg";
 import { useTranslations } from "next-intl";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import Table from "@/components/ui/table";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import Table from "@/src/components/ui/table";
 
 export type CreateServiceForm = {
   _serviceId?: TService["_id"];
@@ -421,14 +421,14 @@ const BusinessServicesListTable = () => {
             <div className="w-auto flex items-center gap-2">
               <Button
                 className="w-9 h-9 p-0"
-                variant="resting-active"
+                variant="outline"
                 onClick={() => showUpdateModalHandler(row)}
               >
                 <EditIcon className="w-5 h-5" />
               </Button>
               <Button
                 className="w-9 h-9 p-0"
-                variant="resting-active"
+                variant="outline"
                 onClick={() => setServiceIdDeleteConfirmModal(row.id)}
               >
                 <DeleteIcon className="w-5 h-5" />
@@ -474,7 +474,7 @@ const BusinessServicesListTable = () => {
           actionButton={
             <Button
               className="flex items-center gap-3"
-              variant="dark"
+              variant="outline"
               onClick={createServiceForm.handleSubmit(createNewServiceHandler)}
               disabled={!createBtnIsActive}
             >
@@ -497,7 +497,7 @@ const BusinessServicesListTable = () => {
           </p>
           <Button
             className="mt-6 flex items-center gap-3"
-            variant="primary"
+            variant="default"
             onClick={() => setIsOpenCreateModal(true)}
             disabled={createCompanyServiceQuery.isPending}
           >
@@ -523,7 +523,7 @@ const BusinessServicesListTable = () => {
         actionButton={
           <Button
             className="flex items-center gap-3"
-            variant="dark"
+            variant="outline"
             onClick={createServiceForm.handleSubmit(createNewServiceHandler)}
             disabled={!createBtnIsActive}
           >
@@ -542,7 +542,7 @@ const BusinessServicesListTable = () => {
         actionButton={
           <Button
             className="flex items-center gap-3"
-            variant="dark"
+            variant="outline"
             onClick={createServiceForm.handleSubmit(updateServiceHandler)}
             disabled={!updateBtnIsActive}
           >
@@ -562,7 +562,7 @@ const BusinessServicesListTable = () => {
           <div className="text-xl font-bold">
             {/* <Button
               className="px-[10px] py-[10px] flex items-center gap-2"
-              variant="dark"
+              variant="outline"
               onClick={() => {}}
             >
               <PlusRight />
@@ -572,7 +572,7 @@ const BusinessServicesListTable = () => {
           <div className="flex items-center gap-1">
             <Button
               className="flex items-center gap-3"
-              variant="dark"
+              variant="outline"
               onClick={showCreateModalHandler}
             >
               <PlusRight />

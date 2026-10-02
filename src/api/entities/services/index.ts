@@ -1,5 +1,5 @@
-import { ApiClientCore } from "@/api/core";
-import { removeEmptyFields } from "@/utils/removeEmptyFields";
+import { ApiClientCore } from "@/src/api/core";
+import { removeEmptyFields } from "@/src/utils/removeEmptyFields";
 
 export type TGetServicesTypesArgs = {
   companyId: string;

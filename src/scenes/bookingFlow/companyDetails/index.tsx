@@ -2,26 +2,27 @@
 
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { Link } from "@/i18n";
+import { Link } from "@/src/i18n";
 
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
-import { useGetCompanyServicesQuery } from "@/api/queries/company/services";
-import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
-import { TServiceAndSelectedOption } from "@/scenes/main/bookingCreation/components/BookingCreation";
+import { useCompanyReviewsQuery, useGetCompanyDetailsQuery } from "@/src/api/queries/company";
+import { useGetCompanyServicesQuery } from "@/src/api/queries/company/services";
+import { useGetCompanySpecialistsQuery } from "@/src/api/queries/company/specialists";
+import { TServiceAndSelectedOption } from "@/src/scenes/main/bookingCreation/components/BookingCreation";
 import ImagesSwiper from "./components/ImagesSwiper";
 import Tabs, { Tab } from "./components/Tabs";
-import { toSlug } from "@/utils/toSlug";
-import { formatCurrency } from "@/utils/formatCurrency";
-import Button from "@/components/ui/button";
-import LocationIcon from "@/components/ui/icons/Location";
-import ShareIcon from "@/components/ui/icons/Share";
-import CopyIcon from "@/components/ui/icons/Copy";
-import Modal from "@/components/ui/modal";
-import { toaster } from "@/components/ui/toaster";
-import { cn } from "@/utils/cn";
-import RadioButton from "@/components/ui/inputs/RadioButton";
-import { TimeManager } from "@/utils/timeManager";
-import { getYandexMapsUrl, getYandexMapsWidgetUrl } from "@/utils/getYandexMapsUrl";
+import { toSlug } from "@/src/utils/toSlug";
+import { formatCurrency } from "@/src/utils/formatCurrency";
+import { Button } from "@/src/components/ui/button";
+import LocationIcon from "@/src/components/ui/icons/Location";
+import ShareIcon from "@/src/components/ui/icons/Share";
+import CopyIcon from "@/src/components/ui/icons/Copy";
+import Modal from "@/src/components/ui/modal";
+import { toaster } from "@/src/components/ui/toaster";
+import { cn } from "@/src/utils/cn";
+import RadioButton from "@/src/components/ui/inputs/RadioButton";
+import { TimeManager } from "@/src/utils/timeManager";
+import { getYandexMapsUrl, getYandexMapsWidgetUrl } from "@/src/utils/getYandexMapsUrl";
+import { Star } from "lucide-react";
 
 const tabs: Tab[] = [
   { id: "our-service", text: "Услуги" },
@@ -85,9 +86,13 @@ const CompanyDetailsScene: FC<Props> = ({ companyId }) => {
   const companyQuery = useGetCompanyDetailsQuery({ companyId });
   const servicesQuery = useGetCompanyServicesQuery({ companyId });
   const specialistsQuery = useGetCompanySpecialistsQuery({ companyId });
+  const reviewsQuery = useCompanyReviewsQuery(companyId);
   const company = companyQuery.data;
   const services = servicesQuery.data?.results || [];
   const specialists = specialistsQuery.data?.results || [];
+  const reviewPages = reviewsQuery.data?.pages || [];
+  const reviews = reviewPages.flatMap((page) => page.items);
+  const reviewSummary = reviewPages[0]?.summary;
 
   const location = useMemo(
     () => [company?.city, company?.country?.name].filter(Boolean).join(", "),
@@ -100,8 +105,6 @@ const CompanyDetailsScene: FC<Props> = ({ companyId }) => {
     lat: company?.pos?.lat ?? null,
     lng: company?.pos?.lng ?? null,
   });
-  const bookingHref = `/company/${toSlug(company?.name)}/booking-creation?storeId=${company?.id}${selectedServices.length ? `&services=${selectedServices.map((service) => service.id).join(",")}&options=${selectedServices.map((service) => service.selectedOption.id).join(",")}` : ""}`;
-
   const shareLink = () => window.location.href || companyHref;
 
   const handleCopyShareLink = () => {
@@ -163,7 +166,7 @@ const CompanyDetailsScene: FC<Props> = ({ companyId }) => {
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold">Поделиться</h2>
             <Button
-              variant="resting-active"
+              variant="outline"
               className="size-9 !rounded-full p-0"
               onClick={() => setIsOpenShareModal(false)}
             >
@@ -174,7 +177,7 @@ const CompanyDetailsScene: FC<Props> = ({ companyId }) => {
             {shareLink()}
           </p>
           <Button
-            variant="primary"
+            variant="default"
             className="mt-4 w-full !rounded-full"
             iconLeft={<CopyIcon className="size-5 fill-white" />}
             onClick={handleCopyShareLink}
@@ -196,7 +199,7 @@ const CompanyDetailsScene: FC<Props> = ({ companyId }) => {
             </div>
           )}
           <div className="absolute right-4 top-4 z-10 flex flex-wrap justify-end gap-3">
-            {company?.business_type?.split(",").map((type) => (
+            {company?.businessType?.split(",").map((type) => (
               <span
                 key={type}
                 className="rounded-full bg-white px-4 py-3 text-sm font-bold"
@@ -214,7 +217,7 @@ const CompanyDetailsScene: FC<Props> = ({ companyId }) => {
                 {company?.name || "Компания"}
               </h1>
               <Button
-                variant="transparent"
+                variant="secondary"
                 className="shrink-0 !rounded-full !px-4 !py-3"
                 iconLeft={<ShareIcon className="stroke-darkPrimary" />}
                 onClick={() => setIsOpenShareModal(true)}
@@ -240,7 +243,7 @@ const CompanyDetailsScene: FC<Props> = ({ companyId }) => {
           </div>
 
           <p className="max-w-[464px] text-sm leading-6 text-greyPrimary">
-            {company?.address || company?.address1 || "Описание компании появится здесь."}
+            {company?.address || company?.address || "Описание компании появится здесь."}
           </p>
 
           <Tabs tabs={tabs} activelTab={selectedTab} handleSelect={handleSelectTab} />
@@ -299,11 +302,11 @@ const CompanyDetailsScene: FC<Props> = ({ companyId }) => {
                 ? `${selectedServices.length} услуга выбрана`
                 : "Выберите услугу ниже"}
             </span>
-            <Link href={bookingHref}>
-              <Button variant="primary" className="!rounded-full px-8">
+            <div className="hidden">
+              <Button variant="default" className="!rounded-full px-8">
                 Записаться
               </Button>
-            </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -409,6 +412,113 @@ const CompanyDetailsScene: FC<Props> = ({ companyId }) => {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="w-full bg-greyBackgroundLight py-14">
+        <div className="max-w-[920px]">
+          <p className="text-[10px] font-bold tracking-[1px] text-purplePrimary">
+            {
+              "\u041e\u0422\u0417\u042b\u0412\u042b \u041a\u041b\u0418\u0415\u041d\u0422\u041e\u0412"
+            }
+          </p>
+          <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="font-funnel text-[30px] font-bold leading-10">
+                {"\u041e\u0442\u0437\u044b\u0432\u044b"}
+              </h2>
+              <p className="mt-2 text-xs text-greyPrimary">
+                {
+                  "\u041e\u0442\u0437\u044b\u0432\u044b \u043e\u0441\u0442\u0430\u0432\u043b\u044f\u044e\u0442 \u0442\u043e\u043b\u044c\u043a\u043e \u043a\u043b\u0438\u0435\u043d\u0442\u044b \u0441 \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043d\u043d\u044b\u043c\u0438 \u0437\u0430\u043f\u0438\u0441\u044f\u043c\u0438."
+                }
+              </p>
+            </div>
+            {reviewSummary && (
+              <div className="flex items-center gap-2 rounded-xl border border-greyOutlineSecondary bg-white px-4 py-3">
+                <Star className="size-5 fill-purplePrimary text-purplePrimary" />
+                <strong>{reviewSummary.averageRating ?? "—"}</strong>
+                <span className="text-sm text-greyPrimary">({reviewSummary.count})</span>
+              </div>
+            )}
+          </div>
+
+          {reviewsQuery.isLoading ? (
+            <p className="mt-6 text-sm text-greyPrimary">
+              {
+                "\u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430 \u043e\u0442\u0437\u044b\u0432\u043e\u0432..."
+              }
+            </p>
+          ) : reviewsQuery.isError ? (
+            <p className="mt-6 text-sm text-redPrimary">
+              {
+                "\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u043e\u0442\u0437\u044b\u0432\u044b."
+              }
+            </p>
+          ) : reviews.length ? (
+            <div className="mt-6 space-y-3">
+              {reviews.map((review) => (
+                <article
+                  key={review.id}
+                  className="rounded-xl border border-greyOutlineSecondary bg-white p-5"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-bold">{review.authorName}</p>
+                      <p className="mt-1 text-xs text-greyPrimary">
+                        {review.specialistName} ·{" "}
+                        {new Intl.DateTimeFormat("ru", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        }).format(new Date(review.createdAt))}
+                      </p>
+                    </div>
+                    <div className="flex gap-1" aria-label={`${review.rating} / 5`}>
+                      {[1, 2, 3, 4, 5].map((rating) => (
+                        <Star
+                          key={rating}
+                          className={`size-4 ${rating <= review.rating ? "fill-purplePrimary text-purplePrimary" : "text-greyPrimary"}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  {review.comment && (
+                    <p className="mt-3 text-sm leading-6">{review.comment}</p>
+                  )}
+                  {review.highlights.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {review.highlights.map((highlight) => (
+                        <span
+                          key={highlight}
+                          className="rounded-full bg-purpleExtraLight px-2.5 py-1 text-[10px] font-semibold"
+                        >
+                          {highlight}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </article>
+              ))}
+              {reviewsQuery.hasNextPage && (
+                <button
+                  type="button"
+                  onClick={() => void reviewsQuery.fetchNextPage()}
+                  disabled={reviewsQuery.isFetchingNextPage}
+                  className="rounded-xl border border-greyOutlineSecondary bg-white px-4 py-2.5 text-sm font-bold disabled:opacity-50"
+                >
+                  {reviewsQuery.isFetchingNextPage
+                    ? "\u0417\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u043c..."
+                    : "\u041f\u043e\u043a\u0430\u0437\u0430\u0442\u044c \u0435\u0449\u0451"}
+                </button>
+              )}
+            </div>
+          ) : (
+            <p className="mt-6 text-sm text-greyPrimary">
+              {
+                "\u041f\u043e\u043a\u0430 \u043d\u0435\u0442 \u043e\u0442\u0437\u044b\u0432\u043e\u0432."
+              }
+            </p>
+          )}
         </div>
       </section>
     </div>

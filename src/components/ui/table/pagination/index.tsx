@@ -7,10 +7,11 @@ import {
   gridPageSelector,
   GridPagination,
 } from "@mui/x-data-grid";
-import { cn } from "@/utils/cn";
-import Button from "../../button";
+import { cn } from "@/src/utils/cn";
+// import {Button} from "@/src/components/ui/button"
 import ArrowSecondaryDownIcon from "../../icons/ArrowSecondaryDown";
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 
 function Pagination() {
   const t = useTranslations()
@@ -33,7 +34,7 @@ function Pagination() {
   return (
     <div className="w-full flex justify-between items-center">
       <div className="flex items-center gap-2">
-        <Button variant="resting" className="w-10 h-10 p-0" onClick={prevPageHandler}>
+        <Button variant="secondary" className="w-10 h-10 p-0" onClick={prevPageHandler}>
           <ArrowSecondaryDownIcon className="rotate-90" />
         </Button>
         <span className="text-sm text-greyPrimary">{t("ui.actions.prev")}</span>
@@ -42,10 +43,10 @@ function Pagination() {
         {Array.from(new Array(pageCount)).map((_, idx) => (
           <Button
             key={idx}
-            variant={pageCurrent === idx ? "primary-resting" : "resting"}
+            variant={pageCurrent === idx ? "default" : "secondary"}
             className={cn("w-8 h-8 text-sm !border-0", {
-              "font-bold text-purplePrimary": pageCurrent === idx,
-              "font-normal text-greyPrimary": pageCurrent !== idx,
+              "font-bold text-white": pageCurrent === idx,
+              "font-normal text-muted-foreground": pageCurrent !== idx,
             })}
             onClick={() => selectPageHandler(idx)}
           >
@@ -55,7 +56,7 @@ function Pagination() {
       </div>
       <div className="flex items-center gap-2">
         <span className="text-sm text-greyPrimary">{t("ui.actions.next")}</span>
-        <Button variant="resting" className="w-10 h-10 p-0" onClick={nextPageHandler}>
+        <Button variant="secondary" className="w-10 h-10 p-0" onClick={nextPageHandler}>
           <ArrowSecondaryDownIcon className="-rotate-90" />
         </Button>
       </div>

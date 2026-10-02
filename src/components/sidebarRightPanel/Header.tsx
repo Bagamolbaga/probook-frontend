@@ -1,7 +1,7 @@
 import React, { PropsWithChildren } from "react";
 import { useStore } from "zustand";
-import { useThemeStore } from "@/stores/theme";
-import useWindowWidth from "@/hooks/useWindowWidth";
+import { useThemeStore } from "@/src/stores/theme";
+import useWindowWidth from "@/src/hooks/useWindowWidth";
 import ArrowSecondaryDownIcon from "../ui/icons/ArrowSecondaryDown";
 
 const Header = ({ children }: PropsWithChildren) => {

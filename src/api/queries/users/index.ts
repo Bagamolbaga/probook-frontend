@@ -5,11 +5,11 @@ import {
   useQueryClient,
   UseQueryOptions,
 } from "@tanstack/react-query";
-import { useApiClient } from "@/api/context";
+import { useApiClient } from "@/src/api/context";
 import {
   TUpdateBusinessUserLineId,
   TUploadUserAvatarArgs,
-} from "@/api/entities/user/business";
+} from "@/src/api/entities/user/business";
 import {
   TBookingCustomerDetails,
   TBookingCustomerListItem,
@@ -19,10 +19,10 @@ import {
   TGetCustomersArgs,
   TLookupCustomerByEmailArgs,
   TLookupCustomersArgs,
-} from "@/api/entities/user/customer";
-import { useAppSession } from "@/hooks/useAppSession";
+} from "@/src/api/entities/user/customer";
+import { useAppSession } from "@/src/hooks/useAppSession";
 import { useStore } from "zustand";
-import { useSuperAdminStore } from "@/stores/superAdmin";
+import { useSuperAdminStore } from "@/src/stores/superAdmin";
 
 type CustomUseQueryOptions<TRes> = Omit<UseQueryOptions<TRes, Error>, "queryKey">;
 

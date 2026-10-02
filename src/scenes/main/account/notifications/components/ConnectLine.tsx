@@ -1,10 +1,10 @@
 "use client";
 
-import { useUpdateBusinessUserLineIdQuery } from "@/api/queries/users";
-import Button from "@/components/ui/button";
-import Line from "@/components/ui/icons/Line";
-import { useAppSession } from "@/hooks/useAppSession";
-import { Link } from "@/i18n";
+import { useUpdateBusinessUserLineIdQuery } from "@/src/api/queries/users";
+import { Button } from "@/src/components/ui/button";
+import Line from "@/src/components/ui/icons/Line";
+import { useAppSession } from "@/src/hooks/useAppSession";
+import { Link } from "@/src/i18n";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
@@ -50,7 +50,7 @@ const ConnectLine = () => {
       <p className="mb-3 text-sm font-bold">Connect notifications via LINE</p>
       {userId || session?.user?.line_user_id ? (
         <Button
-          variant="primary"
+          variant="default"
           className="py-2 bg-greenPrimary"
           iconLeft={<Line className="stroke-none" />}
         >
@@ -59,7 +59,7 @@ const ConnectLine = () => {
       ) : (
         <Link href={getLineOAuthUrl()} target="_blank">
           <Button
-            variant="primary"
+            variant="default"
             className="py-2 bg-greenPrimary"
             iconLeft={<Line className="stroke-none" />}
           >

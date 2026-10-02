@@ -3,8 +3,8 @@ import Image from "next/image";
 import { Autoplay, Pagination } from "swiper/modules";
 import { SwiperSlide } from "swiper/react";
 
-import Swiper from "@/components/ui/swiper";
-import MainLoader from "@/components/ui/loaders/MainLoader";
+import Swiper from "@/src/components/ui/swiper";
+import MainLoader from "@/src/components/ui/loaders/MainLoader";
 
 type Props = {
   images: string[]

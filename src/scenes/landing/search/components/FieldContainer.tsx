@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Dispatch, ReactNode, SetStateAction, useRef, useState } from "react";
-import { useClickOutside } from "@/hooks/useClickOutside";
+import { useClickOutside } from "@/src/hooks/useClickOutside";
 
 type Props = {
   isAnimated?: boolean;

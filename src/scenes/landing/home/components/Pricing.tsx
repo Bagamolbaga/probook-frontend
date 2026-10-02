@@ -1,7 +1,7 @@
 "use client";
 
-import PriceCart from "@/components/ui/pricingCart";
-import { cn } from "@/utils/cn";
+import PriceCart from "@/src/components/ui/pricingCart";
+import { cn } from "@/src/utils/cn";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
@@ -45,7 +45,7 @@ const Pricing = ({className}: {className?: string}) => {
             planItems={includeItems1}
           />
           <PriceCart.LandingVariant
-            variant="primary"
+            variant="default"
             planName={t("landingHome.pricingSection.items.item2.planName")}
             mainPrice="฿5450"
             mainPricePeriod={t("landingHome.pricingSection.items.item2.month")}

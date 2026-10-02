@@ -1,7 +1,7 @@
-import { TIME_SLOTS, TTimeSlot } from "@/constants/timeSlots";
-import { FormattedDataItem } from "@/scenes/main/bookingManagement/components/timeLineCalendar";
+import { TIME_SLOTS, TTimeSlot } from "@/src/constants/timeSlots";
+import { FormattedDataItem } from "@/src/scenes/main/bookingManagement/components/timeLineCalendar";
 import TimeLineBreakItem from "./TimeLineBreakItem";
-import { TimeManager } from "@/utils/timeManager";
+import { TimeManager } from "@/src/utils/timeManager";
 
 export const BreakTime = ({
   data,

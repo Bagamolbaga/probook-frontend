@@ -1,8 +1,8 @@
-import { useTranslations } from "@/i18n";
-import { formatCurrency } from "@/utils/formatCurrency";
+import { useTranslations } from "@/src/i18n";
+import { formatCurrency } from "@/src/utils/formatCurrency";
 import { Player } from "@lottiefiles/react-lottie-player";
 import React, { FC } from "react";
-import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
+import BlackLogoAnimation from "@/src/assets/lottiefiles/blackLogoAnimation.json";
 import StoreCart from "./ServiceCart";
 
 type Props = {

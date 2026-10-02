@@ -1,6 +1,6 @@
 import { format } from "date-fns";
-import { ApiClientCore } from "@/api/core";
-import { removeEmptyFields } from "@/utils/removeEmptyFields";
+import { ApiClientCore } from "@/src/api/core";
+import { removeEmptyFields } from "@/src/utils/removeEmptyFields";
 
 export type TGetBookingsArgs<T = unknown> = {
   companyId: string | number;
@@ -40,8 +40,8 @@ export type TBookingAvailability = {
   slots: Array<{
     slot: number;
     available: boolean;
-    status: "free" | "busy" | "break";
-    reason?: "outside_shift" | "break" | "busy" | "not_enough_time";
+    status: "free" | "busy" | "customer_busy" | "break";
+    booking?: Pick<TApiBooking, "id" | "services" | "specialist">;
   }>;
 };
 
@@ -78,7 +78,7 @@ export type TCreateBookingArgs = {
       email: string;
       first_name: string;
       last_name: string;
-      phone: string;
+      phone?: string;
     };
     customerLocale: "en" | "ru";
     date: Date;
@@ -213,7 +213,8 @@ export class ApiClientBookings extends ApiClientCore {
     const params = new URLSearchParams({ date });
     if (bookingId) params.set("excludeBookingId", bookingId);
 
-    return this.instanceWithoutAuth.get<TBookingAvailability>(
+    const instance = this.isAuth ? this.instance : this.instanceWithoutAuth;
+    return instance.get<TBookingAvailability>(
       `/companies/${companyId}/specialists/${specialistId}/availability?${params.toString()}`
     );
   }

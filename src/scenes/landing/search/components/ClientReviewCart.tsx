@@ -1,6 +1,6 @@
 import { FC } from "react";
 import Image, { StaticImageData } from "next/image";
-import StarRating from "@/components/ui/startRaiting";
+import StarRating from "@/src/components/ui/startRaiting";
 
 type Props = {
   name: string;

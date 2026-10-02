@@ -1,6 +1,6 @@
 import { PropsWithChildren } from "react";
-import { cn } from "@/utils/cn";
-import scrollStyles from "@/styles/scrollbar.module.sass";
+import { cn } from "@/src/utils/cn";
+import scrollStyles from "@/src/styles/scrollbar.module.sass";
 
 const ScrollableCell = ({ children }: PropsWithChildren) => {
   return (

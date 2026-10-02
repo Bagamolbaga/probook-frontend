@@ -1,4 +1,4 @@
-import SearchPageScene from "@/scenes/landing/search";
+import SearchPageScene from "@/src/scenes/landing/search";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 

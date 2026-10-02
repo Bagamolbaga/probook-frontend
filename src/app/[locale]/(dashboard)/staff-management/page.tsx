@@ -1,4 +1,4 @@
-import StaffManagementScene from "@/scenes/main/staffManagement";
+import StaffManagementScene from "@/src/scenes/main/staffManagement";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 

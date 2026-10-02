@@ -1,7 +1,7 @@
 import { FC } from "react";
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 // import ChangeDailyBreakTimePopup from "./ChangeDailyBreakTimePopup";
-import { FormattedDataItem } from "@/scenes/main/bookingManagement/components/timeLineCalendar";
+import { FormattedDataItem } from "@/src/scenes/main/bookingManagement/components/timeLineCalendar";
 
 type TimeLineBreakItemProps = {
   row: FormattedDataItem;

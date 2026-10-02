@@ -1,6 +1,6 @@
-import { useApiClient } from "@/api/context";
-import { TGetCompanySubscriptionArgs, TUpdateCompanySubscriptionArgs } from "@/api/entities/company/subscription";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { useApiClient } from "@/src/api/context";
+import { TGetCompanySubscriptionArgs, TUpdateCompanySubscriptionArgs } from "@/src/api/entities/company/subscription";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
 
 

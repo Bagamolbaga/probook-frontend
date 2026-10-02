@@ -11,13 +11,15 @@ import {
   MessageSquare,
   ShieldCheck,
   Star,
-  TriangleAlert,
   UserRound,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useCustomerBookingQuery } from "@/api/queries/customer";
-import { useAppSession } from "@/hooks/useAppSession";
-import { Link, useLocale, useTranslations } from "@/i18n";
+import {
+  useCreateCustomerBookingReviewMutation,
+  useCustomerBookingQuery,
+} from "@/src/api/queries/customer";
+import { useAppSession } from "@/src/hooks/useAppSession";
+import { Link, useLocale, useTranslations } from "@/src/i18n";
 import { formatBookingTime } from "./components/BookingCard";
 import QueryState from "./components/QueryState";
 
@@ -40,6 +42,7 @@ export default function CustomerBookingReviewScene({ bookingId }: { bookingId: s
   const locale = useLocale();
   const { data: session } = useAppSession();
   const query = useCustomerBookingQuery(bookingId);
+  const createReview = useCreateCustomerBookingReviewMutation();
   const storageKey = `customer-review-draft:${bookingId}`;
   const [rating, setRating] = useState(0);
   const [selected, setSelected] = useState<Highlight[]>([]);
@@ -166,13 +169,6 @@ export default function CustomerBookingReviewScene({ bookingId }: { bookingId: s
             )}
           </div>
           <div className="flex gap-2.5 sm:w-full sm:flex-col">
-            <button
-              type="button"
-              onClick={() => setSubmitted(false)}
-              className="rounded-xl bg-greyOutline px-4 py-3 text-xs font-bold"
-            >
-              {t("review.edit")}
-            </button>
             <Link
               href="/cabinet/bookings"
               className="rounded-xl bg-purplePrimary px-4 py-3 text-center text-xs font-bold text-white"
@@ -180,9 +176,6 @@ export default function CustomerBookingReviewScene({ bookingId }: { bookingId: s
               {t("review.backToBookings")}
             </Link>
           </div>
-          <p className="text-center text-[8px] text-greyPrimary">
-            {t("review.successContractGap")}
-          </p>
         </section>
       </div>
     );
@@ -218,8 +211,19 @@ export default function CustomerBookingReviewScene({ bookingId }: { bookingId: s
           className="flex flex-col gap-[21px] rounded-[18px] border border-greyOutline bg-white p-[26px] sm:p-4"
           onSubmit={(event) => {
             event.preventDefault();
-            if (!rating) return;
-            setSubmitted(true);
+            if (!rating || createReview.isPending) return;
+            void createReview
+              .mutateAsync({
+                bookingId,
+                rating,
+                highlights: selected,
+                comment: comment.trim() || undefined,
+                recommended: recommended ?? undefined,
+              })
+              .then(() => {
+                sessionStorage.removeItem(storageKey);
+                setSubmitted(true);
+              });
           }}
         >
           <fieldset>
@@ -337,12 +341,17 @@ export default function CustomerBookingReviewScene({ bookingId }: { bookingId: s
             </Link>
             <button
               type="submit"
-              disabled={!rating}
+              disabled={!rating || createReview.isPending}
               className="rounded-xl bg-purplePrimary px-4 py-3 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {t("review.publish")}
+              {createReview.isPending ? t("review.publishing") : t("review.publish")}
             </button>
           </div>
+          {createReview.isError && (
+            <p className="text-right text-[10px] text-redPrimary" role="alert">
+              {t("review.submissionError")}
+            </p>
+          )}
         </form>
 
         <aside className="flex flex-col gap-4">
@@ -396,10 +405,6 @@ export default function CustomerBookingReviewScene({ bookingId }: { bookingId: s
               {t("review.visibilityText")}
             </p>
           </section>
-          <div className="flex items-center gap-2 rounded-xl bg-yellowExtraLight px-3 py-2.5 text-[8px] text-grey-800">
-            <TriangleAlert className="size-3.5 shrink-0" />
-            {t("review.formContractGap")}
-          </div>
         </aside>
       </div>
     </div>

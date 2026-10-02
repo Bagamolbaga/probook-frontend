@@ -6,11 +6,11 @@ import { FormControl } from "@mui/material";
 import { useTranslations } from "next-intl";
 
 import { Form } from "..";
-import AppSelect from "@/components/ui/inputs/AppSelect";
-import Spinner from "@/components/ui/loaders/Spinner";
-import { TimeManager } from "@/utils/timeManager";
-import { cn } from "@/utils/cn";
-import PlusRight from "@/components/ui/icons/Plus";
+import AppSelect from "@/src/components/ui/inputs/AppSelect";
+import Spinner from "@/src/components/ui/loaders/Spinner";
+import { TimeManager } from "@/src/utils/timeManager";
+import { cn } from "@/src/utils/cn";
+import PlusRight from "@/src/components/ui/icons/Plus";
 
 const WEEK_DAYS: { id: keyof Form["workingSchedule"]; text: string }[] = [
   {

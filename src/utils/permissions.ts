@@ -1,4 +1,4 @@
-import type { User, UserCompany } from "@/types/user";
+import type { User, UserCompany } from "@/src/types/user";
 
 type CompanyAccess = Pick<UserCompany, "roles" | "permissions">;
 

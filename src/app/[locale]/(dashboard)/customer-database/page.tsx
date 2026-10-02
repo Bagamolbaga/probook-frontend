@@ -1,4 +1,4 @@
-import CustomerDatabase from "@/scenes/main/customerDatabase";
+import CustomerDatabase from "@/src/scenes/main/customerDatabase";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 

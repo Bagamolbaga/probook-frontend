@@ -3,7 +3,7 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { Swiper as SwiperBase } from "swiper/react";
 import style from "./style.module.scss";
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 
 type SwiperProps = React.ComponentProps<typeof SwiperBase>;
 

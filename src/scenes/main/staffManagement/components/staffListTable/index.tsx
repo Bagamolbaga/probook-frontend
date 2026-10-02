@@ -2,45 +2,45 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
-import Button from "@/components/ui/button";
-import PlusRight from "@/components/ui/icons/Plus";
-import UserNameWithAvatar from "@/components/ui/table/customCells/UserNameWithAvatar";
-import EditIcon from "@/components/ui/icons/Edit";
-import DeleteIcon from "@/components/ui/icons/Delete";
+import { Button } from "@/src/components/ui/button";
+import UserNameWithAvatar from "@/src/components/ui/table/customCells/UserNameWithAvatar";
+import EditIcon from "@/src/components/ui/icons/Edit";
+import DeleteIcon from "@/src/components/ui/icons/Delete";
 import {
   useDeleteCompanySpecialistsQuery,
   useGetCompanySpecialistsQuery,
   useUpdateCompanySpecialistsQuery,
-} from "@/api/queries/company/specialists";
+} from "@/src/api/queries/company/specialists";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import CreateUpdateSpecialistModal from "./components/CreateNewSpecialistModal";
 import { useForm } from "react-hook-form";
-import ListIsEmptyPlaceholderImage from "@/assets/staffManagement/SpecialistListEmptyOverlay.svg";
+import ListIsEmptyPlaceholderImage from "@/src/assets/staffManagement/SpecialistListEmptyOverlay.svg";
 import Image from "next/image";
 import { Player } from "@lottiefiles/react-lottie-player";
-import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
-import { toaster } from "@/components/ui/toaster";
-import ConfirmationModal from "@/components/ui/modal/ConfirmationModal";
+import BlackLogoAnimation from "@/src/assets/lottiefiles/blackLogoAnimation.json";
+import { toaster } from "@/src/components/ui/toaster";
+import ConfirmationModal from "@/src/components/ui/modal/ConfirmationModal";
 import { useTranslations } from "next-intl";
 import TableDefaultShift from "./components/TableDefaultShift";
 import {
   useCreateCompanyShiftQuery,
   useGetCompanyShiftsQuery,
   useUpdateCompanyShiftQuery,
-} from "@/api/queries/company/shift";
-import { SHIFT_COLORS } from "@/constants/shiftColors";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import Table from "@/components/ui/table";
-import { TimeManager } from "@/utils/timeManager";
+} from "@/src/api/queries/company/shift";
+import { SHIFT_COLORS } from "@/src/constants/shiftColors";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import Table from "@/src/components/ui/table";
+import { TimeManager } from "@/src/utils/timeManager";
 import {
   useCompanyInvitationsQuery,
   useCreateInvitationMutation,
   useResendInvitationMutation,
   useRevokeInvitationMutation,
-} from "@/api/queries/invitations";
-import type { InvitationDeliveryResponse } from "@/api/entities/invitation";
-import Modal from "@/components/ui/modal";
+} from "@/src/api/queries/invitations";
+import type { InvitationDeliveryResponse } from "@/src/api/entities/invitation";
+import Modal from "@/src/components/ui/modal";
+import { Plus } from "lucide-react";
 
 export type CreateSpecialistForm = {
   _specialistId?: string;
@@ -569,14 +569,14 @@ const StaffListTable = () => {
             <div className="w-auto flex items-center gap-2">
               <Button
                 className="w-9 h-9 p-0"
-                variant="resting-active"
+                variant="outline"
                 onClick={() => showUpdateModalHandler(row)}
               >
                 <EditIcon className="w-5 h-5" />
               </Button>
               <Button
                 className="w-9 h-9 p-0"
-                variant="resting-active"
+                variant="outline"
                 onClick={() => setSpecialistIdDeleteConfirmModal(row.id)}
               >
                 <DeleteIcon className="w-5 h-5" />
@@ -621,11 +621,10 @@ const StaffListTable = () => {
           actionButton={
             <Button
               className="flex items-center gap-3"
-              variant="dark"
+              variant="default"
               onClick={createSpecialistForm.handleSubmit(createSpecialistMainHandler)}
               disabled={!createNewStaffBtnIsActive}
             >
-              <PlusRight />
               <p className="text-sm text-white ">
                 {t("staffManagement.staffList.createNewBtn")}
               </p>
@@ -646,11 +645,10 @@ const StaffListTable = () => {
           </p>
           <Button
             className="mt-6 flex items-center gap-3"
-            variant="dark"
+            variant="default"
             onClick={() => setIsOpenCreateModal(true)}
             disabled={createInvitationMutation.isPending}
           >
-            <PlusRight />
             <p className="text-sm text-white">
               {t("staffManagement.staffList.createNewBtn")}
             </p>
@@ -684,7 +682,7 @@ const StaffListTable = () => {
                 aria-label={t("staffManagement.staffList.invitation.link")}
               />
               <Button
-                variant="primary"
+                variant="default"
                 onClick={() => {
                   void navigator.clipboard.writeText(createdInvitation.inviteUrl);
                   toaster.success(t("staffManagement.staffList.invitation.copied"));
@@ -704,11 +702,10 @@ const StaffListTable = () => {
         actionButton={
           <Button
             className="flex items-center gap-3"
-            variant="dark"
+            variant="default"
             onClick={createSpecialistForm.handleSubmit(createSpecialistMainHandler)}
             disabled={!createNewStaffBtnIsActive}
           >
-            <PlusRight />
             <p className="text-sm text-white ">
               {t("staffManagement.staffList.createNewBtn")}
             </p>
@@ -724,7 +721,7 @@ const StaffListTable = () => {
         actionButton={
           <Button
             className="flex items-center gap-3"
-            variant="dark"
+            variant="default"
             onClick={createSpecialistForm.handleSubmit(updateSpecialistMainHandler)}
             disabled={!updateStaffBtnIsActive}
           >
@@ -763,7 +760,7 @@ const StaffListTable = () => {
                   <div className="flex flex-wrap justify-end gap-2">
                     <Button
                       size="sm"
-                      variant="primary"
+                      variant="default"
                       disabled={
                         resendInvitationMutation.isPending ||
                         copyingInvitationId === invitation.id ||
@@ -775,7 +772,7 @@ const StaffListTable = () => {
                     </Button>
                     <Button
                       size="sm"
-                      variant="resting-active"
+                      variant="outline"
                       disabled={resendInvitationMutation.isPending}
                       onClick={() => {
                         void resendInvitationMutation
@@ -790,7 +787,7 @@ const StaffListTable = () => {
                     </Button>
                     <Button
                       size="sm"
-                      variant="red-outline"
+                      variant="outline"
                       disabled={revokeInvitationMutation.isPending}
                       onClick={() =>
                         void revokeInvitationMutation.mutateAsync({
@@ -811,7 +808,7 @@ const StaffListTable = () => {
           {/* <div className="text-xl font-bold">
             <Button
               className="px-[10px] py-[10px] flex items-center gap-2"
-              variant="dark"
+              variant="outline"
               onClick={() => {}}
             >
               <PlusRight />
@@ -838,11 +835,11 @@ const StaffListTable = () => {
           <div className="flex items-center gap-5 sm:w-full sm:mt-3 sm:justify-end">
             <Button
               className="flex items-center gap-3"
-              variant="dark"
+              variant="default"
               onClick={showCreateModalHandler}
               disabled={Boolean((remainingStaffLimit?.remaining || 0) <= 0)}
             >
-              <PlusRight />
+              <Plus />
               <p className="text-sm text-white ">
                 {t("staffManagement.staffList.createNewBtn")}
               </p>

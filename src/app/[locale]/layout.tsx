@@ -6,21 +6,28 @@ import { PropsWithChildren } from "react";
 import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
-import { Lato } from "next/font/google";
+import { Inter, Lato } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 
-import Providers from "@/components/providers";
-import getDictionary, { NextIntlClientProvider, getTranslations } from "@/i18n";
-import { authOptions } from "@/lib/auth";
-import { cn } from "@/utils/cn";
-import Sentry from "@sentry/nextjs";
+import Providers from "@/src/components/providers";
+import getDictionary, { NextIntlClientProvider, getTranslations } from "@/src/i18n";
+import { authOptions } from "@/src/lib/auth";
+import { cn } from "@/src/utils/cn";
 
 import "line-awesome/dist/line-awesome/css/line-awesome.min.css";
 import "@fontsource-variable/funnel-sans";
 import "react-toastify/dist/ReactToastify.css";
-import "@/styles/globals.sass";
+import "../../styles/globals.sass";
 
 const lato = Lato({
   weight: ["100", "300", "400", "700", "900"],
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const inter = Inter({
+  weight: ["100", "200", "300", "400", "500", "600", "700", "900"],
   subsets: ["latin"],
   display: "swap",
 });
@@ -73,7 +80,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale}>
-      <body className={cn(lato.className)}>
+      <body className={cn(inter.className)}>
         <NextIntlClientProvider locale={locale} messages={dictionary.messages}>
           <Providers session={session}>{children}</Providers>
         </NextIntlClientProvider>

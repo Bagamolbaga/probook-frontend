@@ -1,4 +1,4 @@
-import ServicesAndPricingScene from "@/scenes/main/servicesAndPricing";
+import ServicesAndPricingScene from "@/src/scenes/main/servicesAndPricing";
 
 const ServicesAndPricingPage = () => {
   return <ServicesAndPricingScene />;

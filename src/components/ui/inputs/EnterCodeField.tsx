@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 import React, {
   useRef,
   useState,
@@ -160,7 +160,7 @@ const EnterCodeField: FC<Props> = ({
           visible: code.length,
           invisible: !code.length || isSuccess,
         })}
-        variant="resting-active"
+        variant="outline"
         onClick={resetCode}
       >
         <CloseIcon className="w-5 h-5 stroke-greyPrimary" />

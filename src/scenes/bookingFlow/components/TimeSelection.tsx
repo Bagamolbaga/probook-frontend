@@ -13,21 +13,21 @@ import {
 } from "date-fns";
 import { useTranslations } from "next-intl";
 
-import { useGetBookingAvailabilitiesQuery } from "@/api/queries/booking";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
-import { useGetCompanyShiftsQuery } from "@/api/queries/company/shift";
-import { useGetCompanySpecialistsQuery } from "@/api/queries/company/specialists";
-import Button from "@/components/ui/button";
-import DatePicker from "@/components/ui/DatePicker";
-import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import { TIME_SLOTS, TTimeSlot } from "@/constants/timeSlots";
-import { useClickOutside } from "@/hooks/useClickOutside";
-import { cn } from "@/utils/cn";
-import { TimeManager } from "@/utils/timeManager";
+import { useGetBookingAvailabilitiesQuery } from "@/src/api/queries/booking";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
+import { useGetCompanyShiftsQuery } from "@/src/api/queries/company/shift";
+import { useGetCompanySpecialistsQuery } from "@/src/api/queries/company/specialists";
+import { Button } from "@/src/components/ui/button";
+import DatePicker from "@/src/components/ui/DatePicker";
+import ArrowSecondaryDownIcon from "@/src/components/ui/icons/ArrowSecondaryDown";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import { TIME_SLOTS, TTimeSlot } from "@/src/constants/timeSlots";
+import { useClickOutside } from "@/src/hooks/useClickOutside";
+import { cn } from "@/src/utils/cn";
+import { TimeManager } from "@/src/utils/timeManager";
 import DaysOfWeekList from "./ui/DaysOfWeekList";
-import TimeSlots from "./ui/TimeSlots";
-import { DATE_FNS_LOCALES, useLocale } from "@/i18n";
+import TimeSlots, { TRenderedSlot } from "./ui/TimeSlots";
+import { DATE_FNS_LOCALES, useLocale } from "@/src/i18n";
 
 const WEEK_STARTS_ON = 1;
 type Props = {
@@ -241,48 +241,87 @@ const TimeSelection: FC<Props> = ({
     };
   }, [availabilityBySpecialist, selectedServices, specialistIdsToCheck]);
 
-  const renderedSlots = useMemo(() => {
+  const renderedSlots = useMemo<TRenderedSlot[]>(() => {
     if (!slotsForSelectedDate.workingSlots.length) return [];
 
     const firstSlot = Math.min(...slotsForSelectedDate.workingSlots);
     const lastSlot = Math.max(...slotsForSelectedDate.workingSlots) + 1;
 
-    return TIME_SLOTS.filter(
-      (slot) => slot.slot >= firstSlot && slot.slot <= lastSlot
-    ).map((slot) => {
-      const staffIds = slotsForSelectedDate.specialistsByStartSlot.get(slot.slot) || [];
-      const statuses = specialistIdsToCheck.flatMap((specialistId) => {
-        const availability = availabilityBySpecialist.get(specialistId);
-        const status = availability?.slots.find(
-          (item) => item.slot === slot.slot
-        )?.status;
-        return status ? [status] : [];
-      });
-      const unavailableReason: "busy" | "break" | "not_enough_time" | undefined =
-        !staffIds.length
-          ? !statuses.length
-            ? "not_enough_time"
-            : statuses.every((status) => status === "break")
-              ? "break"
-              : statuses.every((status) => status === "busy")
-                ? "busy"
-                : "not_enough_time"
-          : undefined;
+    return TIME_SLOTS.filter((slot) => slot.slot >= firstSlot && slot.slot <= lastSlot)
+      .map((slot) => {
+        const staffIds = slotsForSelectedDate.specialistsByStartSlot.get(slot.slot) || [];
+        const statuses = specialistIdsToCheck.flatMap((specialistId) => {
+          const availability = availabilityBySpecialist.get(specialistId);
+          const status = availability?.slots.find(
+            (item) => item.slot === slot.slot
+          )?.status;
+          return status ? [status] : [];
+        });
+        const booking = specialistIdsToCheck
+          .map(
+            (specialistId) =>
+              availabilityBySpecialist
+                .get(specialistId)
+                ?.slots.find((item) => item.slot === slot.slot)?.booking
+          )
+          .find(Boolean);
+        const status: "busy" | "customer_busy" | "break" | "not_enough_time" | undefined =
+          !staffIds.length
+            ? !statuses.length
+              ? "not_enough_time"
+              : statuses.every((status) => status === "break")
+                ? "break"
+                : statuses.some((status) => status === "customer_busy")
+                  ? "customer_busy"
+                  : statuses.every((status) => status === "busy")
+                    ? "busy"
+                    : "not_enough_time"
+            : undefined;
 
-      return {
-        ...slot,
-        staffIds,
-        unavailableReason,
-        isDisabled:
-          !staffIds.length ||
-          isBefore(setHours(selectedDate, slot.hour).setMinutes(slot.minute), new Date()),
-        isColorHighlight: Boolean(
-          selectedTime &&
-          slot.slot >= selectedTime.slot &&
-          slot.slot <= selectedTime.slot + slotsForSelectedDate.slotsNeeded
-        ),
-      };
-    });
+        return {
+          ...slot,
+          staffIds,
+          status,
+          booking,
+          isDisabled:
+            !staffIds.length ||
+            isBefore(
+              setHours(selectedDate, slot.hour).setMinutes(slot.minute),
+              new Date()
+            ),
+          isColorHighlight: Boolean(
+            selectedTime &&
+            slot.slot >= selectedTime.slot &&
+            slot.slot <= selectedTime.slot + slotsForSelectedDate.slotsNeeded
+          ),
+        };
+      })
+      .reduce<TRenderedSlot[]>((result, slot) => {
+        if (slot.status !== "customer_busy" || !slot.booking) {
+          result.push(slot);
+          return result;
+        }
+
+        const previous = result.at(-1);
+        if (
+          previous &&
+          "kind" in previous &&
+          previous.booking.id === slot.booking.id &&
+          previous.slots.at(-1)?.slot === slot.slot - 1
+        ) {
+          previous.slots.push(slot);
+          return result;
+        }
+
+        result.push({
+          kind: "booking",
+          booking: slot.booking,
+          slots: [slot],
+          status: "customer_busy",
+          isDisabled: true,
+        });
+        return result;
+      }, []);
   }, [
     availabilityBySpecialist,
     selectedDate,
@@ -311,8 +350,8 @@ const TimeSelection: FC<Props> = ({
     if (!firstDay || !lastDay) return "";
 
     return getMonth(firstDay) === getMonth(lastDay)
-      ? `${format(firstDay, "d", {locale: DATE_FNS_LOCALES[locale]})} - ${format(lastDay, "d, MMMM yyyy", {locale: DATE_FNS_LOCALES[locale]})}`
-      : `${format(firstDay, "d MMMM", {locale: DATE_FNS_LOCALES[locale]})} - ${format(lastDay, "d MMMM, yyyy", {locale: DATE_FNS_LOCALES[locale]})}`;
+      ? `${format(firstDay, "d", { locale: DATE_FNS_LOCALES[locale] })} - ${format(lastDay, "d, MMMM yyyy", { locale: DATE_FNS_LOCALES[locale] })}`
+      : `${format(firstDay, "d MMMM", { locale: DATE_FNS_LOCALES[locale] })} - ${format(lastDay, "d MMMM, yyyy", { locale: DATE_FNS_LOCALES[locale] })}`;
   }, [locale, week.daysOfWeek]);
 
   const isWorkingDay = useCallback(
@@ -372,24 +411,30 @@ const TimeSelection: FC<Props> = ({
           : "w-2/3 min-h-[590px] h-[calc(100vh-124px-100px-52px)] border-r border-greyOutlineSecondary pr-6 sm:w-full sm:border-none sm:pr-0 1sm:pb-[40px]"
       )}
     >
-      {!compact && (<div className="flex flex-col gap-2">
-        <p className="text-[10px] font-bold tracking-[0.5px] text-purplePrimary">
-          {t("booking.timeStep.stepLabel" as any)}
-        </p>
-        <h2 className="font-funnel text-[32px] font-bold leading-tight text-darkPrimary sm:text-[26px]">
-          {t("booking.timeStep.title" as any)}
-        </h2>
-        <p className="text-[13px] text-greyPrimary">
-          {t("booking.timeStep.description" as any, { timezone: timeZoneLabel })}
-        </p>
-      </div>)}
+      {!compact && (
+        <div className="flex flex-col gap-2">
+          <p className="text-[10px] font-bold tracking-[0.5px] text-purplePrimary">
+            {t("booking.timeStep.stepLabel" as any)}
+          </p>
+          <h2 className="font-funnel text-[32px] font-bold leading-tight text-darkPrimary sm:text-[26px]">
+            {t("booking.timeStep.title" as any)}
+          </h2>
+          <p className="text-[13px] text-greyPrimary">
+            {t("booking.timeStep.description" as any, { timezone: timeZoneLabel })}
+          </p>
+        </div>
+      )}
       <div className="w-full flex items-center">
-        <p className={cn("ml-2 flex-1 text-base font-bold", {
-          "text-sm": compact
-        })}>{dateStringBySelectedWeek}</p>
+        <p
+          className={cn("ml-2 flex-1 text-base font-bold", {
+            "text-sm": compact,
+          })}
+        >
+          {dateStringBySelectedWeek}
+        </p>
         <div className="relative flex items-center gap-1">
           <Button
-            variant="resting-active"
+            variant="outline"
             className="size-10 !p-0 !rounded-full border border-greyOutlineSecondary"
             onClick={() => setIsShowDatePicker(true)}
           >
@@ -415,7 +460,7 @@ const TimeSelection: FC<Props> = ({
       <div className={cn("w-full flex items-center justify-between gap-2")}>
         <Button
           disabled={isCurrentWeek}
-          variant="resting-active"
+          variant="outline"
           className="!p-0 !rounded !border-none !size-7"
           onClick={() => setFirstDayOnWeek((current) => addWeeks(current, -1))}
         >
@@ -429,7 +474,7 @@ const TimeSelection: FC<Props> = ({
           selectDateHandler={handleDateSelect}
         />
         <Button
-          variant="resting-active"
+          variant="outline"
           className="!p-0 !rounded !border-none !size-7"
           onClick={() => setFirstDayOnWeek((current) => addWeeks(current, 1))}
         >
@@ -447,7 +492,11 @@ const TimeSelection: FC<Props> = ({
           </h5>
         </div>
       ) : (
-        <div className="w-full max-h-[520px] flex flex-col gap-2 overflow-auto">
+        <div
+          className={cn("w-full flex flex-col gap-2 overflow-auto", {
+            "max-h-[520px]": compact,
+          })}
+        >
           <TimeSlots
             compact={compact}
             selectedSlot={selectedTime}

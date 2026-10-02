@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 import flags from "react-phone-number-input/flags";
 import Image from "next/image";
 
@@ -15,8 +15,8 @@ const LANGS = [
   },
 ];
 
-import i18nConfig from "@/i18n/config"
-import { useChangeLanguage } from "@/hooks/useChangeLanguage";
+import i18nConfig from "@/src/i18n/config"
+import { useChangeLanguage } from "@/src/hooks/useChangeLanguage";
 
 const ChangeLanguage = () => {
   const {language, changeLanguage} = useChangeLanguage()

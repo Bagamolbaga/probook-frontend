@@ -1,6 +1,6 @@
 import Image from "next/image";
-import { cn } from "@/utils/cn";
-import Logo from "@/assets/Logo.svg";
+import { cn } from "@/src/utils/cn";
+import Logo from "@/src/assets/Logo.svg";
 
 const LogoFullIcon = ({
   className,

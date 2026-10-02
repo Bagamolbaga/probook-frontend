@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { FC } from "react";
-import { useGetCompanyServicesTypesQuery } from "@/api/queries/company/serviceTypes";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { useGetCompanyServicesTypesQuery } from "@/src/api/queries/company/serviceTypes";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 import { useTranslations } from "next-intl";
 
 type Props = {

@@ -2,12 +2,12 @@ import React, { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { FormControlLabel } from "@mui/material";
 
-import Button from "@/components/ui/button";
-import RadioButton from "@/components/ui/inputs/RadioButton";
-import TextField from "@/components/ui/inputs/TextField";
-import { Link, useTranslations } from "@/i18n";
+import { Button } from "@/src/components/ui/button";
+import RadioButton from "@/src/components/ui/inputs/RadioButton";
+import TextField from "@/src/components/ui/inputs/TextField";
+import { Link, useTranslations } from "@/src/i18n";
 import { SignUpForm } from "..";
-import { EMAIL_REGEXP, PASSWORD_REGEXP } from "@/utils/regexps";
+import { EMAIL_REGEXP, PASSWORD_REGEXP } from "@/src/utils/regexps";
 
 type Props = {
   form: UseFormReturn<SignUpForm, any, undefined>;
@@ -149,11 +149,11 @@ const EmailPasswordStep: FC<Props> = ({ form, handleSignUpStep }) => {
       </div>
 
       <div className="py-12 flex gap-[100px] sm:gap-0 sm:justify-between">
-        <Button variant="primary" onClick={form.handleSubmit(handleSignUpStep)}>
+        <Button variant="default" onClick={form.handleSubmit(handleSignUpStep)}>
           {t("auth.signUp")}
         </Button>
         <Link href="/sign-in">
-          <Button variant="resting">{t("auth.signIn")}</Button>
+          <Button variant="outline">{t("auth.signIn")}</Button>
         </Link>
       </div>
     </div>

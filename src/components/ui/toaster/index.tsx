@@ -1,6 +1,6 @@
 import { FC, ReactNode } from "react";
 import { toast, ToastOptions } from "react-toastify";
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 import ToastInfoIcon from "../icons/ToastInfo";
 import ToastSuccessIcon from "../icons/ToastSuccess";
 import ToastWarnIcon from "../icons/ToastWarn";

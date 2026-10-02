@@ -2,7 +2,7 @@
 
 import BusinessServicesListTable from "./components/businessServicessListTable";
 import { useTranslations } from "next-intl";
-import MainPagesTitle from "@/components/mainPagesTitle";
+import MainPagesTitle from "@/src/components/mainPagesTitle";
 
 const BusinessServicesScene = () => {
   const t = useTranslations();

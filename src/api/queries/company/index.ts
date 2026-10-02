@@ -1,5 +1,6 @@
 import {
   UndefinedInitialDataOptions,
+  useInfiniteQuery,
   useMutation,
   useQueries,
   useQuery,
@@ -7,27 +8,28 @@ import {
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
-import { useApiClient } from "@/api/context";
+import { useApiClient } from "@/src/api/context";
 import {
   TDeleteCompanyImagesArgs,
   TGetCompaniesArgs,
   TGetCompanyDetailsArgs,
   TGetCompanyImagesArgs,
   TGetCompanyImagesRes,
+  TGetCompanyReviewsArgs,
   TSearchCompanysArgs,
   TSearchCompanysRes,
   TUpdateCompanyDetailsArgs,
   TUploadCompanyImagesArgs,
   TUploadCompanyLogoArgs,
-} from "@/api/entities/company";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+} from "@/src/api/entities/company";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 import { getDefaultQueryOptions } from "../defaultQueryOptions";
 import {
   TSearchServicesAndStoresArgs,
   TSearchServicesAndStoresRes,
-} from "@/api/entities/services";
+} from "@/src/api/entities/services";
 import { AxiosResponse } from "axios";
-import { removeEmptyFields } from "@/utils/removeEmptyFields";
+import { removeEmptyFields } from "@/src/utils/removeEmptyFields";
 
 type CustomUseQueryOptions<TRes> = Omit<UseQueryOptions<TRes, Error>, "queryKey">;
 
@@ -52,6 +54,24 @@ export const useGetCompanyDetailsQuery = (
     staleTime: 1000 * 60,
 
     // ...queryOptions,
+  });
+};
+
+export const useCompanyReviewsQuery = (companyId: string) => {
+  const apiClient = useApiClient();
+  return useInfiniteQuery({
+    queryKey: ["company", companyId, "reviews"],
+    queryFn: async ({ pageParam }) =>
+      (
+        await apiClient.company.getCompanyReviews({
+          companyId,
+          cursor: pageParam || undefined,
+          limit: 10,
+        } satisfies TGetCompanyReviewsArgs)
+      ).data,
+    initialPageParam: "",
+    getNextPageParam: (lastPage) => lastPage.nextCursor || undefined,
+    enabled: Boolean(companyId),
   });
 };
 

@@ -4,15 +4,15 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useApiClient } from "@/api/context";
+import { useApiClient } from "@/src/api/context";
 import {
   TGetCompanyServicesArgs,
   TUpdateCompanyServiceArgs,
   TCreateCompanyServiceArgs,
   TDeleteCompanyServiceArgs,
   TUploadServiceImageArgs,
-} from "@/api/entities/company";
-import { TGetServicesTypesArgs } from "@/api/entities/services";
+} from "@/src/api/entities/company";
+import { TGetServicesTypesArgs } from "@/src/api/entities/services";
 
 type Options<T> = T & {
   queryOptions?: UndefinedInitialDataOptions;

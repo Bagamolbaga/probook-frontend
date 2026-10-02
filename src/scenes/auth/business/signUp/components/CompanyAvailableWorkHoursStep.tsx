@@ -2,11 +2,11 @@ import { FC, useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
 
 import { SignUpForm } from "..";
-import Button from "@/components/ui/button";
-import { TIME_SLOTS, TTimeSlot } from "@/constants/timeSlots";
-import { cn } from "@/utils/cn";
+import { Button } from "@/src/components/ui/button";
+import { TIME_SLOTS, TTimeSlot } from "@/src/constants/timeSlots";
+import { cn } from "@/src/utils/cn";
 import { useTranslations } from "next-intl";
-import Spinner from "@/components/ui/loaders/Spinner";
+import Spinner from "@/src/components/ui/loaders/Spinner";
 
 export const WEEK_DAYS = {
   Mon: "Monday",
@@ -144,11 +144,11 @@ const CompanyAvailableWorkHoursStep: FC<Props> = ({ form, handleSignUpStep }) =>
         ))}
       </div>
       <div className="py-12 flex gap-[100px] sm:gap-0 sm:justify-between">
-        <Button variant="resting" onClick={() => form.setValue("_step", 3)}>
+        <Button variant="outline" onClick={() => form.setValue("_step", 3)}>
           {t("ui.actions.cancel")}
         </Button>
         <Button
-          variant="primary"
+          variant="default"
           onClick={form.handleSubmit(handleSignUpStep)}
           disabled={!isNextBtnActive || form.getValues("_loading")}
         >

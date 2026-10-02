@@ -1,10 +1,10 @@
 import { FC } from "react";
 import { Sparkles, Star } from "lucide-react";
-import { cn } from "@/utils/cn";
-import CustomScrollbar from "@/styles/scrollbar.module.sass";
+import { cn } from "@/src/utils/cn";
+import CustomScrollbar from "@/src/styles/scrollbar.module.sass";
 import SpecialistList from "./ui/SpecialistList";
-import { TTimeSlot } from "@/constants/timeSlots";
-import AvatarPlaceholder from "@/assets/staffManagement/specialistWithoutAvatar.png";
+import { TTimeSlot } from "@/src/constants/timeSlots";
+import AvatarPlaceholder from "@/src/assets/staffManagement/specialistWithoutAvatar.png";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 

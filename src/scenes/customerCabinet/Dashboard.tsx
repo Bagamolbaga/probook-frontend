@@ -8,12 +8,15 @@ import {
   MapPin,
   XCircle,
 } from "lucide-react";
-import type { CustomerBooking } from "@/api/entities/customer";
-import { useCustomerDashboardQuery } from "@/api/queries/customer";
-import { useAppSession } from "@/hooks/useAppSession";
-import { Link, useLocale, useTranslations } from "@/i18n";
+import type { CustomerBooking } from "@/src/api/entities/customer";
+import { useCustomerDashboardQuery } from "@/src/api/queries/customer";
+import { useAppSession } from "@/src/hooks/useAppSession";
+import { Link, useLocale, useTranslations } from "@/src/i18n";
 import { formatBookingTime } from "./components/BookingCard";
 import QueryState from "./components/QueryState";
+import BookingStatusBadge from "./components/BookingStatusBadge";
+import { cn } from "@/src/utils/cn";
+import { BOOKING_STATUS_ICONS } from "@/src/constants/bookingStatuses";
 
 const statusTone: Record<CustomerBooking["status"], string> = {
   PENDING: "bg-yellowPrimary text-darkPrimary",
@@ -38,80 +41,80 @@ const formatPrice = (booking: CustomerBooking, locale: string) =>
     currency: booking.company.currency,
   }).format(booking.totalPrice);
 
-function Status({
-  booking,
-  compact = false,
-}: {
-  booking: CustomerBooking;
-  compact?: boolean;
-}) {
-  const t = useTranslations("customerCabinet");
-  const StatusIcon = statusIcon[booking.status];
-  return (
-    <span
-      className={`inline-flex shrink-0 items-center gap-1 rounded-full font-bold ${statusTone[booking.status]} ${compact ? "px-2.5 py-1 text-[10px]" : "px-3 py-1.5 text-[11px]"}`}
-    >
-      <StatusIcon className={compact ? "size-[11px]" : "size-[13px]"} aria-hidden />
-      {t(`status.${booking.status}`)}
-    </span>
-  );
-}
-
 function UpcomingRow({ booking }: { booking: CustomerBooking }) {
   const locale = useLocale();
+  const t = useTranslations("customerCabinet");
   return (
     <Link
       href={`/cabinet/bookings/${booking.id}`}
-      className="group flex min-h-[92px] items-center gap-4 border-b border-greyOutline px-[18px] outline-none last:border-0 hover:bg-greyBackgroundLight focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-purplePrimary"
+      className={cn(
+        "group flex items-center gap-4 py-2 px-[18px] outline-none border-b border-greyOutline",
+        "last:border-0 hover:bg-greyBackgroundLight focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-purplePrimary",
+        "sm:gap-2"
+      )}
     >
-      <span className="flex size-[58px] shrink-0 flex-col items-center justify-center rounded-xl bg-greyOutline">
+      <span className="flex px-4 py-2 shrink-0 flex-col items-center justify-center rounded-xl bg-greyOutline sm:px-2 sm:py-2 sm:rounded-md">
         <span className="text-[9px] font-bold uppercase tracking-[0.07em] text-greyPrimary">
           {formatDate(booking.date, locale, { weekday: "short" })}
         </span>
         <span className="font-secondary text-[23px] font-bold leading-none">
           {formatDate(booking.date, locale, { day: "2-digit" })}
         </span>
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-[10px] font-bold uppercase tracking-[0.05em] text-greyPrimary">
-          {formatDate(booking.date, locale, { month: "long" })} ·{" "}
-          {formatBookingTime(booking)}
+        <span className="text-[9px] font-bold uppercase tracking-[0.07em] text-greyPrimary">
+          {formatDate(booking.date, locale, { month: "short" }).replace(".", "")}
         </span>
+      </span>
+
+      <div className="flex flex-col flex-1">
+        <div className="min-w-0 flex-1 flex flex-col">
+          <span className="flex-1 block text-xs font-bold tracking-[0.05em] text-greyPrimary">
+            {formatBookingTime(booking)}
+          </span>
+        </div>
         <span className="mt-1 block truncate text-sm font-bold">
           {booking.services.map((service) => service.name).join(", ")}
         </span>
         <span className="mt-1 block truncate text-[11px] text-greyPrimary">
-          {booking.company.name} · {booking.specialist.fullName}
+          {booking.company.name}
         </span>
-      </span>
-      <Status booking={booking} compact />
-      <span className="text-lg text-greyPrimary transition-transform group-hover:translate-x-0.5">
-        ›
-      </span>
+      </div>
+
+      <div className="flex flex-col justify-between items-end gap-2">
+        <BookingStatusBadge status={booking.status} />
+        <Link
+          href={`/cabinet/bookings/${booking.id}`}
+          aria-label={t("bookings.details")}
+          className="flex size-9 items-center justify-center rounded-full bg-purplePrimary text-white outline-none hover:bg-purplePrimary_hover focus-visible:ring-2 focus-visible:ring-purplePrimary focus-visible:ring-offset-2 sm:size-[34px]"
+        >
+          <ArrowRight className="size-[15px]" />
+        </Link>
+      </div>
     </Link>
   );
 }
 
 function HistoryRow({ booking }: { booking: CustomerBooking }) {
   const locale = useLocale();
+  const Icon = BOOKING_STATUS_ICONS["COMPLETED"];
   return (
     <Link
       href={`/cabinet/bookings/${booking.id}`}
       className="flex min-h-[67px] items-center gap-3 border-b border-greyOutline px-5 outline-none last:border-0 hover:bg-greyBackgroundLight focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-purplePrimary"
     >
-      <span className="flex size-[30px] shrink-0 items-center justify-center rounded-full bg-greyOutline text-sm font-bold text-purplePrimary">
-        ✓
+      <span className="size-9 flex items-center justify-center rounded-full bg-purpleExtraLight">
+        <Icon className="size-5 text-purplePrimary" />
       </span>
+
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-xs font-bold">
+        <span className="block truncate text-sm font-bold">
           {booking.services.map((service) => service.name).join(", ")}
         </span>
-        <span className="mt-1 block truncate text-[10px] text-greyPrimary">
+        <span className="mt-1 block truncate text-xs text-greyPrimary">
           {booking.company.name} ·{" "}
           {formatDate(booking.date, locale, { day: "2-digit", month: "short" })}
         </span>
       </span>
-      <span className="shrink-0 text-[11px] font-bold text-grey-800">
+      <span className="shrink-0 text-xs font-semibold text-grey-800">
         {formatPrice(booking, locale)}
       </span>
     </Link>
@@ -150,7 +153,7 @@ export default function CustomerDashboardScene() {
     : "";
 
   return (
-    <div className="flex min-h-full flex-col gap-6">
+    <div className="flex flex-1 min-h-full flex-col gap-6">
       <header className="flex items-center justify-between gap-6">
         <div>
           <h1 className="font-secondary text-[32px] font-bold leading-tight tracking-[-0.02em] sm:text-[26px]">
@@ -172,7 +175,11 @@ export default function CustomerDashboardScene() {
       </header>
 
       <section
-        className="grid min-h-[104px] grid-cols-4 gap-2.5 rounded-2xl border border-greyOutline p-4 md:grid-cols-2 sm:grid-cols-1"
+        className={cn(
+          "grid min-h-[104px] grid-cols-4 gap-2.5 rounded-2xl p-4",
+          "md:grid-cols-2 md:p-0",
+          "sm:grid-cols-2 sm:p-0"
+        )}
         aria-label={t("dashboard.summary")}
       >
         {[
@@ -180,19 +187,16 @@ export default function CustomerDashboardScene() {
             t("dashboard.nextBooking"),
             next ? formatDate(next.date, locale, { day: "numeric", month: "long" }) : "—",
             "bg-purpleExtraLight text-purplePrimary",
-            "text-lg",
           ],
           [
             t("dashboard.upcomingCount"),
             t("dashboard.bookingCount", { count: dashboard.stats.upcomingCount }),
             "bg-bluePrimary/10 text-bluePrimary",
-            "text-[21px]",
           ],
           [
             t("dashboard.completedCount"),
             t("dashboard.bookingCount", { count: dashboard.stats.completedCount }),
             "bg-greenExtraLight text-greenPrimary",
-            "text-[21px]",
           ],
           [
             t("dashboard.spent"),
@@ -207,18 +211,17 @@ export default function CustomerDashboardScene() {
                   .join(" · ")
               : "—",
             "bg-yellowExtraLight text-[#B29A00]",
-            "text-[21px]",
           ],
         ].map(([label, value, tone, size]) => (
           <div
             key={label}
-            className={`flex min-w-0 flex-col justify-center gap-2 rounded-[14px] px-4 py-3 ${tone}`}
+            className={`flex min-w-0 flex-col justify-center gap-2 rounded-[14px] px-4 py-3 sm:gap-1 sm:py-2 ${tone}`}
           >
             <span className="text-[10px] font-bold uppercase tracking-[0.08em]">
               {label}
             </span>
             <strong
-              className={`truncate font-secondary font-bold leading-none text-darkPrimary ${size}`}
+              className={`truncate font-secondary font-bold leading-none text-darkPrimary text-lg sm:text-base`}
             >
               {value}
             </strong>
@@ -226,16 +229,16 @@ export default function CustomerDashboardScene() {
         ))}
       </section>
 
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_354px] gap-6 md:grid-cols-1">
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_400px] gap-6 md:grid-cols-1 sm:grid-cols-1">
         <div className="flex min-w-0 flex-col gap-5">
           {next ? (
-            <article className="grid h-[328px] grid-cols-[minmax(0,1fr)_224px] overflow-hidden rounded-[18px] bg-darkPrimary text-white sm:h-auto sm:min-h-[239px] sm:grid-cols-1">
-              <div className="flex min-w-0 flex-col justify-between p-[26px] sm:min-h-[239px] sm:p-5">
+            <article className="grid grid-cols-[minmax(0,1fr)_224px] overflow-hidden rounded-[18px] bg-darkPrimary text-white sm:h-auto sm:min-h-[239px] sm:grid-cols-1">
+              <div className="flex min-w-0 flex-col justify-between gap-4 p-[26px] sm:min-h-[239px] sm:p-5">
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#8AF1B9]">
                     {t("dashboard.nextBooking")}
                   </span>
-                  <Status booking={next} />
+                  <BookingStatusBadge status={next.status} />
                 </div>
                 <div>
                   <p className="font-funnel text-[35px] font-bold leading-none tracking-[-0.7px] text-white sm:text-[28px]">

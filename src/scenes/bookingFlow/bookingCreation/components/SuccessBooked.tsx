@@ -1,15 +1,15 @@
 import { FC, ReactNode, useMemo } from "react";
 import { format } from "date-fns";
-import { DATE_FNS_LOCALES, Link, useLocale, useTranslations } from "@/i18n";
+import { DATE_FNS_LOCALES, Link, useLocale, useTranslations } from "@/src/i18n";
 import Image from "next/image";
-import Button from "@/components/ui/button";
-import ArrowRightIcon from "@/components/ui/icons/ArrowRight";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import CheckmarkCircle from "@/components/ui/icons/CheckmarkCircle";
-import ClockIcon from "@/components/ui/icons/Clock";
-import EmployeeIcon from "@/components/ui/icons/Employee";
-import { TimeManager } from "@/utils/timeManager";
-import { formatCurrency } from "@/utils/formatCurrency";
+import { Button } from "@/src/components/ui/button";
+import ArrowRightIcon from "@/src/components/ui/icons/ArrowRight";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import CheckmarkCircle from "@/src/components/ui/icons/CheckmarkCircle";
+import ClockIcon from "@/src/components/ui/icons/Clock";
+import EmployeeIcon from "@/src/components/ui/icons/Employee";
+import { TimeManager } from "@/src/utils/timeManager";
+import { formatCurrency } from "@/src/utils/formatCurrency";
 
 type Props = { booking: TApiBooking; company: TCompany };
 
@@ -110,7 +110,7 @@ const SuccessBooked: FC<Props> = ({ company, booking }) => {
                     {company.name}
                   </h2>
                   <p className="font-heading text-xs text-greyPrimary">
-                    {company.address1}
+                    {company.address}
                   </p>
                 </div>
               </div>
@@ -159,7 +159,7 @@ const SuccessBooked: FC<Props> = ({ company, booking }) => {
 
           <div className="flex gap-4 sm:w-full sm:flex-col">
             <Button
-              variant="resting-active"
+              variant="outline"
               className="h-[52px] rounded-full border border-purplePrimary px-6 text-sm"
             >
               <CalendarIcon className="mr-2 size-[18px] stroke-purplePrimary" />
@@ -167,7 +167,7 @@ const SuccessBooked: FC<Props> = ({ company, booking }) => {
             </Button>
             <Link href={`/cabinet`} className="sm:w-full">
               <Button
-                variant="primary"
+                variant="default"
                 className="h-[52px] w-full rounded-full px-6 text-sm"
               >
                 {t("booking.bookedSuccessStep.myBookings")}

@@ -1,7 +1,7 @@
 import { format } from "date-fns";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import ClockIcon from "@/components/ui/icons/Clock";
-import { TTimeSlot } from "@/constants/timeSlots";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import ClockIcon from "@/src/components/ui/icons/Clock";
+import { TTimeSlot } from "@/src/constants/timeSlots";
 import { useMemo } from "react";
 
 export const DateSection = ({ date }: { date: Date }) => {

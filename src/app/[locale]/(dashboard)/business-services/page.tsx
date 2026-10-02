@@ -1,4 +1,4 @@
-import BusinessServicesScene from "@/scenes/main/businessServices";
+import BusinessServicesScene from "@/src/scenes/main/businessServices";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 

@@ -31,10 +31,10 @@ const ConfirmationModal: FC<Props> = ({
         <h5 className="mt-5 text-[26px] font-bold text-center">{title}</h5>
         <p className="mt-4  text-center text-greyPrimary">{subTitle}</p>
         <div className="w-full mt-[76px] flex justify-between">
-          <Button className="px-10" variant="resting" onClick={negativeHandler}>
+          <Button className="px-10" variant="outline" onClick={negativeHandler}>
             {negativeLabel}
           </Button>
-          <Button className="px-10" variant="dark" onClick={pozitiveHandler}>
+          <Button className="px-10" variant="outline" onClick={pozitiveHandler}>
             {positiveLabel}
           </Button>
         </div>

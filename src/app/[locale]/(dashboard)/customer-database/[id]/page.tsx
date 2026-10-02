@@ -1,5 +1,5 @@
-import { MAIN_NAVIGATION_ENUM } from "@/constants/navigations";
-import CustomerDatabaseDetailsScene from "@/scenes/main/customerDatabaseDetails";
+import { MAIN_NAVIGATION_ENUM } from "@/src/constants/navigations";
+import CustomerDatabaseDetailsScene from "@/src/scenes/main/customerDatabaseDetails";
 import { redirect } from "next/navigation";
 
 const CustomerDeatilsPage = ({ params: { id } }: { params: { id: string } }) => {

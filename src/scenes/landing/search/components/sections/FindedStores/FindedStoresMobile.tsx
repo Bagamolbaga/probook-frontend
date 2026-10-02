@@ -7,21 +7,21 @@ import { motion, PanInfo, Variant } from "framer-motion";
 import { OutputFormat, setDefaults } from "react-geocode";
 import { GoogleMap, OverlayView, useLoadScript } from "@react-google-maps/api";
 
-import Button from "@/components/ui/button";
-import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
-import CloseIcon from "@/components/ui/icons/Close";
-import useWindowWidth from "@/hooks/useWindowWidth";
+import { Button } from "@/src/components/ui/button";
+import ArrowSecondaryDownIcon from "@/src/components/ui/icons/ArrowSecondaryDown";
+import CloseIcon from "@/src/components/ui/icons/Close";
+import useWindowWidth from "@/src/hooks/useWindowWidth";
 import StoreCard from "./StoreCard";
-import { cn } from "@/utils/cn";
-import HeartIcon from "@/components/ui/icons/Heart";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { FAVORITE_STORES } from "@/constants/keys";
+import { cn } from "@/src/utils/cn";
+import HeartIcon from "@/src/components/ui/icons/Heart";
+import { useLocalStorage } from "@/src/hooks/useLocalStorage";
+import { FAVORITE_STORES } from "@/src/constants/keys";
 import Search from "../../Search";
 import { UseFormReturn } from "react-hook-form";
 import { SearchForm } from "../../..";
 import { format } from "date-fns";
-import Spinner from "@/components/ui/loaders/Spinner";
-import { TSearchCompany } from "@/api/entities/company";
+import Spinner from "@/src/components/ui/loaders/Spinner";
+import { TSearchCompany } from "@/src/api/entities/company";
 
 type NonNullablePos = {
   lat: NonNullable<TCompany["pos"]["lat"]>;
@@ -149,7 +149,7 @@ const FindedStoresMobile: FC<Props> = ({
                 <div className="fixed z-[210] top-0 left-0 w-screen h-screen px-5 py-6 bg-white">
                   <div className="w-full flex justify-end">
                     <Button
-                      variant="transparent"
+                      variant="secondary"
                       className="size-9 flex items-center justify-center border border-greyOutlineSecondary"
                       onClick={handleCloseSearchForm}
                     >
@@ -171,7 +171,7 @@ const FindedStoresMobile: FC<Props> = ({
               )}
 
               <div className="px-5 py-4 flex items-center gap-2 bg-white">
-                <Button variant="resting" onClick={handleCloseLocal}>
+                <Button variant="outline" onClick={handleCloseLocal}>
                   <ArrowSecondaryDownIcon className="rotate-90" />
                 </Button>
 
@@ -356,7 +356,7 @@ const StoreWidget = ({
       <div className="w-full flex items-center gap-2 rounded-[14px] overflow-hidden bg-white">
         <div className="relative w-[120px] h-[130px] bg-greyOutlineSecondary">
           <Button
-            variant="transparent"
+            variant="secondary"
             className="absolute z-[41] top-2 left-2 size-8 flex items-center justify-center !rounded-full border border-greyOutlineSecondary bg-white"
             onClick={handleClose}
           >

@@ -1,4 +1,4 @@
-import { useApiClient } from "@/api/context";
+import { useApiClient } from "@/src/api/context";
 import { UndefinedInitialDataOptions, useQuery } from "@tanstack/react-query";
 
 type Options<T> = T & {

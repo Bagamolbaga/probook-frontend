@@ -1,8 +1,8 @@
 "use client";
 
-import Button from "@/components/ui/button";
-import Spinner from "@/components/ui/loaders/Spinner";
-import { useTranslations } from "@/i18n";
+import { Button } from "@/src/components/ui/button";
+import Spinner from "@/src/components/ui/loaders/Spinner";
+import { useTranslations } from "@/src/i18n";
 
 export default function QueryState({
   loading,
@@ -20,7 +20,7 @@ export default function QueryState({
   if (loading) {
     return (
       <div
-        className="flex min-h-[260px] items-center justify-center rounded-[24px] border border-greyOutlineSecondary bg-white"
+        className="flex min-h-0 flex-1 items-center justify-center rounded-[24px] border border-greyOutlineSecondary bg-white"
         role="status"
       >
         <Spinner />

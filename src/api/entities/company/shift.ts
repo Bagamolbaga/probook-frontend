@@ -1,4 +1,4 @@
-import { ApiClientCore } from "@/api/core";
+import { ApiClientCore } from "@/src/api/core";
 import { format } from "date-fns";
 
 const WEEK_DAYS = [

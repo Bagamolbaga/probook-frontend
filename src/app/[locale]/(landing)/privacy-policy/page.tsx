@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import PrivacyPolicyScene from "@/scenes/landing/privacy-policy";
+import PrivacyPolicyScene from "@/src/scenes/landing/privacy-policy";
 
 export async function generateMetadata({
   params,

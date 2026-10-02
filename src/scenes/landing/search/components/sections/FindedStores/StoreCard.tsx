@@ -1,11 +1,11 @@
 import { FC } from "react";
 import Image from "next/image";
-import { Link, useRouter, useTranslations } from "@/i18n";
-import Button from "@/components/ui/button";
-import { cn } from "@/utils/cn";
-import { toSlug } from "@/utils/toSlug";
-import { getYandexMapsUrl } from "@/utils/getYandexMapsUrl";
-import { TSearchCompany } from "@/api/entities/company";
+import { Link, useRouter, useTranslations } from "@/src/i18n";
+import { Button } from "@/src/components/ui/button";
+import { cn } from "@/src/utils/cn";
+import { toSlug } from "@/src/utils/toSlug";
+import { getYandexMapsUrl } from "@/src/utils/getYandexMapsUrl";
+import { TSearchCompany } from "@/src/api/entities/company";
 
 type Props = {
   company: TSearchCompany;
@@ -55,7 +55,7 @@ const StoreCard: FC<Props> = ({ company, isDark, setHover }) => {
             <div className="w-full h-full bg-greyPrimary/50"></div>
           )}
           <div className="absolute top-4 right-4 py-1 px-4 rounded-full border bg-white border-purplePrimary">
-            <p className="text-sm font-bold text-grey-800">{company.business_type}</p>
+            <p className="text-sm font-bold text-grey-800">{company.businessType}</p>
           </div>
         </div>
         <div className="p-4 flex-1 flex flex-col items-start justify-between">
@@ -94,7 +94,7 @@ const StoreCard: FC<Props> = ({ company, isDark, setHover }) => {
                 className="w-full"
               >
                 <Button
-                  variant="resting-active"
+                  variant="outline"
                   className="w-full !py-3 font-bold !rounded-full"
                 >
                   Open in Yandex Maps

@@ -1,10 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import TimeLineCalendar from "./components/timeLineCalendar";
-import MainPagesTitle from "@/components/mainPagesTitle";
+import { TimeLineV2 } from "./components/timelineV2";
+import MainPagesTitle from "@/src/components/mainPagesTitle";
 import { useMemo, useState } from "react";
-import Tabs from "@/components/ui/tab";
+import Tabs from "@/src/components/ui/tab";
 import Calendar from "./components/calendar";
 import BookingDetailsModalHost from "./components/BookingDetailsModalHost";
 
@@ -31,7 +31,7 @@ const BookingManagementScene = () => {
         return <Calendar />;
 
       default:
-        return <TimeLineCalendar />;
+        return <TimeLineV2 />;
     }
   }, [activeTab]);
 
@@ -49,7 +49,7 @@ const BookingManagementScene = () => {
             />
           </div>
         </div>
-        <div className="w-full min-h-[calc(100vh-62px-52px)] flex sm:min-h-[calc(100vh-62px-86px)] sm:pb-5">
+        <div className="min-w-0 w-full min-h-[calc(100vh-62px-52px)] flex sm:min-h-[calc(100vh-62px-86px)] sm:pb-5">
           {/* <SuperAdminChecker> */}
           {/* <SubscriptionChecker> */}
           {content}

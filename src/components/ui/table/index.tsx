@@ -3,7 +3,7 @@ import { DataGrid, DataGridProps, GridRowSelectionModel } from "@mui/x-data-grid
 import { Player } from "@lottiefiles/react-lottie-player";
 
 import TablePagination from "./pagination";
-import BlackLogoAnimation from "@/assets/lottiefiles/blackLogoAnimation.json";
+import BlackLogoAnimation from "@/src/assets/lottiefiles/blackLogoAnimation.json";
 
 type Props = {
   _enablePagination?: boolean;

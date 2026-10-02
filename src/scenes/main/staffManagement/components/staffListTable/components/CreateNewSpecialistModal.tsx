@@ -2,24 +2,24 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Button from "@/components/ui/button";
-import StoreIcon from "@/components/ui/icons/Store";
-import TextField from "@/components/ui/inputs/TextField";
-import Modal from "@/components/ui/modal";
+import { Button } from "@/src/components/ui/button";
+import StoreIcon from "@/src/components/ui/icons/Store";
+import TextField from "@/src/components/ui/inputs/TextField";
+import Modal from "@/src/components/ui/modal";
 import { FormControl } from "@mui/material";
 import { FC, ReactNode, useMemo } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { CreateSpecialistForm } from "..";
-import CloseIcon from "@/components/ui/icons/Close";
-import AppSelect from "@/components/ui/inputs/AppSelect";
-import { useGetCompanyShiftsQuery } from "@/api/queries/company/shift";
-import { TimeManager } from "@/utils/timeManager";
-import { SHIFT_COLORS } from "@/constants/shiftColors";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
-import WorkingTimePicker from "@/components/WorkingTimePicker";
-import { useGetCompanyDetailsQuery } from "@/api/queries/company";
-import { WEEK_DAYS } from "@/constants/other";
-import { cn } from "@/utils/cn";
+import CloseIcon from "@/src/components/ui/icons/Close";
+import AppSelect from "@/src/components/ui/inputs/AppSelect";
+import { useGetCompanyShiftsQuery } from "@/src/api/queries/company/shift";
+import { TimeManager } from "@/src/utils/timeManager";
+import { SHIFT_COLORS } from "@/src/constants/shiftColors";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
+import WorkingTimePicker from "@/src/components/WorkingTimePicker";
+import { useGetCompanyDetailsQuery } from "@/src/api/queries/company";
+import { WEEK_DAYS } from "@/src/constants/other";
+import { cn } from "@/src/utils/cn";
 
 type Props = {
   isUpdate?: boolean;
@@ -100,7 +100,7 @@ const CreateUpdateSpecialistModal: FC<Props> = ({
           <div className="flex items-center gap-4">
             <Button
               className="w-9 h-9 p-0"
-              variant="resting-active"
+              variant="outline"
               onClick={localCloseHandler}
             >
               <CloseIcon className="w-5 h-5 stroke-greyPrimary" />
@@ -291,7 +291,7 @@ const CreateUpdateSpecialistModal: FC<Props> = ({
         </div>
 
         <div className="mt-5 flex items-center justify-between gap-5">
-          <Button variant="resting" onClick={localCloseHandler}>
+          <Button variant="outline" onClick={localCloseHandler}>
             Cancel
           </Button>
           {actionButton}

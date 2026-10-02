@@ -1,5 +1,5 @@
-import { useTranslations } from "@/i18n";
-import CheckmarkCircleLight from "@/components/ui/icons/CheckmarkCircleLight";
+import { useTranslations } from "@/src/i18n";
+import CheckmarkCircleLight from "@/src/components/ui/icons/CheckmarkCircleLight";
 
 const AccountCreatedStep = () => {
   const t = useTranslations();

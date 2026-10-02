@@ -1,4 +1,4 @@
-import { FormattedDataItem } from "@/scenes/main/bookingManagement/components/timeLineCalendar";
+import { FormattedDataItem } from "@/src/scenes/main/bookingManagement/components/timeLineCalendar";
 import TimeLineBreakItem from "./BreakTime/TimeLineBreakItem";
 
 export const FullDayOff = ({

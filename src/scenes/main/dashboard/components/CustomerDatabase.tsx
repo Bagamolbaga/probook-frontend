@@ -1,13 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
-import { Link } from "@/i18n";
+import { Link } from "@/src/i18n";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { useGetCustomersQuery } from "@/api/queries/users";
-import UserNameWithAvatar from "@/components/ui/table/customCells/UserNameWithAvatar";
-import Button from "@/components/ui/button";
-import { formatCurrency } from "@/utils/formatCurrency";
-import { useGetCompanyId } from "@/hooks/useGetCompanyId";
+import { useGetCustomersQuery } from "@/src/api/queries/users";
+import UserNameWithAvatar from "@/src/components/ui/table/customCells/UserNameWithAvatar";
+import { Button } from "@/src/components/ui/button";
+import { formatCurrency } from "@/src/utils/formatCurrency";
+import { useGetCompanyId } from "@/src/hooks/useGetCompanyId";
 
 type TRowItem = {
   id: string;
@@ -95,14 +95,14 @@ const CustomerDatabase = () => {
       //       <div className="w-auto flex items-center gap-2">
       //         <Button
       //           className="w-9 h-9 p-0"
-      //           variant="resting-active"
+      //           variant="outline"
       //           // onClick={() => showUpdateModalHandler(row)}
       //         >
       //           <EditIcon className="w-5 h-5" />
       //         </Button>
       //         <Button
       //           className="w-9 h-9 p-0"
-      //           variant="resting-active"
+      //           variant="outline"
       //           // onClick={() => setSpecialistIdDeleteConfirmModal(row.id)}
       //         >
       //           <DeleteIcon className="w-5 h-5" />
@@ -136,7 +136,7 @@ const CustomerDatabase = () => {
         <h4 className="text-lg font-bold">Customer Database</h4>
         <div className="flex items-center gap-1">
           <Link href="/customer-database">
-            <Button className="flex items-center gap-3" variant="resting-active">
+            <Button className="flex items-center gap-3" variant="outline">
               View all
             </Button>
           </Link>

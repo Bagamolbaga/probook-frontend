@@ -1,8 +1,8 @@
-import { BookingCreatedNotification } from "@/api/entities/notification";
-import { TIME_SLOTS } from "@/constants/timeSlots";
-import CalendarIcon from "@/components/ui/icons/Calendar";
-import ClockIcon from "@/components/ui/icons/Clock";
-import { formatCurrency } from "@/utils/formatCurrency";
+import { BookingCreatedNotification } from "@/src/api/entities/notification";
+import { TIME_SLOTS } from "@/src/constants/timeSlots";
+import CalendarIcon from "@/src/components/ui/icons/Calendar";
+import ClockIcon from "@/src/components/ui/icons/Clock";
+import { formatCurrency } from "@/src/utils/formatCurrency";
 import { useLocale, useTranslations } from "next-intl";
 
 type Props = {

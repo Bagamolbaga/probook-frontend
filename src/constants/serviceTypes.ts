@@ -1,9 +1,9 @@
-import BarberingServiceIcon from "@/components/ui/icons/serviceTypes/Barbering";
-import EyebrowsServiceIcon from "@/components/ui/icons/serviceTypes/Eyebrows";
-import HairServiceIcon from "@/components/ui/icons/serviceTypes/Hair";
-import HairRemovalServiceIcon from "@/components/ui/icons/serviceTypes/HairRemoval";
-import MassageServiceIcon from "@/components/ui/icons/serviceTypes/Massage";
-import NailsServiceIcon from "@/components/ui/icons/serviceTypes/Nails";
+import BarberingServiceIcon from "@/src/components/ui/icons/serviceTypes/Barbering";
+import EyebrowsServiceIcon from "@/src/components/ui/icons/serviceTypes/Eyebrows";
+import HairServiceIcon from "@/src/components/ui/icons/serviceTypes/Hair";
+import HairRemovalServiceIcon from "@/src/components/ui/icons/serviceTypes/HairRemoval";
+import MassageServiceIcon from "@/src/components/ui/icons/serviceTypes/Massage";
+import NailsServiceIcon from "@/src/components/ui/icons/serviceTypes/Nails";
 
 // export const SERVICE_TYPES_ICONS = {
 //   HAIR: HairServiceIcon,

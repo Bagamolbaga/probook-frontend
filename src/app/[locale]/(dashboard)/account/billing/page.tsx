@@ -1,4 +1,4 @@
-import AccountBillingScene from "@/scenes/main/account/billing";
+import AccountBillingScene from "@/src/scenes/main/account/billing";
 
 const AccountBillingPage = () => {
   return <AccountBillingScene />;

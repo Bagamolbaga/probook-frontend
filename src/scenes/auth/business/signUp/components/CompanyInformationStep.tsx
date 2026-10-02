@@ -2,11 +2,11 @@ import { FC } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { FormControl, MenuItem } from "@mui/material";
 
-import Button from "@/components/ui/button";
-import TextField from "@/components/ui/inputs/TextField";
-import CustomSelect from "@/components/ui/inputs/Select";
-import ArrowSecondaryDownIcon from "@/components/ui/icons/ArrowSecondaryDown";
-import { useTranslations } from "@/i18n";
+import { Button } from "@/src/components/ui/button";
+import TextField from "@/src/components/ui/inputs/TextField";
+import CustomSelect from "@/src/components/ui/inputs/Select";
+import ArrowSecondaryDownIcon from "@/src/components/ui/icons/ArrowSecondaryDown";
+import { useTranslations } from "@/src/i18n";
 import { SignUpForm } from "..";
 
 const BUSINESS_TYPES = ["Beauty salon", "Barbershop", "Spa", "Wellness", "Other"];
@@ -79,11 +79,11 @@ const CompanyInformationStep: FC<Props> = ({ form, handleSignUpStep }) => {
       </div>
 
       <div className="py-12 flex gap-[100px] sm:gap-0 sm:justify-between">
-        <Button variant="resting" onClick={() => form.setValue("_step", 1)}>
+        <Button variant="outline" onClick={() => form.setValue("_step", 1)}>
           {t("ui.actions.cancel")}
         </Button>
         <Button
-          variant="primary"
+          variant="default"
           onClick={form.handleSubmit(handleSignUpStep)}
           disabled={!isNextBtnActive}
         >

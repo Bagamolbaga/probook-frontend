@@ -1,6 +1,6 @@
 import { FC } from "react";
 import Image from "next/image";
-import { cn } from "@/utils/cn";
+import { cn } from "@/src/utils/cn";
 
 type Props = {
   className?: string;

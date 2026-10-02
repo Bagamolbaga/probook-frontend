@@ -111,6 +111,11 @@ export const customerCabinet = {
     openMap: "Открыть на карте",
   },
   review: {
+    publishing: "\u041f\u0443\u0431\u043b\u0438\u043a\u0443\u0435\u043c...",
+    submissionError:
+      "\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043e\u043f\u0443\u0431\u043b\u0438\u043a\u043e\u0432\u0430\u0442\u044c \u043e\u0442\u0437\u044b\u0432. \u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.",
+    alreadySubmitted:
+      "\u0412\u044b \u0443\u0436\u0435 \u043e\u0441\u0442\u0430\u0432\u0438\u043b\u0438 \u043e\u0442\u0437\u044b\u0432 \u043a \u044d\u0442\u043e\u0439 \u0437\u0430\u043f\u0438\u0441\u0438.",
     entryTitle: "Как всё прошло?",
     entryDescription:
       "Расскажите о качестве услуги и работе специалиста. Это поможет компании стать лучше.",
@@ -194,11 +199,13 @@ export const customerCabinet = {
     CONFIRMED: "Подтверждена",
     COMPLETED: "Завершена",
     CANCELLED: "Отменена",
+    BLOCKED: "Заблокирована",
   },
   statusCompact: {
     PENDING: "Ожидает",
     CONFIRMED: "Подтверждена",
     COMPLETED: "Завершена",
     CANCELLED: "Отменена",
+    BLOCKED: "Заблокирована",
   },
 };

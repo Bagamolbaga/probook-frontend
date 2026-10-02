@@ -6,27 +6,27 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { parsePhoneNumber, isPossiblePhoneNumber } from "react-phone-number-input/input";
-import PhoneTextInput from "@/components/ui/inputs/PhoneTextInput";
-import Button from "@/components/ui/button";
-import CloseIcon from "@/components/ui/icons/Close";
-import TextField from "@/components/ui/inputs/TextField";
-import Modal from "@/components/ui/modal";
-import PersonIcon from "@/components/ui/icons/Person";
+import PhoneTextInput from "@/src/components/ui/inputs/PhoneTextInput";
+import { Button } from "@/src/components/ui/button";
+import CloseIcon from "@/src/components/ui/icons/Close";
+import TextField from "@/src/components/ui/inputs/TextField";
+import Modal from "@/src/components/ui/modal";
+import PersonIcon from "@/src/components/ui/icons/Person";
 import { useLocale, useTranslations } from "next-intl";
-import GoogleIcon from "@/components/ui/icons/GoogleIcon";
+import GoogleIcon from "@/src/components/ui/icons/GoogleIcon";
 import { signIn } from "next-auth/react";
-import { Link, usePathname } from "@/i18n";
+import { Link, usePathname } from "@/src/i18n";
 import { useSearchParams } from "next/navigation";
-import { useAppSession } from "@/hooks/useAppSession";
-import Spinner from "@/components/ui/loaders/Spinner";
-import FacebookIcon from "@/components/ui/icons/FacebookIcon";
-import { getUserCompanies } from "@/utils/permissions";
+import { useAppSession } from "@/src/hooks/useAppSession";
+import Spinner from "@/src/components/ui/loaders/Spinner";
+import FacebookIcon from "@/src/components/ui/icons/FacebookIcon";
+import { getUserCompanies } from "@/src/utils/permissions";
 import {
   useLookupCustomerByEmailQuery,
   useLookupCustomersQuery,
-} from "@/api/queries/users";
-import type { TCustomerLookupItem } from "@/api/entities/user/customer";
-import { useDebounce } from "@/hooks/useDebounce";
+} from "@/src/api/queries/users";
+import type { TCustomerLookupItem } from "@/src/api/entities/user/customer";
+import { useDebounce } from "@/src/hooks/useDebounce";
 
 export type AuthForm = {
   first_name: string;
@@ -34,6 +34,13 @@ export type AuthForm = {
   phone: string;
   email: string;
   preferredLocale: "en" | "ru";
+};
+
+const normalizePhone = (phone: string) => {
+  const trimmedPhone = phone.trim();
+  return trimmedPhone && !trimmedPhone.startsWith("+")
+    ? `+${trimmedPhone}`
+    : trimmedPhone;
 };
 
 type Props = {
@@ -135,14 +142,16 @@ const AuthModal: FC<Props> = ({
   };
 
   const handleContinueWithPhone = (formData: AuthForm) => {
-    if (!isPossiblePhoneNumber(formData.phone)) {
+    const phone = normalizePhone(formData.phone);
+
+    if (!isPossiblePhoneNumber(phone)) {
       setError("phone", { type: "validate", message: "Phone is not valid" });
     } else {
-      const parsedPhone = parsePhoneNumber(formData.phone);
-      const phone = parsedPhone?.number;
+      const parsedPhone = parsePhoneNumber(phone);
+      const normalizedPhone = parsedPhone?.number;
 
-      if (phone) {
-        continueWithPreferredLocale({ ...formData, phone });
+      if (normalizedPhone) {
+        continueWithPreferredLocale({ ...formData, phone: normalizedPhone });
       }
     }
   };
@@ -334,7 +343,7 @@ const AuthModal: FC<Props> = ({
           <div className="flex items-center gap-4">
             <Button
               className="w-9 h-9 p-0"
-              variant="resting-active"
+              variant="outline"
               onClick={handleClose}
             >
               <CloseIcon className="w-5 h-5 stroke-greyPrimary" />
@@ -398,7 +407,7 @@ const AuthModal: FC<Props> = ({
           /> */}
 
           <Button
-            variant="dark"
+            variant="outline"
             className="w-full mt-8"
             onClick={handleSubmit(
               authWithSocial ? handleSubmitWithEmailHandler : handleSubmitWithPhoneHandler
@@ -420,7 +429,7 @@ const AuthModal: FC<Props> = ({
                 <div className="flex-1 h-[1px] bg-greyOutlineSecondary"></div>
               </div>
               <Button
-                variant="dark-outline"
+                variant="outline"
                 className="w-full mt-3"
                 onClick={() =>
                   signIn("google", {
@@ -432,7 +441,7 @@ const AuthModal: FC<Props> = ({
                 Continue with Google
               </Button>
               <Button
-                variant="dark-outline"
+                variant="outline"
                 className="w-full mt-3"
                 onClick={() =>
                   signIn("facebook", {
